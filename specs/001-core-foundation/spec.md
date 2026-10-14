@@ -58,7 +58,7 @@ As the platform Super Admin, I need to create a tenant with an organization name
 
 ### User Story 2 — Invited employee activates an independent tenant account and signs in (Priority: P1)
 
-As an invited staff member, I need to choose my own username and password, sign in from my organization's portal using username or email, and recover access securely using verified email.
+As an invited staff member, I need to choose my own username and password, change my username securely from my own account settings, sign in from my organization's portal using username or email, and recover access using verified email.
 
 **Why this priority:** Staff access is invitation-only and must not confuse two separate tenant accounts that share the same email.
 
@@ -74,6 +74,8 @@ As an invited staff member, I need to choose my own username and password, sign 
 6. **Given** invalid credentials, an expired/reused invitation, unknown host, or a disabled account, **when** a user tries to authenticate, **then** access is refused without leaking another tenant's identity or revealing whether a private account exists.
 7. **Given** a user who forgot the password, **when** they use verified-email recovery, **then** only the selected tenant account may be reset; an authorized administrator may initiate a reset without viewing an existing password or impersonating the user.
 8. **Given** an email is already registered for one staff account in tenant A, **when** an administrator tries to invite a second account in tenant A with that email, **then** duplicate onboarding is rejected safely; the same email remains eligible for an independent account in tenant B.
+9. **Given** a signed-in staff member who verifies their identity for a sensitive account change, **when** they choose an available new username in their own account settings, **then** only their tenant-local username changes, the same internal account/roles/records remain intact, the change is audited, and future login accepts the new username.
+10. **Given** the requested new username is already assigned to another staff account in the same tenant, **when** a change is attempted, **then** it is rejected without disclosing unnecessary account details; a matching username in another tenant does not block the change.
 
 ### User Story 3 — Staff use long-lived, controllable sessions on multiple devices (Priority: P1)
 
@@ -163,6 +165,7 @@ As the responsible operator, I need separate non-production and production envir
 
 - Unknown, malformed, reserved or duplicate subdomain; hostname spoofing and tenant-mismatched invitation links.
 - One email associated with separate tenants and potentially multiple pending invitations; invitation reused, expired, already activated or resent; concurrent username reservation/activation.
+- Simultaneous username changes to the same value, attempts to change another user's username, old-username sign-in after a change, and identity verification expiring before the username update.
 - Same verified email entered twice within one tenant: reject duplicate account/invitation safely; that same email may still be used by a different tenant.
 - Tenant suspended during an active browser session, email recovery, or a pending invite; later reactivation without accidental privilege restoration to a disabled individual account.
 - Two simultaneous role updates or a role removal while a staff member remains signed in; effective privileges must not persist improperly.
@@ -194,56 +197,57 @@ As the responsible operator, I need separate non-production and production envir
 - **FR-008:** Only appropriately authorized administrators MUST be able to invite, disable and manage tenant staff accounts.
 - **FR-009:** Staff onboarding MUST begin with a tenant-bound verified-email invitation that allows the recipient to set their own username and password.
 - **FR-010:** A staff username AND registered verified email MUST each be unique within its tenant, and MAY repeat in other tenants. Two staff accounts in the same tenant MUST NOT share a verified email.
-- **FR-011:** Tenant sign-in MUST accept either a tenant-local username or the registered email plus the account's password.
-- **FR-012:** The same real email MUST be supported by independent staff accounts in different tenants, without requiring shared passwords or cross-tenant identity switching. **Implementation blocked by G-01 until a security-reviewed working proof exists.**
-- **FR-013:** Authentication and recovery MUST not reveal account existence or other tenant data through untrusted lookup, errors, logs or URLs.
-- **FR-014:** Staff MUST be able to recover access through their verified email. Authorized administrators MUST be able to initiate a secure reset without knowing their existing password or impersonating them.
-- **FR-015:** Staff self-registration, donor/beneficiary/volunteer sign-in, SMS recovery and MFA/2FA MUST NOT be introduced in this MVP.
-- **FR-016:** Credentials, privileged secrets and raw passwords MUST NOT be exposed to the browser, logs, or application-owned credential tables.
+- **FR-011:** Staff MUST be able to change their own tenant-local username in account settings after appropriate identity verification. The requested username MUST be available in the same tenant; updates MUST be authorized, validated server-side, concurrency-safe, and auditable. The underlying immutable account identity, email, role assignments, and records MUST NOT be replaced by a username change.
+- **FR-012:** Tenant sign-in MUST accept either a tenant-local username or the registered email plus the account's password.
+- **FR-013:** The same real email MUST be supported by independent staff accounts in different tenants, without requiring shared passwords or cross-tenant identity switching. **Implementation blocked by G-01 until a security-reviewed working proof exists.**
+- **FR-014:** Authentication and recovery MUST not reveal account existence or other tenant data through untrusted lookup, errors, logs or URLs.
+- **FR-015:** Staff MUST be able to recover access through their verified email. Authorized administrators MUST be able to initiate a secure reset without knowing their existing password or impersonating them.
+- **FR-016:** Staff self-registration, donor/beneficiary/volunteer sign-in, SMS recovery and MFA/2FA MUST NOT be introduced in this MVP.
+- **FR-017:** Credentials, privileged secrets and raw passwords MUST NOT be exposed to the browser, logs, or application-owned credential tables.
 
 **Sessions**
 
-- **FR-017:** A valid session MUST survive browser restart and MUST expire after 30 days without verified meaningful user activity; background-only refresh MUST NOT count as activity.
-- **FR-018:** A staff member MUST be allowed concurrent sessions across multiple devices without an MVP device-count cap.
-- **FR-019:** A staff member MUST be able to view and revoke individual other sessions and revoke all other sessions from account settings.
-- **FR-020:** Changing a password MUST invalidate other sessions, retaining the current session only if safely revalidated; recovery or admin reset MUST invalidate all pre-reset sessions.
-- **FR-021:** Tenant suspension, employee disablement, and session revocation MUST be enforced on protected operations even if old browser tokens remain locally present.
+- **FR-018:** A valid session MUST survive browser restart and MUST expire after 30 days without verified meaningful user activity; background-only refresh MUST NOT count as activity.
+- **FR-019:** A staff member MUST be allowed concurrent sessions across multiple devices without an MVP device-count cap.
+- **FR-020:** A staff member MUST be able to view and revoke individual other sessions and revoke all other sessions from account settings.
+- **FR-021:** Changing a password MUST invalidate other sessions, retaining the current session only if safely revalidated; recovery or admin reset MUST invalidate all pre-reset sessions.
+- **FR-022:** Tenant suspension, employee disablement, and session revocation MUST be enforced on protected operations even if old browser tokens remain locally present.
 
 **Roles, permissions, and record scope**
 
-- **FR-022:** Each tenant MUST be able to create and manage its own roles and staff-role assignments; a staff account MUST support multiple simultaneous roles.
-- **FR-023:** Effective grants MUST combine the grants of assigned roles without bypassing explicit record restrictions, tenant bounds, or higher-priority prohibitions.
-- **FR-024:** Authorization MUST deny by default and MUST be checked for protected operations, not only screen or navigation visibility.
-- **FR-025:** Tenant managers MAY delegate role administration to authorized staff, but delegates MUST NOT grant privileges beyond their authorized authority, self-elevate, or grant platform-administrator privileges.
-- **FR-026:** The foundation MUST establish the permission vocabulary and extensibility for relevant create/view/update/archive/restore/export/approval and administrative actions without inventing domain-level business behavior.
-- **FR-027:** The authorization foundation MUST support the All / Own / Assigned record scopes where domain specs call for them. Ownership, assignment and applicable operations MUST be defined by each future module.
-- **FR-028:** The platform Super Admin MUST NOT gain default permission to inspect beneficiary/donor personal details, tenant files or financial data solely through platform administrative status.
+- **FR-023:** Each tenant MUST be able to create and manage its own roles and staff-role assignments; a staff account MUST support multiple simultaneous roles.
+- **FR-024:** Effective grants MUST combine the grants of assigned roles without bypassing explicit record restrictions, tenant bounds, or higher-priority prohibitions.
+- **FR-025:** Authorization MUST deny by default and MUST be checked for protected operations, not only screen or navigation visibility.
+- **FR-026:** Tenant managers MAY delegate role administration to authorized staff, but delegates MUST NOT grant privileges beyond their authorized authority, self-elevate, or grant platform-administrator privileges.
+- **FR-027:** The foundation MUST establish the permission vocabulary and extensibility for relevant create/view/update/archive/restore/export/approval and administrative actions without inventing domain-level business behavior.
+- **FR-028:** The authorization foundation MUST support the All / Own / Assigned record scopes where domain specs call for them. Ownership, assignment and applicable operations MUST be defined by each future module.
+- **FR-029:** The platform Super Admin MUST NOT gain default permission to inspect beneficiary/donor personal details, tenant files or financial data solely through platform administrative status.
 
 **Audit and privacy**
 
-- **FR-029:** The foundation MUST record important tenant lifecycle, account, membership, role, permission, sensitive settings and in-scope business mutation events with safe actor/action/time/context metadata.
-- **FR-030:** Viewing tenant audit logs MUST require explicit tenant-scoped audit_logs.view permission and must enforce its applicable visibility scope; platform administrative logs MUST remain separate.
-- **FR-031:** Ordinary staff/tenant managers MUST NOT be able to modify or manually erase audit records. No indiscriminate read-only business audit event stream MUST be imposed.
-- **FR-032:** Audit event retention MUST follow an approved per-category retention policy established before production release; exact durations MUST NOT be invented in this spec.
-- **FR-033:** Any tenant-private file access and exported records MUST remain tenant/permission scoped, including when a staff member owns or is assigned a record.
+- **FR-030:** The foundation MUST record important tenant lifecycle, account, membership, role, permission, sensitive settings and in-scope business mutation events with safe actor/action/time/context metadata.
+- **FR-031:** Viewing tenant audit logs MUST require explicit tenant-scoped audit_logs.view permission and must enforce its applicable visibility scope; platform administrative logs MUST remain separate.
+- **FR-032:** Ordinary staff/tenant managers MUST NOT be able to modify or manually erase audit records. No indiscriminate read-only business audit event stream MUST be imposed.
+- **FR-033:** Audit event retention MUST follow an approved per-category retention policy established before production release; exact durations MUST NOT be invented in this spec.
+- **FR-034:** Any tenant-private file access and exported records MUST remain tenant/permission scoped, including when a staff member owns or is assigned a record.
 
 **White-label identity, language, and shell**
 
-- **FR-034:** The portal MUST show only the active organization's required name and optional logo; without a logo, it MUST show a neutral accessible icon and the organization name.
-- **FR-035:** Only the tenant manager (or authorized Super Admin intervention) MUST be able to modify a tenant's display name and logo; such changes MUST be validated and audited.
-- **FR-036:** All tenants MUST use the same fixed, accessible color palette; tenant-selected colors and provider branding MUST NOT appear in tenant-facing surfaces, assets, notifications or document metadata.
-- **FR-037:** Arabic/RTL MUST be the initial language/direction and English/LTR MUST be supported in the first release across all shipped experiences.
-- **FR-038:** Employees MUST be able to choose Dark, Light or System theme; System MUST initially follow device preference, and user selections MUST persist.
-- **FR-039:** The staff portal MUST provide permission-aware primary navigation and allow modules to omit a secondary sidebar. The foundation MUST NOT fill the shell with unapproved business dashboards or copy reference mockups literally.
-- **FR-040:** Shipped interactive UI MUST meet WCAG 2.2 AA objectives, keyboard navigation, screen-reader feedback, responsive behavior, and clear mixed-direction content.
-- **FR-041:** Common visual controls in both applications MUST follow the shared presentation system required by the constitution, with no tenant-specific copied component variants.
+- **FR-035:** The portal MUST show only the active organization's required name and optional logo; without a logo, it MUST show a neutral accessible icon and the organization name.
+- **FR-036:** Only the tenant manager (or authorized Super Admin intervention) MUST be able to modify a tenant's display name and logo; such changes MUST be validated and audited.
+- **FR-037:** All tenants MUST use the same fixed, accessible color palette; tenant-selected colors and provider branding MUST NOT appear in tenant-facing surfaces, assets, notifications or document metadata.
+- **FR-038:** Arabic/RTL MUST be the initial language/direction and English/LTR MUST be supported in the first release across all shipped experiences.
+- **FR-039:** Employees MUST be able to choose Dark, Light or System theme; System MUST initially follow device preference, and user selections MUST persist.
+- **FR-040:** The staff portal MUST provide permission-aware primary navigation and allow modules to omit a secondary sidebar. The foundation MUST NOT fill the shell with unapproved business dashboards or copy reference mockups literally.
+- **FR-041:** Shipped interactive UI MUST meet WCAG 2.2 AA objectives, keyboard navigation, screen-reader feedback, responsive behavior, and clear mixed-direction content.
+- **FR-042:** Common visual controls in both applications MUST follow the shared presentation system required by the constitution, with no tenant-specific copied component variants.
 
 **Production readiness**
 
-- **FR-042:** Development and Production MUST be isolated persistent environments. Tests MUST NOT access Production private data without separately approved controls.
-- **FR-043:** Before Production handles live data, the platform MUST have verified regular automated database backups targeting at least daily recovery points and separate appropriate protection/restoration of required stored files.
-- **FR-044:** Backup retention, recovery ownership/objectives, release rollback, audit retention, and restore rehearsal frequency MUST be documented and approved before Production launch.
-- **FR-045:** Acceptance testing MUST include two tenants, positive and negative permission/security cases, cross-tenant access attempts, active-session suspension/revocation, and translation/theme/accessibility checks.
+- **FR-043:** Development and Production MUST be isolated persistent environments. Tests MUST NOT access Production private data without separately approved controls.
+- **FR-044:** Before Production handles live data, the platform MUST have verified regular automated database backups targeting at least daily recovery points and separate appropriate protection/restoration of required stored files.
+- **FR-045:** Backup retention, recovery ownership/objectives, release rollback, audit retention, and restore rehearsal frequency MUST be documented and approved before Production launch.
+- **FR-046:** Acceptance testing MUST include two tenants, positive and negative permission/security cases, cross-tenant access attempts, active-session suspension/revocation, and translation/theme/accessibility checks.
 
 ### Key Entities (conceptual; NOT a physical schema)
 
@@ -263,7 +267,7 @@ As the responsible operator, I need separate non-production and production envir
 
 - **SC-001:** All tested cross-tenant attempts to view, mutate, reference or export protected data or private files fail for two distinct tenants; no successful cross-tenant unauthorized access.
 - **SC-002:** 100% of protected tenant operations are denied when the tenant is suspended, including operations initiated by a session authenticated before suspension.
-- **SC-003:** The invitation-to-activation and username/email login acceptance suite passes for two independent tenant accounts using the same real email; neither account can use the other's password.
+- **SC-003:** The invitation-to-activation and username/email login acceptance suite passes for two independent tenant accounts using the same real email; neither account can use the other's password. Self-service username changes are identity-verified, tenant-unique, preserve the original account identity/permissions, and reject conflicting names.
 - **SC-004:** Every defined session scenario passes: 30-day inactivity, browser restart, concurrent devices, individual revocation, password change, recovery/reset and staff disablement.
 - **SC-005:** 100% of tested unauthorized role grants, self-escalation attempts and cross-tenant permission operations are refused; multi-role grants and record-scope fixtures produce the expected effective permissions.
 - **SC-006:** All tested major administrative events appear in the correct tenant or platform log, without secrets, and no unauthenticated or unauthorized tenant user can read/modify the log.
@@ -285,12 +289,13 @@ As the responsible operator, I need separate non-production and production envir
 ## Clarification Record
 
 - **2026-10-15 — CL-001 (approved by project owner):** Within a single tenant, every staff account must use a different verified email; duplicate email accounts are not permitted. The same real verified email can still be used by independent accounts in different tenants. This resolves only the within-tenant email uniqueness part of G-02, not the G-01 technical feasibility gate.
+- **2026-10-15 — CL-002 (approved by project owner):** Employees may change their own username through account settings after identity verification, provided the replacement is unused within their tenant. Login/account identity remains the same; the change is authorized and audited. Username format constraints and exact verification mechanism are still to be specified.
 
 ## Blocking Gates and Decisions to Resolve
 
 **G-01 — Authentication feasibility (CRITICAL; before production auth implementation):** Demonstrate a security-reviewed, Supabase-Auth-authoritative approach that provides *independent accounts with the same real email* across tenants in a shared Auth project. The working proof MUST cover both tenant-local username and email login, invitations, email verification, password recovery, distinct credentials, independent sessions, account revocation and avoidance of account enumeration. **[NEEDS CLARIFICATION: If no secure feasible design is established, the project owner must approve an explicit constitutional/architecture decision before this requirement changes.]**
 
-**G-02 — Staff identity and account lifecycle policy (before final auth UX/contracts):** **Resolved decision:** a verified email is unique to one staff account within a tenant but MAY be reused in other tenants. **Still open:** username format and change rules, invitation lifetime/resend/expiry, email change/verification, recovery abuse limits, and administrative reset behavior. **[NEEDS CLARIFICATION: What username-change policy and other identifier lifecycle rules apply?]**
+**G-02 — Staff identity and account lifecycle policy (before final auth UX/contracts):** **Resolved decision:** a verified email is unique to one staff account within a tenant but MAY be reused in other tenants. **Still open:** username character/length/normalization rules, the precise identity-verification method for username changes, invitation lifetime/resend/expiry, email change/verification, recovery abuse limits, and administrative reset behavior. **[NEEDS CLARIFICATION: What are the remaining username-validation and invitation/recovery lifecycle rules?]**
 
 **G-03 — Authorization and operations contract (before technical planning/production launch as applicable):** Approve the permission catalog and protected manager/grant-authority safeguards, audit-log viewing scope and retention policy, definition of meaningful session activity, session-list/revocation behavior, platform-admin provisioning, branding upload limitations, backup coverage/retention, and recovery responsibility. **[NEEDS CLARIFICATION: Which permissions are grantable by tenant managers/delegates, and how is protected tenant-manager authority governed?]**
 
