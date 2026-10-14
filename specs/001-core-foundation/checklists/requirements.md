@@ -25,7 +25,7 @@
 ## Feature Readiness
 
 - [ ] **G-01 / critical:** Supabase Auth feasibility proof supports independent accounts sharing one real email across tenants.
-- [ ] **G-02:** Within-tenant verified-email uniqueness APPROVED. Employee self-service username change after identity verification and tenant uniqueness checks APPROVED (CL-002). Username format/validation, exact verification mechanism, invitation/recovery lifecycle rules remain unresolved.
+- [ ] **G-02:** Within-tenant verified-email uniqueness APPROVED (CL-001); self-service username change with identity verification and tenant uniqueness checks APPROVED (CL-002); seven-day / 168-hour single-use invitation validity APPROVED (CL-003). Username format, exact verification, invitation resend/reissue, email change and recovery lifecycle rules remain unresolved. Verify secure implementation of seven-day invitation validity in the Authentication Plan.
 - [ ] **G-03:** Approved permission grant-authority safeguards and affected operational policies.
 - [ ] Owner approves this specification as the basis for planning.
 - [ ] Constitution compliance is rechecked after clarifications and again after the technical plan.
