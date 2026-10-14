@@ -73,6 +73,7 @@ As an invited staff member, I need to choose my own username and password, sign 
 5. **Given** the same real email is invited to tenants A and B, **when** both accounts are activated, **then** they remain independently authorized, may have different usernames and passwords, and cannot log into the wrong tenant using the other tenant's password.
 6. **Given** invalid credentials, an expired/reused invitation, unknown host, or a disabled account, **when** a user tries to authenticate, **then** access is refused without leaking another tenant's identity or revealing whether a private account exists.
 7. **Given** a user who forgot the password, **when** they use verified-email recovery, **then** only the selected tenant account may be reset; an authorized administrator may initiate a reset without viewing an existing password or impersonating the user.
+8. **Given** an email is already registered for one staff account in tenant A, **when** an administrator tries to invite a second account in tenant A with that email, **then** duplicate onboarding is rejected safely; the same email remains eligible for an independent account in tenant B.
 
 ### User Story 3 — Staff use long-lived, controllable sessions on multiple devices (Priority: P1)
 
@@ -162,7 +163,7 @@ As the responsible operator, I need separate non-production and production envir
 
 - Unknown, malformed, reserved or duplicate subdomain; hostname spoofing and tenant-mismatched invitation links.
 - One email associated with separate tenants and potentially multiple pending invitations; invitation reused, expired, already activated or resent; concurrent username reservation/activation.
-- Same email entered twice within one tenant: unresolved collision decision; must be clarified before implementation.
+- Same verified email entered twice within one tenant: reject duplicate account/invitation safely; that same email may still be used by a different tenant.
 - Tenant suspended during an active browser session, email recovery, or a pending invite; later reactivation without accidental privilege restoration to a disabled individual account.
 - Two simultaneous role updates or a role removal while a staff member remains signed in; effective privileges must not persist improperly.
 - Attempts to use a role's grant permission to modify itself or protected tenant-manager/platform authority.
@@ -192,7 +193,7 @@ As the responsible operator, I need separate non-production and production envir
 
 - **FR-008:** Only appropriately authorized administrators MUST be able to invite, disable and manage tenant staff accounts.
 - **FR-009:** Staff onboarding MUST begin with a tenant-bound verified-email invitation that allows the recipient to set their own username and password.
-- **FR-010:** A staff username MUST be unique within its tenant, and MAY repeat in other tenants.
+- **FR-010:** A staff username AND registered verified email MUST each be unique within its tenant, and MAY repeat in other tenants. Two staff accounts in the same tenant MUST NOT share a verified email.
 - **FR-011:** Tenant sign-in MUST accept either a tenant-local username or the registered email plus the account's password.
 - **FR-012:** The same real email MUST be supported by independent staff accounts in different tenants, without requiring shared passwords or cross-tenant identity switching. **Implementation blocked by G-01 until a security-reviewed working proof exists.**
 - **FR-013:** Authentication and recovery MUST not reveal account existence or other tenant data through untrusted lookup, errors, logs or URLs.
@@ -281,11 +282,15 @@ As the responsible operator, I need separate non-production and production envir
 - User-facing visual design may differ substantially from any reference HTML as long as approved experience and accessibility requirements are met.
 - Production cannot be declared ready based only on this document or a successful UI demonstration.
 
+## Clarification Record
+
+- **2026-10-15 — CL-001 (approved by project owner):** Within a single tenant, every staff account must use a different verified email; duplicate email accounts are not permitted. The same real verified email can still be used by independent accounts in different tenants. This resolves only the within-tenant email uniqueness part of G-02, not the G-01 technical feasibility gate.
+
 ## Blocking Gates and Decisions to Resolve
 
 **G-01 — Authentication feasibility (CRITICAL; before production auth implementation):** Demonstrate a security-reviewed, Supabase-Auth-authoritative approach that provides *independent accounts with the same real email* across tenants in a shared Auth project. The working proof MUST cover both tenant-local username and email login, invitations, email verification, password recovery, distinct credentials, independent sessions, account revocation and avoidance of account enumeration. **[NEEDS CLARIFICATION: If no secure feasible design is established, the project owner must approve an explicit constitutional/architecture decision before this requirement changes.]**
 
-**G-02 — Staff identity and account lifecycle policy (before final auth UX/contracts):** Approve the same-email collision policy *within one tenant*, username format/change rules, invitation lifetime/resend/expiry, email change/verification, recovery abuse limits, and admin reset behavior. **[NEEDS CLARIFICATION: Does one tenant permit only one staff account per verified email, and what are the exact account-identifier rules?]**
+**G-02 — Staff identity and account lifecycle policy (before final auth UX/contracts):** **Resolved decision:** a verified email is unique to one staff account within a tenant but MAY be reused in other tenants. **Still open:** username format and change rules, invitation lifetime/resend/expiry, email change/verification, recovery abuse limits, and administrative reset behavior. **[NEEDS CLARIFICATION: What username-change policy and other identifier lifecycle rules apply?]**
 
 **G-03 — Authorization and operations contract (before technical planning/production launch as applicable):** Approve the permission catalog and protected manager/grant-authority safeguards, audit-log viewing scope and retention policy, definition of meaningful session activity, session-list/revocation behavior, platform-admin provisioning, branding upload limitations, backup coverage/retention, and recovery responsibility. **[NEEDS CLARIFICATION: Which permissions are grantable by tenant managers/delegates, and how is protected tenant-manager authority governed?]**
 
