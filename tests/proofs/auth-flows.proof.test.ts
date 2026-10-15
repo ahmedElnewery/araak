@@ -160,32 +160,21 @@ describe("R-02 proof", () => {
     expect(gap).toBeLessThan(250);
   });
 
-  it("(6) Auth rate limits key on the connecting client, not on a spoofed X-Forwarded-For", async () => {
-    const patch = (rate: number) =>
-      fetch(`https://api.supabase.com/v1/projects/${env.ref}/config/auth`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${env.accessToken}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ rate_limit_token_refresh: rate }),
+  it("(6) Auth's password-grant rate limit keys on the connecting client, not on a spoofed X-Forwarded-For", async () => {
+    // The password-grant limit is not exposed through the project config API, so probe it:
+    // 80 failed sign-ins in quick succession, each with a DIFFERENT forged client IP.
+    // If the forged header were trusted, no request would ever be limited.
+    const codes: number[] = [];
+    for (let i = 0; i < 80; i++) {
+      const res = await fetch(`${env.url}/auth/v1/token?grant_type=password`, {
+        method: "POST",
+        headers: { apikey: env.publishableKey, "Content-Type": "application/json", "X-Forwarded-For": `203.0.113.${(i % 250) + 1}` },
+        body: JSON.stringify({ email: "nobody@example.invalid", password: "Wrong-Pass-9999" }),
       });
-    const original = await (
-      await fetch(`https://api.supabase.com/v1/projects/${env.ref}/config/auth`, { headers: { Authorization: `Bearer ${env.accessToken}` } })
-    ).json() as { rate_limit_token_refresh: number };
-    try {
-      expect((await patch(5)).ok).toBe(true);
-      await new Promise((r) => setTimeout(r, 3000));
-      const codes: number[] = [];
-      for (let i = 0; i < 9; i++) {
-        const res = await fetch(`${env.url}/auth/v1/token?grant_type=password`, {
-          method: "POST",
-          headers: { apikey: env.publishableKey, "Content-Type": "application/json", "X-Forwarded-For": `203.0.113.${i + 1}` },
-          body: JSON.stringify({ email: "nobody@example.invalid", password: "Wrong-Pass-9999" }),
-        });
-        codes.push(res.status);
-      }
-      console.log("R-02 status codes with distinct spoofed XFF per request (limit=5):", codes.join(","));
-      expect(codes).toContain(429); // limit applied despite 9 different forged client IPs
-    } finally {
-      await patch(original.rate_limit_token_refresh);
+      codes.push(res.status);
     }
+    const limitedAt = codes.indexOf(429);
+    console.log("R-02 first 429 at request #", limitedAt + 1 || "never", "of 80 (distinct forged XFF each)");
+    expect(limitedAt).toBeGreaterThan(-1);
   });
 });
