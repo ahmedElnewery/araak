@@ -63,7 +63,7 @@ select is((select metadata::text like '%' || tests.psid('o1')::text || '%' from 
 
 -- ---- revoke_my_other_sessions ------------------------------------------------------------------------------------------
 select tests.throws_ok($$select public.revoke_my_other_sessions('recovery')$$, '42501', null, 'only user_all_others / password_change reasons are accepted');
-select is(public.revoke_my_other_sessions(), 1, 'revokes the remaining live other session (o2)');
+select is(public.revoke_my_other_sessions(), 2, 'revokes every unrevoked other session (o2 and the stale one)');
 select is(tests.live('cur'), true, 'the current session survives');
 select is(tests.live('o2'), false, 'the other session is revoked');
 select is((select revoked_reason::text from public.session_registry where provider_session_id = tests.psid('o2')), 'user_all_others', 'reason recorded as user_all_others');

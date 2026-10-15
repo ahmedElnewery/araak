@@ -611,7 +611,7 @@ Bootstrap and platform-admin removal stay operations-only.
 
   (FR-021, US3 scenario 4)
 - [X] T133 [P] [US3] Add AR/EN strings for sessions, password change and session-expired messages to `packages/i18n/src/dictionaries/{ar,en}.ts`
-- [ ] T134 [US3] Run `supabase/tests/030_sessions.test.sql`, `tests/security/session-revocation.test.ts`, `tests/security/session-activity.test.ts` and `tests/e2e/us3-sessions.spec.ts` until T124–T127 pass
+- [X] T134 [US3] Run `supabase/tests/030_sessions.test.sql`, `tests/security/session-revocation.test.ts`, `tests/security/session-activity.test.ts` and `tests/e2e/us3-sessions.spec.ts` until T124–T127 pass
 
 **Checkpoint**: Session semantics are proven end to end, including races. US1 suspension and US2 recovery revocation now also hold at the UI level.
 
