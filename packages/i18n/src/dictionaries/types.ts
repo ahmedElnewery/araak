@@ -70,7 +70,7 @@ export type Dictionary = {
     label: string; hint: string; errorLength: string; errorCharset: string; errorPlacement: string;
   };
   portal: {
-    nav: { menu: string; home: string; inviteStaff: string; invitations: string; account: string; signOut: string };
+    nav: { menu: string; home: string; inviteStaff: string; invitations: string; staff: string; roles: string; account: string; signOut: string };
     auth: {
       title: string; identifier: string; identifierHint: string; password: string; signIn: string;
       invalidCredentials: string; forgotPassword: string;
@@ -91,6 +91,20 @@ export type Dictionary = {
       resendAvailableAt: string; resendNotAvailable: string; resent: string; noCancelNote: string; resetPassword: string;
       resetTitle: string; resetIntro: string; managerPassword: string; confirmReset: string; resetSent: string; resetNotDelivered: string;
       cancel: string;
+      directoryTitle: string; colUsername: string; colState: string; stateEnabled: string; stateDisabled: string;
+      managerBadge: string; noStaff: string; open: string; back: string; pendingLink: string; noRolesAssigned: string;
+      rolesEditorTitle: string; rolesEditorIntro: string; saveRoles: string; rolesSaved: string; ownRolesNote: string;
+      noAssignableRoles: string; disable: string; enable: string; disableTitle: string; disableBody: string;
+      enableTitle: string; enableBody: string; confirm: string; disabled: string; enabled: string;
+    };
+    roles: {
+      title: string; intro: string; tabActive: string; tabArchived: string; new: string; newTitle: string; editTitle: string;
+      name: string; description: string; permissions: string; save: string; saved: string; created: string; archive: string;
+      restore: string; archived: string; restored: string; empty: string; emptyArchived: string; members: string;
+      heldNote: string; archiveTitle: string; archiveBody: string; restoreTitle: string; restoreBody: string; back: string;
+      extraNote: string; noSwitches: string; open: string; view: string;
+      switches: { viewStaff: string; manageStaff: string; manageRoles: string; viewAudit: string };
+      switchHints: { viewStaff: string; manageStaff: string; manageRoles: string; viewAudit: string };
     };
     account: {
       title: string; username: string; changeUsername: string; save: string; saved: string; email: string;
@@ -102,6 +116,9 @@ export type Dictionary = {
       invitation_not_found: string; invitation_not_pending: string; confirmation_required: string;
       recovery_rate_limited: string; cannot_reset_self: string; staff_not_found: string; staff_not_eligible: string;
       password_policy: string; password_mismatch: string; not_authorized: string; invalid_credentials: string;
+      role_name_conflict: string; role_name_invalid: string; role_assigned: string; role_self_edit: string;
+      role_not_found: string; privilege_escalation: string; grants_invalid: string; cannot_change_own_roles: string;
+      cannot_disable_self: string; manager_protected: string; last_active_manager: string; roles_invalid: string;
       generic: string;
     };
   };
