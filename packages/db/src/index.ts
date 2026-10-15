@@ -1,1 +1,1 @@
-export {};
+export type { Database, Json } from "./types.gen";

@@ -30,6 +30,7 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
 - **Tokens**: generate them server-side (32 random bytes, base64url). Persist only SHA-256 hashes. Never log or audit raw tokens or passwords.
 - **Errors**: use stable error codes and neutral, localized messages. Never reveal whether an account or email exists in another tenant (FR-014).
 - **Unit tests**: Vitest, co-located as `*.test.ts`. **DB tests**: pgTAP under `supabase/tests/*.test.sql`, run with `supabase test db`. **Security/integration tests**: Vitest in `tests/security/` against local Supabase. **E2E/a11y**: Playwright in `tests/e2e/` and `tests/accessibility/`.
+- **Cloud-only execution (owner decision for this phase):** there is no Docker, local Supabase, DB URL or CLI. Migrations are hand-written under `supabase/migrations/` (timestamp names) and applied to the **Development** project only, through the Supabase Management API (the channel the Supabase MCP uses; the MCP itself was not connected in this session). DB tests are pgTAP-style SQL files in `supabase/tests/` run by `pnpm test:db` (`scripts/run-db-tests.mjs`) inside a rolled-back transaction. "Local Supabase" in later task text means the Development project; `tests/helpers/env.ts` refuses anything else. Types come from `pnpm db:types`.
 
 ---
 
@@ -92,42 +93,42 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
 
 ### 2B — Core database schema and RLS
 
-- [ ] T026 Create migration `supabase/migrations/<ts>_foundation_base.sql` with:
+- [X] T026 Create migration `supabase/migrations/<ts>_foundation_base.sql` with:
   - The `private` schema (no API exposure; `revoke all on schema private from anon, authenticated`) and the `pgcrypto` and `pg_cron` extensions.
   - Enums: `tenant_state ('active','suspended')`, `record_scope ('all','own','assigned')`, `session_revoked_reason ('user','user_all_others','password_change','recovery','admin_reset','disabled','manager_demoted','platform_revoked','sign_out')`.
   - `private.normalize_email(text)`, implementing exactly the R-01 rule from T019.
   - `private.reserved_subdomains(name text primary key)`, seeded with `admin`, `www`, `api`, `app`, `mail`, `smtp`, `auth`, `static`, `assets`, `portal`, `status`, `support`.
-- [ ] T027 Create migration `supabase/migrations/<ts>_tenants.sql` for `public.tenants`:
+- [X] T027 Create migration `supabase/migrations/<ts>_tenants.sql` for `public.tenants`:
   - Columns: `id uuid pk default gen_random_uuid()`, `display_name text not null check (char_length(btrim(display_name)) > 0)`, `subdomain text not null unique check (subdomain ~ '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$')`, `state tenant_state not null default 'active'`, `logo_object_path text null`, `logo_version int not null default 0`, `created_at`, `updated_at`.
   - A BEFORE INSERT trigger that rejects reserved subdomains.
   - A BEFORE UPDATE trigger that raises if `id` or `subdomain` changes (FR-005, CL immutability).
   - RLS enabled and forced, with no direct anon/authenticated policies yet; no DELETE grant to anyone (FR-007).
-- [ ] T028 Create migration `supabase/migrations/<ts>_platform_admins.sql` with:
+- [X] T028 Create migration `supabase/migrations/<ts>_platform_admins.sql` with:
   - `public.platform_admins`: `auth_user_id uuid pk references auth.users`, `enabled bool not null default true`, `capabilities text[] not null check (capabilities <@ array['tenants.manage','tenants.managers.manage','tenants.staff.manage','platform_admins.invite','platform_audit.view'])`, `created_via text check in ('bootstrap','invitation')`, `created_at`.
   - `private.platform_bootstrap_state`, a single-row table (`id boolean primary key default true check (id)`, `bootstrapped_at`, `operator_ref`) (CL-043).
   - RLS forced; self-row SELECT only.
   - A trigger that rejects an `auth_user_id` already linked to `tenant_staff`. This is the GATE-COLLIDE default ⛔ GATE-COLLIDE.
-- [ ] T029 Create migration `supabase/migrations/<ts>_tenant_staff.sql` for `public.tenant_staff`. Rows exist only for activated accounts.
+- [X] T029 Create migration `supabase/migrations/<ts>_tenant_staff.sql` for `public.tenant_staff`. Rows exist only for activated accounts.
   - Columns: `id uuid pk`, `tenant_id uuid not null references tenants`, `auth_user_id uuid not null unique references auth.users`, `email text not null`, `email_normalized text not null unique` (global, including disabled, CL-048), `username text not null check (char_length(username) between 3 and 30 and username ~ '^[A-Za-z]+(?:[._][A-Za-z]+)*$')`, `username_normalized text generated always as (lower(username)) stored`, `enabled bool not null default true`, `activated_at timestamptz not null`, `created_at`.
   - Constraints: `unique (tenant_id, id)` as a composite-FK target, and `unique (tenant_id, username_normalized)` (FR-010, CL-007–CL-010).
   - A BEFORE UPDATE trigger that rejects changes to `tenant_id`, `auth_user_id`, `email` and `email_normalized` (CL-012).
   - No DELETE grant; history is retained.
-- [ ] T030 Create migration `supabase/migrations/<ts>_email_reservations.sql`:
+- [X] T030 Create migration `supabase/migrations/<ts>_email_reservations.sql`:
   - `public.email_reservations`: `email_normalized text pk`, `tenant_id`, `invitation_id`, `expires_at`, `created_at`.
   - `private.claim_email_reservation(p_tenant_id uuid, p_email_normalized text, p_invitation_id uuid, p_expires_at timestamptz) returns boolean`. It takes `pg_advisory_xact_lock(hashtextextended('email:'||p_email_normalized,0))` and returns false if any `tenant_staff.email_normalized` matches or an unexpired reservation belongs to a different invitation. It replaces an expired reservation, upserts for the same invitation, and never reveals the owning tenant (FR-013, CL-048).
   - RLS forced; no client access.
-- [ ] T031 Create migration `supabase/migrations/<ts>_rbac.sql` with:
+- [X] T031 Create migration `supabase/migrations/<ts>_rbac.sql` with:
   - `public.permission_catalog` (`key text pk`, `resource`, `action`, `supports_scopes record_scope[]`, `tenant_grantable bool`, `description`), seeded from the T021 draft ⛔ GATE-RBAC.
   - `public.roles` (`id`, `tenant_id`, `name`, `name_normalized text generated always as (lower(btrim(name))) stored`, `description`, `archived_at timestamptz null`, `created_at`, `updated_at`, `unique(tenant_id,id)`) plus a partial unique index on `(tenant_id, name_normalized) where archived_at is null` (CL-031).
   - `public.permission_grants` (`tenant_id`, `role_id`, `permission_key references permission_catalog`, `scope record_scope not null default 'all'`, `audit_categories text[] null`, with a check that `audit_categories` is only non-null for `audit_logs.view`), with a composite FK `(tenant_id, role_id) → roles(tenant_id,id)` and a trigger rejecting keys where `tenant_grantable = false`.
   - `public.staff_roles` (`tenant_id`, `staff_id`, `role_id`, `assigned_by_staff_id`, `assigned_at`, pk `(staff_id, role_id)`), with composite FKs to `tenant_staff(tenant_id,id)` and `roles(tenant_id,id)` and a trigger rejecting assignment of archived roles (CL-029).
   - `public.tenant_manager_grants` (`id`, `tenant_id`, `staff_id`, `granted_by_platform_admin uuid not null`, `granted_at`, `revoked_at`, `revoked_by_platform_admin`), with a composite FK and a partial unique `(tenant_id, staff_id) where revoked_at is null` (CL-023).
   - RLS forced on all tables.
-- [ ] T032 Create migration `supabase/migrations/<ts>_session_registry.sql` for `public.session_registry`:
+- [X] T032 Create migration `supabase/migrations/<ts>_session_registry.sql` for `public.session_registry`:
   - Columns: `id uuid pk`, `provider_session_id uuid not null unique`, `auth_user_id uuid not null`, `tenant_id uuid null`, `staff_id uuid null`, `platform_admin_id uuid null`, a check that exactly one owner kind is set, a composite FK `(tenant_id, staff_id)`, `created_at`, `verified_activity_at timestamptz not null`, `revoked_at`, `revoked_reason session_revoked_reason`, `device_type text`, `browser text`. There are NO IP, geolocation or user-agent-string columns (CL-037).
   - `private.current_session_is_live() returns boolean`, keyed on `(select auth.jwt()->>'session_id')::uuid`. It requires the same `auth_user_id`, `revoked_at is null` and `verified_activity_at > now() - interval '30 days'` (FR-018).
   - `private.revoke_sessions(p_session_ids uuid[], p_reason session_revoked_reason)`, which sets `revoked_at` and deletes the matching `auth.sessions` rows in the same transaction, using the method proven in T018 ⛔ GATE-AUTH.
-- [ ] T033 Create migration `supabase/migrations/<ts>_audit.sql` with:
+- [X] T033 Create migration `supabase/migrations/<ts>_audit.sql` with:
   - `public.tenant_audit_events` (`id bigint generated always as identity`, `tenant_id`, `actor_kind text check in ('staff','platform_admin','system')`, `actor_staff_id`, `actor_platform_admin_id`, `category text not null`, `event text not null`, `resource_type`, `resource_id`, `occurred_at default now()`, `metadata jsonb not null default '{}'`).
   - `public.tenant_security_events` (`id`, `tenant_id`, `actor_staff_id null`, `event text`, `occurred_at`, `metadata jsonb`).
   - `public.platform_audit_events` (`id`, `actor_platform_admin_id null`, `actor_operator_ref null`, `event`, `occurred_at`, `metadata jsonb`).
@@ -135,7 +136,7 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
   - REVOKE UPDATE/DELETE/TRUNCATE from anon, authenticated and service_role, plus BEFORE UPDATE/DELETE triggers that raise unless the transaction-local flag `app.retention_purge = 'on'` is set (FR-032).
   - `private.sanitize_audit_metadata(jsonb)`, which drops keys matching `(?i)(password|token|secret|key|otp|code)`.
   - Append-only SECURITY DEFINER writers `private.write_tenant_audit(...)`, `private.write_security_event(...)` and `private.write_platform_audit(...)` (FR-030, Constitution VI).
-- [ ] T034 Create migration `supabase/migrations/<ts>_rls_helpers.sql` with STABLE SECURITY DEFINER helpers:
+- [X] T034 Create migration `supabase/migrations/<ts>_rls_helpers.sql` with STABLE SECURITY DEFINER helpers:
   - `private.current_staff()`: the staff row for `auth.uid()`.
   - `private.request_context_ok()`: staff enabled, tenant `active`, and `current_session_is_live()` (FR-006, FR-022).
   - `private.has_permission(p_key text, p_scope record_scope default null)`: the union over the actor's non-archived roles' grants, gated by `request_context_ok()` (FR-024, FR-025).
@@ -145,7 +146,7 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
   - `private.rbac_lock(p_tenant_id)`: `pg_advisory_xact_lock(hashtextextended('rbac:'||p_tenant_id,0))`, used by every role, membership and role-bearing invitation mutation.
   - `private.actor_can_grant(p_key, p_scope, p_audit_categories) returns boolean`: a manager may grant any `tenant_grantable` key; otherwise the actor must hold the same key with scope `all` or the identical scope, plus a superset of the audit categories. Per T021 ⛔ GATE-RBAC.
   - `private.actor_can_grant_role(p_role_id)`: the role is active and in the actor's tenant, and all of its grants pass `actor_can_grant`. Shared by US2 invitations and US4 role administration (FR-026).
-- [ ] T035 Create migration `supabase/migrations/<ts>_rls_policies_core.sql`. It defaults to deny and adds SELECT policies for:
+- [X] T035 Create migration `supabase/migrations/<ts>_rls_policies_core.sql`. It defaults to deny and adds SELECT policies for:
   - `tenant_staff`: own row, or `has_permission('staff.view')` within the same tenant.
   - `roles`, `permission_grants`, `staff_roles`: same tenant with `roles.view`/`staff.view`, or own memberships.
   - `session_registry`: own rows only.
@@ -153,15 +154,15 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
   - `platform_admins`: self.
 
   It adds no INSERT/UPDATE/DELETE policies for `authenticated` on core tables, because all mutations go through RPCs. It adds supporting indexes on every policy column (FR-004, Constitution I)
-- [ ] T036 [P] Create migration `supabase/migrations/<ts>_storage_buckets.sql`. It creates private buckets `tenant-logos` and `tenant-private` (`public = false`) with `storage.objects` policies:
+- [X] T036 [P] Create migration `supabase/migrations/<ts>_storage_buckets.sql`. It creates private buckets `tenant-logos` and `tenant-private` (`public = false`) with `storage.objects` policies:
   - No anon access.
   - Authenticated SELECT on `tenant-private` only when `(storage.foldername(name))[1] = private.current_staff().tenant_id::text` and `request_context_ok()` hold.
   - `tenant-logos` writable and readable only through server-side service-role code.
 
   (FR-034, Constitution VI)
-- [ ] T037 Generate DB types into `packages/db/src/types.gen.ts` with `supabase gen types typescript --local`. Export a typed `Database` from `packages/db/src/index.ts`. Add a CI step to `.github/workflows/ci.yml` that fails when the generated types are stale
-- [ ] T038 [P] Write pgTAP `supabase/tests/000_rls_baseline.test.sql`. It asserts that every `public` table has RLS enabled and forced, that `anon` has no table privileges, that every SECURITY DEFINER function has a fixed `search_path`, and that no `private` function is executable by `anon`/`authenticated` unless allowlisted (Constitution I, XIV-4)
-- [ ] T039 [P] Write pgTAP `supabase/tests/001_tenant_integrity.test.sql`. It asserts that:
+- [X] T037 Generate DB types into `packages/db/src/types.gen.ts` with `supabase gen types typescript --local`. Export a typed `Database` from `packages/db/src/index.ts`. Add a CI step to `.github/workflows/ci.yml` that fails when the generated types are stale
+- [X] T038 [P] Write pgTAP `supabase/tests/000_rls_baseline.test.sql`. It asserts that every `public` table has RLS enabled and forced, that `anon` has no table privileges, that every SECURITY DEFINER function has a fixed `search_path`, and that no `private` function is executable by `anon`/`authenticated` unless allowlisted (Constitution I, XIV-4)
+- [X] T039 [P] Write pgTAP `supabase/tests/001_tenant_integrity.test.sql`. It asserts that:
   - Composite FKs block linking tenant-A staff to tenant-B roles.
   - Subdomain and tenant_id updates are rejected.
   - Reserved and invalid subdomains are rejected.
@@ -171,8 +172,8 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
   - Global email uniqueness holds, including disabled staff.
 
   (FR-005, FR-010, FR-013, CL-007–CL-012)
-- [ ] T040 [P] Write pgTAP `supabase/tests/002_audit_append_only.test.sql`. It asserts that UPDATE/DELETE/TRUNCATE on all audit tables fail for `authenticated` and `service_role`, that the writers strip secret-like metadata keys, and that only the writers can insert (FR-032, Constitution VI)
-- [ ] T041 [P] Write pgTAP `supabase/tests/003_session_liveness.test.sql`. `current_session_is_live()` must be false for a revoked row, for `verified_activity_at = now() - interval '30 days'`, for a mismatched `auth.uid()` and for a missing row, and true at `now() - interval '29 days 23 hours'` (FR-018, FR-022)
+- [X] T040 [P] Write pgTAP `supabase/tests/002_audit_append_only.test.sql`. It asserts that UPDATE/DELETE/TRUNCATE on all audit tables fail for `authenticated` and `service_role`, that the writers strip secret-like metadata keys, and that only the writers can insert (FR-032, Constitution VI)
+- [X] T041 [P] Write pgTAP `supabase/tests/003_session_liveness.test.sql`. `current_session_is_live()` must be false for a revoked row, for `verified_activity_at = now() - interval '30 days'`, for a mismatched `auth.uid()` and for a missing row, and true at `now() - interval '29 days 23 hours'` (FR-018, FR-022)
 
 ### 2C — Core server packages (tenancy, auth adapters, authorization, audit, invitations core)
 
