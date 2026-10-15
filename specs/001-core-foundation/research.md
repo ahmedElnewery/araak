@@ -35,7 +35,9 @@
 ## R-06 — Hosting, bilingual UI and configuration
 **Decision:** two separately deployed Next.js applications; approved admin hostname distinct from tenant subdomains. Wildcard subdomain DNS/TLS and proxy Host/Forwarded validation require deployment-specific threat review. packages/ui hosts shadcn primitives and fixed global palette. Tenant name required and logo optional; no tenant-controlled colors. Arabic initial/RTL, English LTR, persisted user appearance.
 
-**Open:** exact domain(s), deployment provider, email transport, typography/colors/logo limits, CSP and app security headers.
+**Decided (owner, 2026-10-15):** the palette starts from the non-binding reference in `docs/design-references/` with WCAG contrast fixes; the accent is green in Dark and teal in Light; fonts are Cairo (Arabic) and Inter (Latin).
+
+**Open:** exact domain(s), deployment provider, email transport, final palette sign-off, logo limits, CSP and app security headers.
 
 ## R-07 — Operations
 **Decision:** separate Dev and Prod Supabase projects, migration-managed schema, no standing staging. Require at least daily recoverable DB + needed Storage-file backups retained rolling 30 days, encrypted/access restricted. Isolated DB+Storage restore before launch and at least every three calendar months, audited operation by authorized platform ops only, tenant-wide impact reviewed. Rollback/recovery plan includes schema deploy compatibility.
