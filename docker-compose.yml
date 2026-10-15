@@ -1,0 +1,9 @@
+# Development only: a local mail catcher so invitation emails can be read without sending anything real.
+#   docker compose up -d mailpit      (SMTP on 1025, web UI on http://localhost:8025)
+services:
+  mailpit:
+    image: axllent/mailpit:v1.31
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    restart: unless-stopped
