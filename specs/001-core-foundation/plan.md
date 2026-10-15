@@ -5,14 +5,14 @@
 **Plan date:** 2026-10-15
 **Status:** Draft technical plan; NOT approval to deploy
 **Specification:** ./spec.md
-**Constitution:** ../../.specify/memory/constitution.md, v2.0.0 (authoritative)
+**Constitution:** ../../.specify/memory/constitution.md, v2.0.1 (authoritative)
 **Supporting artifacts:** research.md, data-model.md, contracts/foundation-api.md, contracts/security-matrix.md, quickstart.md
 
 ## Summary
 
 Build the foundation for a white-label, multi-tenant charity management portal. Deliver two isolated Next.js application surfaces (tenant portal and platform administration), a single shared pnpm/Turborepo workspace and shadcn-based UI package, Supabase-backed tenant-bound staff authentication, platform-controlled tenant provisioning and protected manager authority, multi-role authorization, server-enforced revocable sessions, safe audit history, bilingual accessible shells, and verified two-environment release/recovery operations. Do not introduce business-domain records or unapproved screens.
 
-The verified staff email is globally unique across ALL tenant staff identities and unexpired pending invitations under Constitution v2.0.0 / CL-048; the same username may be reused by another tenant. No cross-tenant staff switching or same-email aliases.
+**Non-negotiable email rule (Constitution v2.0.1 / CL-048):** The same normalized real staff email MUST NOT be used for staff accounts or overlapping live invitations in two organizations — nor for two separate staff accounts in one organization. Global uniqueness is enforced across ALL tenants, including disabled staff accounts and unexpired pending invitations. Only expiry of an unredeemed invitation with no account releases that reservation. A person working for two organizations must have two different verified emails and two independent tenant-scoped accounts. Username uniqueness remains tenant-local; the same username CAN occur in different tenants. No cross-tenant account switching or generated email aliases.
 
 ## Technical Context
 
@@ -44,7 +44,7 @@ The verified staff email is globally unique across ALL tenant staff identities a
 | XI/XII: controlled scope | Administrative foundation only; no invented domain dashboards or fields | Scope inspection |
 | XIII/XIV: operations | Separate Supabase projects; migrations, 30-day daily DB+file backups, initial/quarterly isolated restore tests | Go-live hard gate |
 
-**Blocking reconciliation (resolved 2026-10-15):** The spec's stale v1.0.0 references, its same-email-across-tenants scope statement and FR-010's obsolete wording were corrected to Constitution 2.0.0 / FR-013 / CL-048, and the project owner approved the spec. The requirements checklist still marks G-02/G-03 decisions incomplete; this plan does not mark them approved.
+**Specification alignment (resolved 2026-10-15):** Corrected the former v1.0.0 references and obsolete email-reuse wording in spec.md (in-scope statement, FR-010, assumptions) to match Constitution v2.0.1 and FR-013/CL-048, and the project owner then approved the revised spec. G-02/G-03 implementation and operational details remain incomplete; this plan does not mark them approved.
 
 ## Project Structure
 
@@ -84,7 +84,7 @@ Package names are architectural proposals, not a mandate to create abstractions 
 ## Phase 0 — Research and architecture proofs (no production code)
 
 1. Verify Supabase Auth email/password, email verification and SSR PKCE flows: a tenant-bound server resolver converts a validated username into the account email without exposing the lookup; login always checks trusted host + Auth identity + staff/tenant authorization. Use normalized real addresses, not generated email aliases.
-2. Prototype transactional email reservation and activation/reissue race safety (DB unique constraint + locked workflow/outbox) while recognizing Auth API and Postgres updates are NOT one database transaction. Design reconciliation and idempotency for partial failures.
+2. Prototype a GLOBAL (not tenant-scoped) normalized-email uniqueness constraint and transactional reservation for all live staff accounts and unexpired pending invitations. Deny same-tenant and cross-tenant duplicates, including disabled accounts and concurrent requests; permit reuse only once an unused invitation expires without a staff account. Verify issuance, resend, activation and reissue races (DB locks/unique constraints + outbox), and Auth failure recovery/idempotency: Supabase Auth Admin API and Postgres writes are NOT a single transaction.
 3. Prove all mandated session semantics against Supabase Auth: 30-day verified-activity window; arbitrary other-session revocation; revoke all except current; reset/demotion revoke all; blocked refresh capability; active-token denial after tenant/account changes. No assumption that signOut alone invalidates an issued JWT.
 4. Define the initial permission catalog, the manager/delegate grant ceiling and event-category audit filters for owner/security approval. Protected manager authority must NOT be an ordinary tenant-customizable permission.
 5. Verify invitation and reset link issuance/reissue, provider token expiry versus stricter app-enforced expiry, successful email ownership verification, anti-enumeration and abuse limits, current provider plan features.
@@ -94,7 +94,7 @@ Package names are architectural proposals, not a mandate to create abstractions 
 ## Phase 1 — Data model, interfaces, contracts
 
 1. Produce tenant/platform/staff/role/session/audit/invitation conceptual-to-logical model in data-model.md, with constraints and ownership. No beneficiaries, donors, donations, volunteers or accounts tables.
-2. Define trust boundaries and operation contracts in contracts/foundation-api.md. All tenant endpoints derive tenant context from trusted host; API body tenant_id is never authorization evidence.
+2. Define trust boundaries and operation contracts in contracts/foundation-api.md. All tenant endpoints derive tenant context from trusted host; API body tenant_id is never authorization evidence. Specify an atomic global email claim/release workflow with a single normalized email key across both staff identity and invitation reservations; handle race and expiry boundaries without leaking tenant ownership.
 3. Define the authorization matrix and invariant tests in contracts/security-matrix.md; install RLS on application-facing tenant tables and tenant-aware private Storage policies.
 4. Document a repeatable local development/test walkthrough and acceptance gates in quickstart.md.
 5. Design audit outbox/append-only admin events and retention: administrative 12 months; security 3 months; other categories only after approved policy. Keep platform audit separate; no indiscriminate business-read audit events.
@@ -127,7 +127,8 @@ S0–S1 can start after baseline review, but S2/S3/S4/S7 cannot be treated as se
 ## Test and release gates
 
 - Migration reset and RLS SELECT/INSERT/UPDATE/DELETE and tenant-qualified FK tests with two disjoint tenants; test anonymous and revoked sessions, service-key misuse guards, relationships, exports and file reads.
-- Race tests: same email in two tenants, expiring/reissued invitations, duplicate usernames differing by case, grant/self-role edits, archive vs membership, last-manager revocation, reset and session refresh vs revocation.
+- Global email-uniqueness tests: Tenant A reserves an email via live invitation; Tenant B cannot invite/activate it. Tenant A activates or disables that account; Tenant B still cannot use the email. Same-tenant second staff account is denied. A case/normalization variant and two parallel issuance/activation attempts cannot bypass global uniqueness. An expired unredeemed invitation without activated staff MUST release the email reservation. Error responses must not reveal tenant identity. Separate tenants MAY use the same username when their staff emails differ.
+- Other race tests: expiring/reissued invitations, duplicate usernames differing by case within a tenant, grant/self-role edits, archive vs membership, last-manager revocation, reset and session refresh vs revocation.
 - Session tests: different devices, activity at exact 30-day boundary, background token refresh does not update activity, targeted revocation, all-other, reset, password change, suspended/disabled/demoted accounts.
 - AR/EN and RTL/LTR, System/Dark/Light, responsive/keyboard/screen-reader and WCAG 2.2 AA; provider-branding absence and neutral logo fallback.
 - Production release MUST block until qualified operators verify two separate environments, migration rollback strategy, daily database and required-file recovery points over 30 days, isolated prelaunch restore, quarterly restore schedule, and approval of RPO/RTO and ownership.
@@ -135,7 +136,7 @@ S0–S1 can start after baseline review, but S2/S3/S4/S7 cannot be treated as se
 
 ## Open decisions / blockers (owner or feasibility approval required)
 
-- **SPEC-ALIGN (resolved 2026-10-15):** Stale v1 email-sharing and ratification references corrected; project owner signed off the spec.
+- **SPEC-OWNER (resolved 2026-10-15):** Global staff-email uniqueness conflicts in spec.md were corrected to Constitution v2.0.1, and the project owner signed off the revised spec.
 - **AUTH-PROOF:** Determine provider-compatible mechanism for per-session refresh revocation (not just application denial), SSR cookie/security model, account verification, email reservation failure recovery, anti-abuse/IP quotas and delivery provider.
 - **RBAC-APPROVAL:** Approve exhaustive foundation permission/action catalog and delegate grant-ceiling semantics; decide audit category-to-grant mapping.
 - **BRANDING:** Owner approves precise accessible palette, logo mime/size/dimension constraints and safe public-display delivery.
