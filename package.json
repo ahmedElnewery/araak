@@ -6,6 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "dev": "turbo run dev",
     "lint": "turbo run lint && node scripts/check-ui-boundaries.mjs",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
