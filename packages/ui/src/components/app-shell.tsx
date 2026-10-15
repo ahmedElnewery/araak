@@ -38,7 +38,8 @@ export function AppShell({ dir, brand, primaryNav, secondaryNav, header, childre
       >
         {labels.skipToContent}
       </a>
-      <aside className="hidden w-64 shrink-0 flex-col gap-4 border-e bg-sidebar p-4 md:flex">
+      {/* Both sidebars appear together from `md` (narrower until `lg`); below that the drawer carries them, so no breakpoint hides navigation. */}
+      <aside className="hidden w-56 shrink-0 flex-col gap-4 border-e bg-sidebar p-4 md:flex lg:w-64">
         <div>{brand}</div>
         <div className="flex-1 overflow-y-auto">
           {primaryNav}
@@ -46,9 +47,10 @@ export function AppShell({ dir, brand, primaryNav, secondaryNav, header, childre
           {secondaryNav ? <div className="mt-4 border-t pt-4 lg:hidden">{secondaryNav}</div> : null}
         </div>
       </aside>
-      {secondaryNav ? <aside className="hidden w-56 shrink-0 border-e bg-secondary p-4 lg:block">{secondaryNav}</aside> : null}
+      {secondaryNav ? <aside className="hidden w-48 shrink-0 border-e bg-secondary p-4 md:block lg:w-56">{secondaryNav}</aside> : null}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-2 border-b bg-card px-4 py-3">
+        {/* A size container: header controls compact themselves by the room the sidebars leave, not by viewport width */}
+        <header className="@container flex items-center gap-2 border-b bg-card px-4 py-3">
           <Button variant="ghost" size="icon" className="md:hidden" aria-label={labels.openMenu} onClick={() => { setOpen(true); }}>
             <Menu aria-hidden="true" />
           </Button>
