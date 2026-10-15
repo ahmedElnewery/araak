@@ -24,8 +24,8 @@ Auth emails sent by Supabase itself (recovery, etc.) come from the Development p
 2. Copy the three `.env.example` files to `.env.local` and fill them from the Supabase dashboard.
 3. Migrations are applied to the Development project through the Supabase Management API with an access token (no database URL, password, Docker, CLI or MCP needed). Everything runs against the cloud Development project; nothing runs locally.
 4. `pnpm db:check-env` — fails unless the target is the Development project and not Production.
-5. Apply `supabase/migrations/*` in order through the Management API (`POST /v1/projects/{ref}/database/migrations`).
-6. `pnpm db:types` — regenerates `packages/db/src/database.types.ts`.
+5. `pnpm db:migrate` — applies the pending `supabase/migrations/*` in order (`--dry-run` only lists them). It reads the root `.env.local` (`SUPABASE_ENV`, `SUPABASE_DEV_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`), runs each file in one transaction with its row in `supabase_migrations.schema_migrations`, and stops at the first failure. A file counts as applied when its version or its name is in that history. For a database whose files were applied by hand without history, record them once with `--baseline <last applied version>`.
+6. `pnpm db:types` — regenerates `packages/db/src/types.gen.ts`.
 7. `pnpm --filter @workspace/portal dev` and `pnpm --filter @workspace/admin dev`.
 
 ## Manual check of the domain layout
