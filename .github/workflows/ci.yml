@@ -25,10 +25,37 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: node scripts/check-client-bundles.mjs
+  db-security:
+    # Runs against the Supabase Cloud DEVELOPMENT project only. Skipped for forks (no secrets).
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    concurrency:
+      group: supabase-dev-project
+      cancel-in-progress: false
+    env:
+      SUPABASE_ENV: development
+      SUPABASE_DEV_PROJECT_REF: ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
+      SUPABASE_PROD_PROJECT_REF: ${{ secrets.SUPABASE_PROD_PROJECT_REF }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_DEV_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_DEV_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_DEV_SERVICE_ROLE_KEY }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DEV_DB_URL }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
       - uses: supabase/setup-cli@v1
         with:
           version: 2.121.0
-      - run: supabase start
-      - run: supabase db reset
-      - run: supabase test db
+      - run: pnpm db:check-env
+      - run: supabase link --project-ref "$SUPABASE_DEV_PROJECT_REF"
+      - run: supabase db push --linked
+      - run: pnpm test:db
+      - run: pnpm vitest run --root tests/security --passWithNoTests
       - run: pnpm e2e
