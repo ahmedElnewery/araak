@@ -14,6 +14,8 @@ export type TwoTenantFixture = {
   tenantA: Tenant; tenantB: Tenant; platformAdminId: string;
   managerA: Staff; staffA: Staff; managerB: Staff; staffB: Staff;
   roleA: string; roleB: string;
+  /** Registers an Auth user created inside a test so teardown removes it (and any staff row it gained). */
+  trackUser(userId: string): void;
   teardown(): Promise<void>;
 };
 
@@ -81,6 +83,9 @@ export async function createTwoTenantFixture(): Promise<TwoTenantFixture> {
 
   return {
     tenantA, tenantB, platformAdminId, managerA, staffA, managerB, staffB, roleA: ra!.id, roleB: rb!.id,
+    trackUser(userId) {
+      userIds.push(userId);
+    },
     async teardown() {
       const ids = tenantIds.map(q).join(",");
       const users = userIds.map(q).join(",");
@@ -90,6 +95,9 @@ export async function createTwoTenantFixture(): Promise<TwoTenantFixture> {
         delete from public.tenant_audit_events where tenant_id in (${ids});
         delete from public.tenant_security_events where tenant_id in (${ids});
         delete from public.platform_audit_events where actor_platform_admin_id in (${users});
+        delete from public.recovery_requests where tenant_id in (${ids});
+        delete from public.password_confirmations where actor_auth_user_id in (${users});
+        delete from private.auth_attempts where tenant_id in (${ids});
         delete from public.staff_invitation_links where tenant_id in (${ids});
         delete from public.staff_invitation_roles where tenant_id in (${ids});
         delete from public.staff_invitations where tenant_id in (${ids});
@@ -98,7 +106,7 @@ export async function createTwoTenantFixture(): Promise<TwoTenantFixture> {
         delete from public.permission_grants where tenant_id in (${ids});
         delete from public.roles where tenant_id in (${ids});
         delete from public.tenant_manager_grants where tenant_id in (${ids});
-        delete from public.session_registry where auth_user_id in (${users});
+        delete from public.session_registry where auth_user_id in (${users}) or tenant_id in (${ids});
         delete from public.tenant_staff where tenant_id in (${ids});
         delete from public.platform_admins where auth_user_id in (${users});
         delete from public.tenants where id in (${ids});`);

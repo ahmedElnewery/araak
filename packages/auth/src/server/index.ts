@@ -13,3 +13,13 @@ export { renderStaffInvitation } from "../email/templates/staff-invitation";
 export { renderPlatformInvitation } from "../email/templates/platform-invitation";
 export { renderPasswordReset } from "../email/templates/password-reset";
 export { generateToken, hashToken, timingSafeEqualHex } from "../tokens";
+export { getClientIp, throttleHmac, normalizeIdentifier } from "./client-ip";
+export { buildThrottleKeys, checkAndRecordAttempt, recordAuthSuccess, type ThrottleKeys, type ThrottleKind } from "./throttle";
+export { padFailedSignIn, TIMING_PAD_EMAIL } from "./timing-pad";
+export { buildStaffInvitationLink, buildRecoveryLink } from "./invitations/link";
+export { resendStaffInvitation, type ResendInvitationInput } from "./invitations/resend";
+export { signInTenantStaff, type TenantSignInInput, type TenantSignInResult } from "./sign-in";
+export {
+  requestSelfServiceRecovery, mailResetLink, peekRecovery, redeemRecovery, confirmOwnPassword,
+  type SelfServiceRecoveryInput, type RedeemRecoveryResult,
+} from "./recovery";

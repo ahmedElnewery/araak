@@ -399,8 +399,8 @@ Bootstrap and platform-admin removal stay operations-only.
 
 ### Tests for User Story 2 (write first, must FAIL) ⚠️
 
-- [ ] T096 [P] [US2] Write unit tests `packages/auth/src/username.test.ts` for the shared validator: the same cases as T039, plus localized error-key mapping (FR-010, CL-007–CL-010)
-- [ ] T097 [P] [US2] Write pgTAP `supabase/tests/020_staff_invitations.test.sql`:
+- [X] T096 [P] [US2] Write unit tests `packages/auth/src/username.test.ts` for the shared validator: the same cases as T039, plus localized error-key mapping (FR-010, CL-007–CL-010)
+- [X] T097 [P] [US2] Write pgTAP `supabase/tests/020_staff_invitations.test.sql`:
   - **Authorization**: `invite_staff` requires `staff.invite` or manager authority, and roles must be active, same-tenant and within the grant ceiling; a manager-authority invite from tenant actors is impossible.
   - **Expiry**: redemption works at `+167:59:59` and fails at exactly `+168:00:00`; links are single-use.
   - **Resend authorization**: manager or permitted platform admin only.
@@ -409,7 +409,7 @@ Bootstrap and platform-admin removal stay operations-only.
   - **No cancellation**: no cancel function exists and direct UPDATEs are denied.
 
   (FR-009, CL-003, CL-004, CL-020–CL-022, SC-003)
-- [ ] T098 [P] [US2] Write pgTAP `supabase/tests/021_username_and_email.test.sql`:
+- [X] T098 [P] [US2] Write pgTAP `supabase/tests/021_username_and_email.test.sql`:
   - `change_my_username` requires a live session and changes only the caller's row.
   - Case-insensitive tenant uniqueness applies; the same name in another tenant is allowed.
   - The change is audited, with no password parameter.
@@ -417,7 +417,7 @@ Bootstrap and platform-admin removal stay operations-only.
   - The `auth.users` email trigger blocks email change for linked staff.
 
   (FR-010, FR-011, CL-011, CL-012)
-- [ ] T099 [P] [US2] Write pgTAP `supabase/tests/022_recovery.test.sql`:
+- [X] T099 [P] [US2] Write pgTAP `supabase/tests/022_recovery.test.sql`:
   - **Expiry**: redeem at `+59:59` OK; at `+60:00` rejected; single-use.
   - **Newest-only**: a newer issuance supersedes older links across self-service and manager origins.
   - **Cooldown**: 299s is denied without invalidating the current link; 300s is allowed.
@@ -427,7 +427,7 @@ Bootstrap and platform-admin removal stay operations-only.
   - **Completion**: revokes ALL sessions of the target.
 
   (FR-015, FR-021, CL-015–CL-019, SC-004)
-- [ ] T100 [P] [US2] Write `tests/security/invitation-races.test.ts`:
+- [X] T100 [P] [US2] Write `tests/security/invitation-races.test.ts`:
   - Concurrent resends never exceed the cooldown or cap.
   - Concurrent redemption of one link creates exactly one `tenant_staff`.
   - The old link fails after a reissue, even when it races.
@@ -435,9 +435,9 @@ Bootstrap and platform-admin removal stay operations-only.
   - Two tenants inviting the same email simultaneously yield one invitation.
 
   (SC-003, edge cases)
-- [ ] T101 [P] [US2] Write `tests/security/recovery-races.test.ts`. Parallel issuance inside the cooldown issues exactly one link. Redemption racing a reissue never lets the older link succeed. Parallel requests cannot exceed 5/24h (CL-017–CL-019)
-- [ ] T102 [P] [US2] Write `tests/security/login-enumeration.test.ts`. Sign-in failures for an unknown username, a wrong password, a disabled account, a tenant-B email on the tenant-A host, and a suspended tenant return an identical status, body and error code, with response-time medians within the tolerance recorded by T020 in research.md R-02. After the approved number of failures, further sign-in attempts for that identifier or client IP are throttled with the same generic response, while other identifiers and tenants are unaffected. Public recovery always returns the same neutral response, including when throttled (FR-014, US2 scenario 6)
-- [ ] T103 [P] [US2] Write Playwright `tests/e2e/us2-invite-activate-login.spec.ts`:
+- [X] T101 [P] [US2] Write `tests/security/recovery-races.test.ts`. Parallel issuance inside the cooldown issues exactly one link. Redemption racing a reissue never lets the older link succeed. Parallel requests cannot exceed 5/24h (CL-017–CL-019)
+- [X] T102 [P] [US2] Write `tests/security/login-enumeration.test.ts`. Sign-in failures for an unknown username, a wrong password, a disabled account, a tenant-B email on the tenant-A host, and a suspended tenant return an identical status, body and error code, with response-time medians within the tolerance recorded by T020 in research.md R-02. After the approved number of failures, further sign-in attempts for that identifier or client IP are throttled with the same generic response, while other identifiers and tenants are unaffected. Public recovery always returns the same neutral response, including when throttled (FR-014, US2 scenario 6)
+- [X] T103 [P] [US2] Write Playwright `tests/e2e/us2-invite-activate-login.spec.ts`:
   - A manager invites in tenants A and B.
   - The invitee opens the link, sees localized username rules, gets inline errors for invalid names, and activates.
   - Sign in with `Ahmed`, `AHMED` and the email.
@@ -446,7 +446,7 @@ Bootstrap and platform-admin removal stay operations-only.
   - Self-service recovery; manager-assisted reset with own-password entry; an expired-link message.
 
   (US2 scenarios 1–28)
-- [ ] T104 [P] [US2] Write `tests/security/lost-mailbox-reonboarding.test.ts`:
+- [X] T104 [P] [US2] Write `tests/security/lost-mailbox-reonboarding.test.ts`:
   - Disabling the old account denies its sessions.
   - Inviting a new email creates a new `tenant_staff.id` with no roles preselected or copied.
   - The old row, email and audit authorship are unchanged.
@@ -456,15 +456,15 @@ Bootstrap and platform-admin removal stay operations-only.
 
 ### Implementation for User Story 2
 
-- [ ] T105 [P] [US2] Implement `packages/auth/src/username.ts`: `validateUsername(value)` returning `{ok:true}` or `{ok:false, code:'length'|'charset'|'placement'}` with logic equivalent to `^[A-Za-z]+(?:[._][A-Za-z]+)*$` and 3–30 chars. Add the AR/EN messages to `packages/i18n/src/dictionaries/{ar,en}.ts` under `username.*` (FR-010)
-- [ ] T106 [US2] Create migration `supabase/migrations/<ts>_staff_invitation_rpcs.sql`:
+- [X] T105 [P] [US2] Implement `packages/auth/src/username.ts`: `validateUsername(value)` returning `{ok:true}` or `{ok:false, code:'length'|'charset'|'placement'}` with logic equivalent to `^[A-Za-z]+(?:[._][A-Za-z]+)*$` and 3–30 chars. Add the AR/EN messages to `packages/i18n/src/dictionaries/{ar,en}.ts` under `username.*` (FR-010)
+- [X] T106 [US2] Create migration `supabase/migrations/<ts>_staff_invitation_rpcs.sql`:
   - `public.invite_staff(p_email, p_role_ids uuid[], p_token_hash)`: tenant actor; requires `request_context_ok()` and (`has_permission('staff.invite')` or `is_active_tenant_manager()`); takes `private.rbac_lock` and requires every role to pass `private.actor_can_grant_role(role_id)` (T034); never `grants_manager`. Audited as `invitations` / `staff.invited`.
   - `public.platform_invite_staff(p_tenant_id, p_email, p_role_ids, p_token_hash)`: requires `is_platform_admin('tenants.staff.manage')`.
   - `public.resend_staff_invitation(p_invitation_id, p_token_hash)` (manager-only) and `public.platform_resend_staff_invitation(...)`. Both lock the invitation `for update`, require `state = 'pending'`, require `now() - max(issued_at) >= interval '900 seconds'`, require fewer than 5 `kind = 'resend'` links within the last 24h, supersede all links, insert a fresh 168h link, and re-claim the email reservation (`email_unavailable` if another tenant claimed it after expiry). Each is audited.
   - `public.list_pending_invitations()`: tenant-scoped; returns email, roles, latest issued/expiry and resend availability, never token hashes.
 
   (FR-008, FR-009, CL-004, CL-021, CL-022)
-- [ ] T107 [US2] Create migration `supabase/migrations/<ts>_invitation_redemption.sql`, both functions service_role only:
+- [X] T107 [US2] Create migration `supabase/migrations/<ts>_invitation_redemption.sql`, both functions service_role only:
   - `private.peek_staff_invitation(p_token_hash)` returns `tenant_id`, recipient email and validity.
   - `private.redeem_staff_invitation(p_token_hash, p_auth_user_id, p_username)`:
     1. Locks the link and invitation and requires the tenant `active`, `now() < expires_at`, not consumed and not superseded.
@@ -476,7 +476,7 @@ Bootstrap and platform-admin removal stay operations-only.
     7. Audits the redemption.
 
   (FR-009, CL-003)
-- [ ] T108 [US2] Implement invitation acceptance: `apps/portal/src/app/(public)/invite/accept/page.tsx` and `apps/portal/src/features/invitations/accept-action.ts`:
+- [X] T108 [US2] Implement invitation acceptance: `apps/portal/src/app/(public)/invite/accept/page.tsx` and `apps/portal/src/features/invitations/accept-action.ts`:
   1. Require `peek` tenant = host tenant; otherwise show a neutral invalid/expired message.
   2. Show the recipient email read-only.
   3. Validate username and password.
@@ -485,16 +485,16 @@ Bootstrap and platform-admin removal stay operations-only.
   6. Sign in and call `registerSession`.
 
   No public registration route exists (FR-009, FR-016, US2 scenarios 1–3, 11)
-- [ ] T109 [P] [US2] Implement `scripts/ops/reconcile-auth-users.ts` plus the scheduled CI/cron documentation in `docs/operations/reconciliation.md`. List Auth users older than 1h that have no `tenant_staff` or `platform_admins` row, report them, and delete them only with `--apply`. Never grant access to incomplete accounts (R-01)
-- [ ] T110 [US2] Implement staff invitation UI: `apps/portal/src/app/(app)/settings/staff/invite/page.tsx` (email plus a role multi-select listing only active roles the actor may grant, from `my_effective_permissions`/ceiling) and `apps/portal/src/features/staff/invite-action.ts` (`issueInvitation` with `invite_staff`). `email_unavailable` maps to a neutral message that discloses no tenant (US2 scenarios 1, 5, 8)
-- [ ] T111 [US2] Implement pending invitations: `apps/portal/src/app/(app)/settings/staff/invitations/page.tsx` (list plus a Resend button for managers that is disabled until cooldown and cap allow, showing the next allowed time; there is NO cancel control) and `apps/portal/src/features/invitations/resend-action.ts` (FR-009, CL-020–CL-022)
-- [ ] T112 [US2] Create migration `supabase/migrations/<ts>_login_resolution.sql` with `private.resolve_login_email(p_tenant_id uuid, p_identifier text) returns text`, service_role only. An identifier containing `@` matches `email_normalized` in that tenant; otherwise it matches `lower(p_identifier)` against `username_normalized`. It returns the email only for an enabled staff member of an active tenant, else `null`. The same migration adds:
+- [X] T109 [P] [US2] Implement `scripts/ops/reconcile-auth-users.ts` plus the scheduled CI/cron documentation in `docs/operations/reconciliation.md`. List Auth users older than 1h that have no `tenant_staff` or `platform_admins` row, report them, and delete them only with `--apply`. Never grant access to incomplete accounts (R-01)
+- [X] T110 [US2] Implement staff invitation UI: `apps/portal/src/app/(app)/settings/staff/invite/page.tsx` (email plus a role multi-select listing only active roles the actor may grant, from `my_effective_permissions`/ceiling) and `apps/portal/src/features/staff/invite-action.ts` (`issueInvitation` with `invite_staff`). `email_unavailable` maps to a neutral message that discloses no tenant (US2 scenarios 1, 5, 8)
+- [X] T111 [US2] Implement pending invitations: `apps/portal/src/app/(app)/settings/staff/invitations/page.tsx` (list plus a Resend button for managers that is disabled until cooldown and cap allow, showing the next allowed time; there is NO cancel control) and `apps/portal/src/features/invitations/resend-action.ts` (FR-009, CL-020–CL-022)
+- [X] T112 [US2] Create migration `supabase/migrations/<ts>_login_resolution.sql` with `private.resolve_login_email(p_tenant_id uuid, p_identifier text) returns text`, service_role only. An identifier containing `@` matches `email_normalized` in that tenant; otherwise it matches `lower(p_identifier)` against `username_normalized`. It returns the email only for an enabled staff member of an active tenant, else `null`. The same migration adds:
   - `private.auth_attempts` (`tenant_id`, `kind text check in ('sign_in','recovery')`, `identifier_hmac`, `client_ip_hmac`, `attempted_at`, `succeeded`), with no raw identifiers or IPs, plus an hourly `pg_cron` job that deletes rows older than 24 hours.
   - `private.auth_abuse_limits`, seeded from `docs/decisions/auth-abuse-controls.md` ⛔ GATE-ABUSE.
   - `private.check_and_record_auth_attempt(p_tenant_id, p_kind, p_identifier_hmac, p_client_ip_hmac) returns boolean` (service_role only), which records the attempt and returns false when any limit is exceeded.
 
   (FR-012, FR-014, edge case "credential stuffing/abuse")
-- [ ] T113 [US2] Implement sign-in: `apps/portal/src/app/(public)/login/page.tsx` (tenant identity header, username-or-email plus password, localized) and `apps/portal/src/features/auth/sign-in-action.ts`:
+- [X] T113 [US2] Implement sign-in: `apps/portal/src/app/(public)/login/page.tsx` (tenant identity header, username-or-email plus password, localized) and `apps/portal/src/features/auth/sign-in-action.ts`:
   1. Resolve the tenant from the host.
   2. Call `check_and_record_auth_attempt('sign_in', …)` with HMAC-SHA256 (`AUTH_THROTTLE_HMAC_KEY`) of the normalized identifier and of the client IP from `packages/auth/src/server/client-ip.ts`, which trusts `x-forwarded-for` only when `TRUSTED_PROXY_HOPS > 0`. When throttled, return the same generic failure as every other failure. Supabase Auth rate limits stay as a second layer.
   3. `resolve_login_email`. When it returns null, still call `signInWithPassword` with a fixed non-existent placeholder address to equalize timing.
@@ -503,11 +503,11 @@ Bootstrap and platform-admin removal stay operations-only.
   6. On failure, write `recordSecurityEvent('auth.sign_in_failed')` with a hashed identifier.
 
   Rely on Supabase Auth rate limits configured in `supabase/config.toml` `[auth.rate_limit]`; IP/global limits remain pending G-02 (FR-012, FR-014, US2 scenarios 4–6)
-- [ ] T114 [P] [US2] Implement sign-out in `apps/portal/src/features/auth/sign-out-action.ts`: revoke the current registry session (`sign_out`) and call `signOut({scope:'local'})`
-- [ ] T115 [US2] Create migration `supabase/migrations/<ts>_username_change.sql`. `public.change_my_username(p_username text)` requires `request_context_ok()`, updates only `private.current_staff()`, validates format, maps unique violations to `username_taken`, and audits `staff.username_changed` with old and new values. It takes no password parameter (FR-011, CL-011)
-- [ ] T116 [US2] Implement the account page `apps/portal/src/app/(app)/account/page.tsx`: username change form with no password field, email shown read-only via `LtrText` with an "email cannot be changed" note. Add `apps/portal/src/features/account/change-username-action.ts` (US2 scenarios 9–10, 14–19)
-- [ ] T117 [US2] Create migration `supabase/migrations/<ts>_auth_email_immutability.sql`: a `BEFORE UPDATE OF email, email_change ON auth.users` trigger that raises when the user is linked to `tenant_staff`, using the method proven in T020 ⛔ GATE-AUTH (CL-012, edge case "lower-level Auth update")
-- [ ] T118 [US2] Create migration `supabase/migrations/<ts>_recovery.sql`:
+- [X] T114 [P] [US2] Implement sign-out in `apps/portal/src/features/auth/sign-out-action.ts`: revoke the current registry session (`sign_out`) and call `signOut({scope:'local'})`
+- [X] T115 [US2] Create migration `supabase/migrations/<ts>_username_change.sql`. `public.change_my_username(p_username text)` requires `request_context_ok()`, updates only `private.current_staff()`, validates format, maps unique violations to `username_taken`, and audits `staff.username_changed` with old and new values. It takes no password parameter (FR-011, CL-011)
+- [X] T116 [US2] Implement the account page `apps/portal/src/app/(app)/account/page.tsx`: username change form with no password field, email shown read-only via `LtrText` with an "email cannot be changed" note. Add `apps/portal/src/features/account/change-username-action.ts` (US2 scenarios 9–10, 14–19)
+- [X] T117 [US2] Create migration `supabase/migrations/<ts>_auth_email_immutability.sql`: a `BEFORE UPDATE OF email, email_change ON auth.users` trigger that raises when the user is linked to `tenant_staff`, using the method proven in T020 ⛔ GATE-AUTH (CL-012, edge case "lower-level Auth update")
+- [X] T118 [US2] Create migration `supabase/migrations/<ts>_recovery.sql`:
   - `public.recovery_requests`: `id`, `tenant_id`, `staff_id`, `origin text check in ('self_service','manager_assisted','platform_assisted')`, `requested_by_staff_id null`, `requested_by_platform_admin_id null`, `token_hash unique`, `issued_at`, `expires_at` (always `issued_at + interval '60 minutes'`), `used_at`, `superseded_at`, `failed_at`, with a composite FK.
   - `public.password_confirmations`: `actor_auth_user_id`, `confirmed_at`, `expires_at` (+120s), `consumed_at`; written by the service role only.
   - `private.issue_recovery(p_staff_id, p_origin, p_actor_staff_id, p_actor_platform_admin_id, p_token_hash) returns boolean`. It locks the `tenant_staff` row `for update`, requires 300s since the last issuance and fewer than 5 issuances in 24h, supersedes earlier links, inserts the new link and audits. A denial returns false with no side effects.
@@ -516,23 +516,31 @@ Bootstrap and platform-admin removal stay operations-only.
   - `public.request_manager_assisted_reset(p_target_staff_id, p_token_hash)`. It requires `is_active_tenant_manager()`, the same tenant, an enabled target, a target that is not self, and an unconsumed `password_confirmations` row for the actor within 120s (consumed atomically), then calls `issue_recovery`.
 
   (FR-015, FR-021, CL-015–CL-019)
-- [ ] T119 [US2] Implement self-service recovery in `apps/portal/src/app/(public)/recover/` and `apps/portal/src/features/recovery/`:
+- [X] T119 [US2] Implement self-service recovery in `apps/portal/src/app/(public)/recover/` and `apps/portal/src/features/recovery/`:
   - `apps/portal/src/app/(public)/recover/page.tsx` and `apps/portal/src/features/recovery/request-action.ts`: `check_and_record_auth_attempt('recovery', …)` first (throttled requests get the same neutral response), identifier resolved via `resolve_login_email` within the host tenant, `issue_recovery('self_service')`, email sent only if issued, and an always-identical neutral response.
   - `apps/portal/src/app/(public)/recover/complete/page.tsx` and `apps/portal/src/features/recovery/complete-action.ts`: `begin_recovery_redemption`, then `auth.admin.updateUserById(password)`, then `complete_recovery_redemption`. On password-update failure, mark `failed_at` and show a neutral retry message.
 
   (FR-015, US2 scenarios 7, 25–28)
-- [ ] T120 [US2] Implement manager-assisted reset: a dialog in `apps/portal/src/app/(app)/settings/staff/[staffId]/reset-password-dialog.tsx` asks for the MANAGER's own current password only. `apps/portal/src/features/staff/manager-reset-action.ts` then:
+- [X] T120 [US2] Implement manager-assisted reset: a dialog in `apps/portal/src/app/(app)/settings/staff/[staffId]/reset-password-dialog.tsx` asks for the MANAGER's own current password only. `apps/portal/src/features/staff/manager-reset-action.ts` then:
   1. Verifies the password with a throwaway non-persisting Supabase client and immediately revokes the resulting provider session (method from T020).
   2. Inserts `password_confirmations` via the service role.
   3. Calls `request_manager_assisted_reset` with the manager's JWT.
   4. Emails the link to the employee only.
 
   The manager never sees the employee's password (CL-015, US2 scenarios 23–24)
-- [ ] T121 [P] [US2] Implement platform-assisted reset, mirroring CL-015 controls (own-password confirmation of the platform admin; `tenants.staff.manage`). Add `public.platform_request_staff_reset(...)` in `supabase/migrations/<ts>_platform_staff_reset.sql`, plus an action in `apps/admin/src/features/tenants/staff-reset-action.ts` ⛔ GATE-RBAC (confirm the platform variant) (Constitution III, FR-015)
-- [ ] T122 [US2] Add AR/EN strings for invitation, sign-in, recovery, username and the related errors to `packages/i18n/src/dictionaries/{ar,en}.ts`, with neutral wording and no provider names (FR-038, Constitution X)
-- [ ] T123 [US2] Run `supabase test db` (`supabase/tests/020_*`–`022_*`), the `tests/security/` suites from T100–T102 and T104, `packages/auth/src/username.test.ts` and `tests/e2e/us2-invite-activate-login.spec.ts` until T096–T104 pass
+- [X] T121 [P] [US2] Implement platform-assisted reset, mirroring CL-015 controls (own-password confirmation of the platform admin; `tenants.staff.manage`). Add `public.platform_request_staff_reset(...)` in `supabase/migrations/<ts>_platform_staff_reset.sql`, plus an action in `apps/admin/src/features/tenants/staff-reset-action.ts` ⛔ GATE-RBAC (confirm the platform variant) (Constitution III, FR-015)
+- [X] T122 [US2] Add AR/EN strings for invitation, sign-in, recovery, username and the related errors to `packages/i18n/src/dictionaries/{ar,en}.ts`, with neutral wording and no provider names (FR-038, Constitution X)
+- [X] T123 [US2] Run `supabase test db` (`supabase/tests/020_*`–`022_*`), the `tests/security/` suites from T100–T102 and T104, `packages/auth/src/username.test.ts` and `tests/e2e/us2-invite-activate-login.spec.ts` until T096–T104 pass
 
 **Checkpoint**: Staff in two tenants can be invited, activate, sign in, change usernames and recover access with every boundary enforced.
+
+**Implementation notes (Phase 4)**:
+- Portal pages live under `apps/portal/src/app/(tenant)/(public)/…` and `(tenant)/(app)/…` (not top-level `(public)`/`(app)`), so every page keeps the tenant-host guard in `(tenant)/layout.tsx`. `(app)/layout.tsx` is a minimal signed-in frame that the shell story replaces.
+- Two small migrations beyond the task text: `<ts>_grantable_roles_and_confirmations.sql` (`list_grantable_roles()` for the invite role picker; `svc_record_password_confirmation()` so the 120 s window uses the database clock) and `<ts>_recovery_peek.sql` (`svc_peek_recovery()` so the reset page can show a neutral "link unavailable" message before the form).
+- Audit event names follow the existing `TenantAuditEvent` set (`invitation.issued`, `invitation.resent`, `staff.activated`, `password.reset_initiated`) plus `staff.username_changed` and `password.reset_completed`; sign-in failures use the existing `auth.login_failed` / `auth.login_throttled` security events with an HMAC identifier only.
+- The per-IP throttle key is (tenant, client IP) and is skipped when `TRUSTED_PROXY_HOPS = 0` (the forwarded header is then attacker-controlled).
+- Self-service recovery does its account-dependent work after the response (`after()`), so timing cannot reveal whether an account exists. Unknown/throttled/foreign sign-ins pay for one real failed password check against an internal timing-pad identity (excluded by `reconcile-auth-users`).
+- ⛔ GATE-RBAC is still open for the platform-assisted reset variant (T121): it is implemented behind `tenants.staff.manage` but needs the owner's confirmation.
 
 ---
 

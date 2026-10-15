@@ -82,6 +82,30 @@ export type Database = {
           },
         ];
       };
+      password_confirmations: {
+        Row: {
+          actor_auth_user_id: string;
+          confirmed_at: string;
+          consumed_at: string | null;
+          expires_at: string;
+          id: string;
+        };
+        Insert: {
+          actor_auth_user_id: string;
+          confirmed_at?: string;
+          consumed_at?: string | null;
+          expires_at: string;
+          id?: string;
+        };
+        Update: {
+          actor_auth_user_id?: string;
+          confirmed_at?: string;
+          consumed_at?: string | null;
+          expires_at?: string;
+          id?: string;
+        };
+        Relationships: [];
+      };
       permission_catalog: {
         Row: {
           action: string;
@@ -245,6 +269,73 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "platform_admins";
             referencedColumns: ["auth_user_id"];
+          },
+        ];
+      };
+      recovery_requests: {
+        Row: {
+          expires_at: string;
+          failed_at: string | null;
+          id: string;
+          issued_at: string;
+          origin: string;
+          requested_by_platform_admin_id: string | null;
+          requested_by_staff_id: string | null;
+          staff_id: string;
+          superseded_at: string | null;
+          tenant_id: string;
+          token_hash: string;
+          used_at: string | null;
+        };
+        Insert: {
+          expires_at: string;
+          failed_at?: string | null;
+          id?: string;
+          issued_at?: string;
+          origin: string;
+          requested_by_platform_admin_id?: string | null;
+          requested_by_staff_id?: string | null;
+          staff_id: string;
+          superseded_at?: string | null;
+          tenant_id: string;
+          token_hash: string;
+          used_at?: string | null;
+        };
+        Update: {
+          expires_at?: string;
+          failed_at?: string | null;
+          id?: string;
+          issued_at?: string;
+          origin?: string;
+          requested_by_platform_admin_id?: string | null;
+          requested_by_staff_id?: string | null;
+          staff_id?: string;
+          superseded_at?: string | null;
+          tenant_id?: string;
+          token_hash?: string;
+          used_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "recovery_requests_requested_by_platform_admin_id_fkey";
+            columns: ["requested_by_platform_admin_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_admins";
+            referencedColumns: ["auth_user_id"];
+          },
+          {
+            foreignKeyName: "recovery_requests_requester_fk";
+            columns: ["tenant_id", "requested_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "tenant_staff";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "recovery_requests_staff_fk";
+            columns: ["tenant_id", "staff_id"];
+            isOneToOne: false;
+            referencedRelation: "tenant_staff";
+            referencedColumns: ["tenant_id", "id"];
           },
         ];
       };
@@ -776,6 +867,13 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      change_my_username: { Args: { p_username: string }; Returns: undefined };
+      invite_staff: {
+        Args: { p_email: string; p_role_ids: string[]; p_token_hash: string };
+        Returns: string;
+      };
+      list_grantable_roles: { Args: never; Returns: Json };
+      list_pending_invitations: { Args: never; Returns: Json };
       my_effective_permissions: { Args: never; Returns: Json };
       platform_create_tenant: {
         Args: {
@@ -804,6 +902,15 @@ export type Database = {
         };
         Returns: string;
       };
+      platform_invite_staff: {
+        Args: {
+          p_email: string;
+          p_role_ids: string[];
+          p_tenant_id: string;
+          p_token_hash: string;
+        };
+        Returns: string;
+      };
       platform_invite_tenant_manager: {
         Args: { p_email: string; p_tenant_id: string; p_token_hash: string };
         Returns: string;
@@ -817,6 +924,14 @@ export type Database = {
           state: Database["public"]["Enums"]["tenant_state"];
           subdomain: string;
         }[];
+      };
+      platform_request_staff_reset: {
+        Args: { p_target_staff_id: string; p_token_hash: string };
+        Returns: string;
+      };
+      platform_resend_staff_invitation: {
+        Args: { p_invitation_id: string; p_token_hash: string };
+        Returns: string;
       };
       platform_revoke_tenant_manager: {
         Args: { p_staff_id: string; p_tenant_id: string };
@@ -833,6 +948,41 @@ export type Database = {
         Args: { p_display_name: string; p_tenant_id: string };
         Returns: undefined;
       };
+      request_manager_assisted_reset: {
+        Args: { p_target_staff_id: string; p_token_hash: string };
+        Returns: string;
+      };
+      resend_staff_invitation: {
+        Args: { p_invitation_id: string; p_token_hash: string };
+        Returns: string;
+      };
+      svc_begin_recovery_redemption: {
+        Args: { p_token_hash: string };
+        Returns: Json;
+      };
+      svc_check_and_record_auth_attempt: {
+        Args: {
+          p_client_ip_hmac: string;
+          p_identifier_hmac: string;
+          p_kind: string;
+          p_tenant_id: string;
+        };
+        Returns: boolean;
+      };
+      svc_complete_recovery_redemption: {
+        Args: { p_request_id: string };
+        Returns: undefined;
+      };
+      svc_issue_recovery: {
+        Args: {
+          p_actor_platform_admin_id: string;
+          p_actor_staff_id: string;
+          p_origin: string;
+          p_staff_id: string;
+          p_token_hash: string;
+        };
+        Returns: boolean;
+      };
       svc_load_platform_context: {
         Args: { p_auth_user_id: string; p_session_id: string };
         Returns: Json;
@@ -840,6 +990,10 @@ export type Database = {
       svc_load_staff_context: {
         Args: { p_auth_user_id: string; p_session_id: string };
         Returns: Json;
+      };
+      svc_mark_recovery_failed: {
+        Args: { p_request_id: string };
+        Returns: undefined;
       };
       svc_ops_bootstrap_platform_admin: {
         Args: { p_auth_user_id: string; p_operator_ref: string };
@@ -858,9 +1012,34 @@ export type Database = {
         Args: { p_token_hash: string };
         Returns: Json;
       };
+      svc_peek_recovery: { Args: { p_token_hash: string }; Returns: Json };
+      svc_peek_staff_invitation: {
+        Args: { p_token_hash: string };
+        Returns: Json;
+      };
+      svc_record_auth_success: {
+        Args: { p_identifier_hmac: string; p_kind: string; p_tenant_id: string };
+        Returns: undefined;
+      };
+      svc_record_password_confirmation: {
+        Args: { p_actor_auth_user_id: string };
+        Returns: undefined;
+      };
       svc_redeem_platform_invitation: {
         Args: { p_auth_user_id: string; p_token_hash: string };
         Returns: boolean;
+      };
+      svc_redeem_staff_invitation: {
+        Args: {
+          p_auth_user_id: string;
+          p_token_hash: string;
+          p_username: string;
+        };
+        Returns: string;
+      };
+      svc_resolve_login_email: {
+        Args: { p_identifier: string; p_tenant_id: string };
+        Returns: string;
       };
       svc_revoke_sessions: {
         Args: {

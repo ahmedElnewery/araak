@@ -26,3 +26,8 @@ export function extractLink(body: string, pathFragment: string): string {
   if (!m) throw new Error(`no ${pathFragment} link in mail`);
   return m[0];
 }
+
+/** Empties the catcher so the next `waitForMail` can only see mail sent after this call. */
+export async function clearMail(): Promise<void> {
+  await fetch(`${base()}/api/v1/messages`, { method: "DELETE" });
+}
