@@ -16,7 +16,7 @@ Invitation and recovery emails come from the Development project's configured ma
 ## Setup
 
 1. `corepack enable && pnpm install`
-2. Copy `.env.example` to `.env.local` (root) and the app `.env.example` files to `apps/*/.env.local`; fill values from the Supabase dashboard. Real values stay out of version control.
+2. Copy the three `.env.example` files to `.env.local` and fill them from the Supabase dashboard.
 3. `supabase login` (or set `SUPABASE_ACCESS_TOKEN`), then `supabase link --project-ref $SUPABASE_DEV_PROJECT_REF`.
 4. `pnpm db:check-env` — fails unless the target is the Development project and not Production.
 5. `pnpm db:push` — applies `supabase/migrations/*` to the Development project. `supabase config push` applies `supabase/config.toml` Auth settings.
