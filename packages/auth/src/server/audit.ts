@@ -13,7 +13,7 @@ export type PlatformAuditEvent =
   | "tenant.created" | "tenant.suspended" | "tenant.activated" | "manager.granted" | "manager.revoked"
   | "platform_admin.invited" | "platform_admin.bootstrapped" | "platform_admin.invitation_accepted"
   | "platform_admin.invitation_rejected" | "platform_admin.revoked_by_ops" | "tenant.name_updated" | "tenant.logo_updated" | "manager.invited"
-  | "auth.login_failed" | "restore.rehearsed" | "authz.denied";
+  | "auth.login_failed" | "auth.login_throttled" | "restore.rehearsed" | "authz.denied";
 
 type Meta = Record<string, unknown>;
 

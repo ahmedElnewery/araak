@@ -22,14 +22,18 @@ let cached: Partial<Record<AppName, ServerEnv>> = {};
 
 /**
  * Validated server env, read lazily (so `next build` does not need secrets) and fail-fast at first use.
- * The portal requires PORTAL_BASE_DOMAIN; the admin app requires ADMIN_HOST.
+ * Both apps require PORTAL_BASE_DOMAIN (the admin app mails invitation and reset links to tenant portals); the admin
+ * app also requires ADMIN_HOST.
  */
 export function getServerEnv(app: AppName, source: Record<string, string | undefined> = process.env): ServerEnv {
   const hit = cached[app];
   if (hit && source === process.env) return hit;
   const parsed = serverSchema.parse(source);
-  const needed = app === "portal" ? parsed.PORTAL_BASE_DOMAIN : parsed.ADMIN_HOST;
-  if (!needed) throw new Error(`${app === "portal" ? "PORTAL_BASE_DOMAIN" : "ADMIN_HOST"} is required for the ${app} app`);
+  const missing = [
+    ...(parsed.PORTAL_BASE_DOMAIN ? [] : ["PORTAL_BASE_DOMAIN"]),
+    ...(app === "admin" && !parsed.ADMIN_HOST ? ["ADMIN_HOST"] : []),
+  ];
+  if (missing.length > 0) throw new Error(`${missing.join(" and ")} ${missing.length > 1 ? "are" : "is"} required for the ${app} app`);
   const env = { ...parsed, PORTAL_BASE_DOMAIN: parsed.PORTAL_BASE_DOMAIN ?? "", ADMIN_HOST: parsed.ADMIN_HOST ?? "" };
   if (source === process.env) cached = { ...cached, [app]: env };
   return env;

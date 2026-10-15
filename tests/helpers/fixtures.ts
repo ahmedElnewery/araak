@@ -107,6 +107,7 @@ export async function createTwoTenantFixture(): Promise<TwoTenantFixture> {
         delete from public.roles where tenant_id in (${ids});
         delete from public.tenant_manager_grants where tenant_id in (${ids});
         delete from public.session_registry where auth_user_id in (${users}) or tenant_id in (${ids});
+        delete from public.tenant_preferences where tenant_id in (${ids});
         delete from public.tenant_staff where tenant_id in (${ids});
         delete from public.platform_admins where auth_user_id in (${users});
         delete from public.tenants where id in (${ids});`);

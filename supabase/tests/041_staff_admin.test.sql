@@ -85,6 +85,11 @@ select is((select enabled from public.tenant_staff where id = tests.sid('tgt')),
 select is(tests.rpc('m1', format($$public.disable_staff(%L)$$, tests.sid('m2'))) ->> 'ok', 'true', 'a manager disables another manager while one remains');
 select is(tests.err('m1', format($$public.disable_staff(%L)$$, tests.sid('m1'))), 'cannot_disable_self', 'the last manager cannot disable themselves');
 select is((select count(*) from public.tenant_manager_grants g join public.tenant_staff s on s.id = g.staff_id where g.tenant_id = (select a from fx) and g.revoked_at is null and s.enabled), 1::bigint, 'one active manager remains');
+-- re-enabling a manager restores protected authority: never a staff.enable delegate (CL-023)
+select is(tests.err('adm', format($$public.enable_staff(%L)$$, tests.sid('m2'))), 'manager_protected', 'a delegate cannot re-enable a manager');
+select is((select enabled from public.tenant_staff where id = tests.sid('m2')), false, 'the manager stays disabled');
+select is((select count(*) from public.tenant_security_events where tenant_id = (select a from fx) and event = 'authz.privilege_escalation_denied'
+  and metadata ->> 'resourceId' = tests.sid('m2')::text), 2::bigint, 'the denied re-enable writes a security event');
 select is(tests.rpc('m1', format($$public.enable_staff(%L)$$, tests.sid('m2'))) ->> 'ok', 'true', 'manager re-enables the other manager');
 
 -- no RPC edits email or username
@@ -102,4 +107,18 @@ select is(private.has_permission('staff.view'), true, 'union: key from the first
 select is(private.has_permission('roles.view'), true, 'union: key from the second role');
 select is(private.has_permission('roles.update'), true, 'union: key from the third role');
 select is(private.has_permission('staff.invite'), false, 'union does not invent keys');
+select tests.reset();
+
+-- the set-based ceiling used by the lists agrees with the per-role check, for a delegate and for a manager
+select tests.claims((select user_id from st where k = 'adm'), (select sid from st where k = 'adm'));
+select is((select count(*) from public.roles r where r.tenant_id = (select a from fx)
+  and (r.id in (select private.actor_covered_role_ids())) is distinct from private.actor_covers_role(r.id)), 0::bigint,
+  'delegate: actor_covered_role_ids matches actor_covers_role for every role');
+select is((select count(*) from private.actor_covered_role_ids() c(id) join public.roles r on r.id = c.id where r.tenant_id <> (select a from fx)),
+  0::bigint, 'only roles of the actor''s tenant are ever covered');
+select tests.reset();
+select tests.claims((select user_id from st where k = 'm1'), (select sid from st where k = 'm1'));
+select is((select count(*) from public.roles r where r.tenant_id = (select a from fx)
+  and (r.id in (select private.actor_covered_role_ids())) is distinct from private.actor_covers_role(r.id)), 0::bigint,
+  'manager: actor_covered_role_ids matches actor_covers_role for every role');
 select tests.reset();

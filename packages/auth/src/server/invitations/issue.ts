@@ -37,6 +37,7 @@ export async function issueStaffInvitation(input: IssueInvitationInput): Promise
     return { invitationId, tenantId, delivered: true };
   } catch {
     if (!tenantId) return { invitationId, tenantId, delivered: false };
+    // the invitation (and, at creation, the tenant) is already committed: an audit error must not report a failure
     await recordTenantAudit({
       tenantId,
       actor: input.actor,
@@ -44,7 +45,7 @@ export async function issueStaffInvitation(input: IssueInvitationInput): Promise
       event: "invitation.delivery_failed",
       resourceType: "staff_invitation",
       resourceId: invitationId,
-    });
+    }).catch(() => undefined);
     return { invitationId, tenantId, delivered: false };
   }
 }

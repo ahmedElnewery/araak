@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { DISPLAY_NAME_MAX } from "@workspace/config";
 import type { Dictionary } from "@workspace/i18n";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -17,7 +18,7 @@ export function NameForm({ tenantId, displayName, subdomain, t }: Props) {
     <form action={action} className="space-y-4">
       <div className="grid gap-2">
         <Label htmlFor="displayName">{t.tenants.displayName}</Label>
-        <Input id="displayName" name="displayName" defaultValue={displayName} required maxLength={120} dir="auto" />
+        <Input id="displayName" name="displayName" defaultValue={displayName} required maxLength={DISPLAY_NAME_MAX} dir="auto" />
         {code ? <p role="alert" className="text-sm text-destructive">{t.errors[code]}</p> : null}
       </div>
       <div className="grid gap-2">

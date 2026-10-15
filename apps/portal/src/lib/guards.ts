@@ -3,7 +3,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AuthError, createSupabaseServerClient, getTenantStaffContext, recordMeaningfulActivity, recordSecurityEvent } from "@workspace/auth/server";
-import { can, loadEffectivePermissions, type PermissionKey, type RecordScope } from "@workspace/authorization";
+import { can, loadEffectivePermissions, type EffectivePermissions, type PermissionKey, type RecordScope } from "@workspace/authorization";
 import { requireTenant } from "./tenant-context";
 
 async function deny(ctx: { tenantId: string; staffId: string }, reason: string): Promise<never> {
@@ -16,20 +16,33 @@ async function deny(ctx: { tenantId: string; staffId: string }, reason: string):
 type StaffCtx = Awaited<ReturnType<typeof getTenantStaffContext>>;
 
 /**
+ * One guard pipeline per request (getClaims + svc_load_staff_context): the layout and the page share it, like
+ * resolveTenantFromHost. A failure is memoized too, so both report the same outcome.
+ */
+const loadStaffContext = cache(async (): Promise<StaffCtx | AuthError> => {
+  const tenant = await requireTenant();
+  const supabase = await createSupabaseServerClient("portal");
+  try {
+    return await getTenantStaffContext(tenant, supabase);
+  } catch (e) {
+    if (e instanceof AuthError) return e;
+    throw e;
+  }
+});
+
+/** The actor's effective permissions, loaded once per request for the memoized context. */
+export const loadPermissions = cache((ctx: StaffCtx): Promise<EffectivePermissions> => loadEffectivePermissions(ctx));
+
+/**
  * Pass `{ touch: false }` from shared layouts and from guards that still have to authorize the request: the caller
  * then renews the session itself once the request is fully authorized, so a denied request never counts.
  */
 export async function requireStaff(opts: { touch?: boolean } = {}) {
-  const tenant = await requireTenant();
-  const supabase = await createSupabaseServerClient("portal");
-  let ctx: StaffCtx;
-  try {
-    ctx = await getTenantStaffContext(tenant, supabase);
-  } catch (e) {
-    if (!(e instanceof AuthError)) throw e;
-    if (e.code === "suspended") redirect("/suspended");
-    if (e.code === "forbidden") redirect("/forbidden");
-    if (e.code === "session_expired") redirect("/login?reason=expired");
+  const ctx = await loadStaffContext();
+  if (ctx instanceof AuthError) {
+    if (ctx.code === "suspended") redirect("/suspended");
+    if (ctx.code === "forbidden") redirect("/forbidden");
+    if (ctx.code === "session_expired") redirect("/login?reason=expired");
     redirect("/login");
   }
   if (opts.touch !== false) await renewSession(ctx);
@@ -50,7 +63,7 @@ export async function renewSession(ctx: StaffCtx): Promise<void> {
 
 export async function requirePermission(key: PermissionKey, scope?: RecordScope) {
   const ctx = await requireStaff({ touch: false });
-  const perms = await loadEffectivePermissions(ctx);
+  const perms = await loadPermissions(ctx);
   if (!can(perms, key, scope)) return deny(ctx, `permission:${key}`);
   await renewSession(ctx);
   return { ...ctx, permissions: perms };

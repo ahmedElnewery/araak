@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { loadEffectivePermissions } from "@workspace/authorization";
 import { Button } from "@workspace/ui/components/button";
 import { LtrText } from "@workspace/ui/components/ltr-text";
 import { TenantIdentity } from "@workspace/ui/components/tenant-identity";
@@ -7,7 +6,7 @@ import { HeaderControls } from "@/components/header-controls";
 import { PortalShell } from "@/components/portal-shell";
 import { signOutAction } from "@/features/auth/sign-out-action";
 import { tenantLogoSrc } from "@/lib/branding";
-import { requireStaff } from "@/lib/guards";
+import { loadPermissions, requireStaff } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 import { buildNavigation } from "@/lib/navigation";
 import { requireTenant } from "@/lib/tenant-context";
@@ -17,7 +16,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const ctx = await requireStaff({ touch: false }); // the page's own guard renews the session once authorized
   const tenant = await requireTenant();
   const { locale, theme, dir, t } = await getI18n();
-  const perms = await loadEffectivePermissions(ctx);
+  const perms = await loadPermissions(ctx);
   return (
     <PortalShell
       dir={dir}

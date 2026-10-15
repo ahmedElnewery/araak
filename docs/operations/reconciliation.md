@@ -15,7 +15,7 @@ OPS_CONFIRM=yes OPERATOR_REF=<your-ref> NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SE
 ```
 
 - Only users older than **1 hour** are considered, so an activation in progress is never touched.
-- The internal timing-pad identity used to equalize sign-in cost is ignored.
+- The internal timing-pad identity that earlier versions created to equalize sign-in cost is ignored (the pad no longer calls Supabase Auth).
 - The script never creates a staff or admin row and never grants access to an incomplete account.
 
 ## Scheduling

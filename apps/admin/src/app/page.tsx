@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import { landingPath, requirePlatformSession } from "@/lib/platform-guards";
 
-export default function Home() {
-  redirect("/tenants");
+export default async function Home() {
+  const ctx = await requirePlatformSession({ touch: false });
+  redirect(landingPath(ctx.capabilities));
 }

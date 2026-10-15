@@ -40,7 +40,11 @@ export function AppShell({ dir, brand, primaryNav, secondaryNav, header, childre
       </a>
       <aside className="hidden w-64 shrink-0 flex-col gap-4 border-e bg-sidebar p-4 md:flex">
         <div>{brand}</div>
-        <div className="flex-1 overflow-y-auto">{primaryNav}</div>
+        <div className="flex-1 overflow-y-auto">
+          {primaryNav}
+          {/* tablet widths (md to lg): no room for a second sidebar, so the module sections sit under the primary nav */}
+          {secondaryNav ? <div className="mt-4 border-t pt-4 lg:hidden">{secondaryNav}</div> : null}
+        </div>
       </aside>
       {secondaryNav ? <aside className="hidden w-56 shrink-0 border-e bg-secondary p-4 lg:block">{secondaryNav}</aside> : null}
       <div className="flex min-w-0 flex-1 flex-col">

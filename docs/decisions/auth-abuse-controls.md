@@ -15,7 +15,7 @@
 Per-account recovery issuance caps from R-02 still apply on top (>=5 min between issuances, <=5 successful in rolling 24 h).
 
 ## Throttled response
-Identical to every other failure: the same HTTP status, body, localized message and error code (`invalid_credentials`), and padded to the same response time (R-02 item 5: tolerance 250 ms on the p50 gap). The response never reveals whether an account exists, in any tenant, or whether a limit was hit. A throttled attempt does not run the password check, but must still perform the padded dummy check so timing matches.
+Identical to every other failure: the same HTTP status, body, localized message and error code (`invalid_credentials`), and padded to the same response time (R-02 item 5: tolerance 250 ms on the p50 gap). The response never reveals whether an account exists, in any tenant, or whether a limit was hit. A throttled attempt does not run the password check, but must still perform the padded dummy check so timing matches. The pad is a delay calibrated on the measured duration of real failed password checks, not a Supabase Auth call: every Auth call from the server spends the per-IP sign-in budget all tenants share (R-02 item 6), so a throttled or unknown attempt must not consume it.
 
 ## Keys and data retention
 - Throttle keys are `HMAC-SHA256(AUTH_THROTTLE_HMAC_KEY, tenant_id || ':' || normalized_identifier)` and `HMAC(key, client_ip)`; no raw identifiers or IPs are stored.

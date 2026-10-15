@@ -9,7 +9,7 @@ const env = requireOps();
 const apply = process.argv.includes("--apply");
 const admin = serviceClient(env);
 const cutoff = Date.now() - 60 * 60 * 1000;
-// internal identity used only to equalize sign-in timing (packages/auth timing-pad); never an account
+// identity earlier versions of the sign-in timing pad created (the pad no longer calls Supabase Auth); never an account
 const IGNORED = new Set(["signin-timing-pad@example.com"]);
 
 const orphans: { id: string; email: string; createdAt: string }[] = [];

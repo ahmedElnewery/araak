@@ -49,6 +49,11 @@ export type Dictionary = {
       promote: string; promoted: string; revoke: string; revoked: string; confirmRevoke: string; revokeTitle: string;
       revokeBody: string; inviteEmail: string; invite: string; invited: string; expires: string;
     };
+    staff: {
+      title: string; intro: string; none: string; username: string; email: string; status: string; enabled: string;
+      disabled: string; manager: string; resetPassword: string; resetTitle: string; resetIntro: string;
+      adminPassword: string; confirmReset: string; resetSent: string; resetNotDelivered: string;
+    };
     admins: {
       title: string; intro: string; invite: string; inviteTitle: string; capabilities: string; sendInvitation: string;
       invitationSent: string; invitationNotDelivered: string; acceptTitle: string; acceptIntro: string; accept: string;

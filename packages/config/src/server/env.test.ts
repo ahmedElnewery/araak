@@ -23,7 +23,12 @@ describe("getServerEnv", () => {
   });
   it("requires the app-specific host variable", () => {
     expect(() => getServerEnv("portal", base)).toThrow(/PORTAL_BASE_DOMAIN/);
-    expect(() => getServerEnv("admin", base)).toThrow(/ADMIN_HOST/);
-    expect(getServerEnv("admin", { ...base, ADMIN_HOST: "admin.localhost:3001" }).ADMIN_HOST).toBe("admin.localhost:3001");
+    expect(() => getServerEnv("admin", { ...base, PORTAL_BASE_DOMAIN: "portal.localhost:3000" })).toThrow(/ADMIN_HOST/);
+    const admin = getServerEnv("admin", { ...base, ADMIN_HOST: "admin.localhost:3001", PORTAL_BASE_DOMAIN: "portal.localhost:3000" });
+    expect(admin.ADMIN_HOST).toBe("admin.localhost:3001");
+    expect(admin.PORTAL_BASE_DOMAIN).toBe("portal.localhost:3000");
+  });
+  it("requires PORTAL_BASE_DOMAIN in the admin app too (it builds tenant invitation and reset links)", () => {
+    expect(() => getServerEnv("admin", { ...base, ADMIN_HOST: "admin.localhost:3001" })).toThrow(/PORTAL_BASE_DOMAIN/);
   });
 });

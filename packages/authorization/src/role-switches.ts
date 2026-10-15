@@ -47,3 +47,26 @@ export function grantsToSwitches(grants: readonly StoredGrant[]): { on: RoleSwit
 export function offerableSwitches(actor: EffectivePermissions): RoleSwitch[] {
   return ROLE_SWITCHES.filter((s) => canGrant(actor, switchesToGrants([s])).ok);
 }
+
+export type RoleGrantPayload = { key: string; scope: string; auditCategories?: string[] | null };
+
+/**
+ * The grants to save when an actor edits a role through the switches. Only the switches the actor can offer are
+ * taken from the form; every stored grant of a switch the actor cannot offer is kept exactly as stored (key, scope and
+ * audit categories), so an edit never touches authority above the actor's ceiling and the database does not read the
+ * edit as removing it (CL-031).
+ */
+export function applySwitchEdit(
+  stored: readonly StoredGrant[], submitted: readonly RoleSwitch[], offered: readonly RoleSwitch[],
+): RoleGrantPayload[] {
+  const offeredSet = new Set(offered);
+  const lockedKeys = new Set<string>(ROLE_SWITCHES.filter((s) => !offeredSet.has(s)).flatMap((s) => SWITCH_KEYS[s]));
+  const fresh: RoleGrantPayload[] = switchesToGrants(submitted.filter((s) => offeredSet.has(s)))
+    .filter((g) => !lockedKeys.has(g.key));
+  const kept: RoleGrantPayload[] = stored
+    .filter((g) => lockedKeys.has(g.key))
+    .map((g) => (g.auditCategories == null
+      ? { key: g.key, scope: g.scope }
+      : { key: g.key, scope: g.scope, auditCategories: [...g.auditCategories] }));
+  return [...fresh, ...kept];
+}

@@ -51,7 +51,7 @@ export async function createTenantAction(_prev: FormState, formData: FormData): 
     const code = codeOf(e);
     // map to the field the user can fix; the rest shows as a form-level message
     if (code === "subdomain_taken" || code === "subdomain_reserved" || code === "subdomain_invalid") return { fieldErrors: { subdomain: code } };
-    if (code === "name_required") return { fieldErrors: { displayName: code } };
+    if (code === "name_required" || code === "name_invalid") return { fieldErrors: { displayName: code } };
     if (code === "email_invalid" || code === "email_unavailable") return { fieldErrors: { managerEmail: code } };
     return { error: code };
   }

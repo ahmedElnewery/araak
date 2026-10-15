@@ -17,7 +17,7 @@ All text/background and non-text UI pairs must meet WCAG 2.2 AA (4.5:1 text, 3:1
 Cairo for Arabic, Inter for English/Latin, via `next/font/google` (self-hosted at build time), exposed as `--font-arabic` and `--font-latin`. Arabic text lists Cairo first, Latin text Inter first.
 
 ## 3. Organization display name
-Required. After `btrim`, 1–80 characters, Unicode letters, digits, spaces and common punctuation (`. , - ' & ( )`). No control characters, no markup. Rendered as text only, never as HTML. Shown with `dir="auto"`.
+Required. After `btrim`, 1–80 characters, Unicode letters, digits, spaces and common punctuation (`. , - ' & ( )`; the comma includes its Arabic form `،`). The same rule applies when the platform creates or renames a tenant. No control characters, no markup. Rendered as text only, never as HTML. Shown with `dir="auto"`.
 
 ## 4. Logo
 - Optional. Allowed MIME types (checked by content sniffing, not only the extension): `image/png`, `image/jpeg`, `image/webp`. **SVG is excluded** (script/XSS risk).

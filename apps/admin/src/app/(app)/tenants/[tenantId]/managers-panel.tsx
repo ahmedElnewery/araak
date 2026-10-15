@@ -1,11 +1,12 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { formatDate, type Dictionary, type Locale } from "@workspace/i18n";
+import { formatDateTime, type Dictionary, type Locale } from "@workspace/i18n";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { LtrText } from "@workspace/ui/components/ltr-text";
+import { useTimeZone } from "@workspace/ui/hooks/use-time-zone";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -27,6 +28,7 @@ export function ManagersPanel({ tenantId, data, t, locale }: Props) {
   const [inviteState, inviteAction, inviting] = useActionState<FormState, FormData>(inviteManager.bind(null, tenantId), initialFormState);
   const [revokeError, setRevokeError] = useState<ErrorCode | undefined>();
   const [pending, start] = useTransition();
+  const timeZone = useTimeZone();
   const err = (c: ErrorCode | undefined) => (c ? t.errors[c] : null);
 
   return (
@@ -70,7 +72,7 @@ export function ManagersPanel({ tenantId, data, t, locale }: Props) {
           {data.pending.map((p) => (
             <li key={p.invitationId} className="p-3">
               <LtrText>{p.email}</LtrText>
-              {p.expiresAt ? <span className="text-sm text-muted-foreground"> · {t.managers.expires} {formatDate(p.expiresAt, locale)}</span> : null}
+              {p.expiresAt ? <span className="text-sm text-muted-foreground"> · {t.managers.expires} {formatDateTime(p.expiresAt, locale, timeZone)}</span> : null}
             </li>
           ))}
         </ul>

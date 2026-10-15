@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { DISPLAY_NAME_MAX } from "@workspace/config";
 import type { Dictionary } from "@workspace/i18n";
 import { createTenantAction } from "@/features/tenants/create-tenant-action";
 import { initialFormState, type FormState } from "@/features/form-state";
@@ -34,7 +35,7 @@ export function CreateTenantForm({ t }: { t: Dictionary["admin"] }) {
       }}
     >
       <Field id="displayName" label={t.tenants.displayName} error={msg(errors.displayName)}>
-        <Input id="displayName" name="displayName" required maxLength={120} dir="auto" aria-invalid={!!errors.displayName} />
+        <Input id="displayName" name="displayName" required maxLength={DISPLAY_NAME_MAX} dir="auto" aria-invalid={!!errors.displayName} />
       </Field>
       <Field id="subdomain" label={t.tenants.subdomain} hint={t.tenants.subdomainHint} error={msg(errors.subdomain)}>
         <Input id="subdomain" name="subdomain" required maxLength={63} dir="ltr" autoCapitalize="none" spellCheck={false} aria-invalid={!!errors.subdomain} />

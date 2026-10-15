@@ -5,10 +5,10 @@ import { buttonVariants } from "@workspace/ui/components/button";
 import { LtrText } from "@workspace/ui/components/ltr-text";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 import { getI18n } from "@/lib/locale";
-import { requirePlatformAdmin } from "@/lib/platform-guards";
+import { TENANT_CAPABILITIES, requirePlatformAdminAny } from "@/lib/platform-guards";
 
 export default async function TenantsPage() {
-  const ctx = await requirePlatformAdmin("tenants.manage");
+  const ctx = await requirePlatformAdminAny(TENANT_CAPABILITIES);
   const { locale, t } = await getI18n();
   // Metadata only: no tenant-private data is ever listed here (FR-029).
   const { data } = await ctx.supabase.rpc("platform_list_tenants");
@@ -17,9 +17,11 @@ export default async function TenantsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">{t.admin.tenants.title}</h1>
-        <Link href="/tenants/new" className={buttonVariants()}>
-          {t.admin.tenants.new}
-        </Link>
+        {ctx.capabilities.includes("tenants.manage") ? (
+          <Link href="/tenants/new" className={buttonVariants()}>
+            {t.admin.tenants.new}
+          </Link>
+        ) : null}
       </div>
       {rows.length === 0 ? (
         <p className="text-muted-foreground">{t.admin.tenants.empty}</p>

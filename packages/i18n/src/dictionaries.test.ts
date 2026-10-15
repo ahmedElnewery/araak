@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ar } from "./dictionaries/ar";
 import { en } from "./dictionaries/en";
 import { dir, DEFAULT_LOCALE } from "./config";
-import { formatDate, formatNumber } from "./format";
+import { formatDate, formatDateTime, formatNumber } from "./format";
 import { resolveLocale, resolveTheme } from "./resolve-locale";
 
 const keys = (o: Record<string, unknown>, p = ""): string[] =>
@@ -43,5 +43,10 @@ describe("locale helpers", () => {
     expect(formatNumber(1234.5, "ar")).toBe("1,234.5");
     expect(formatDate("2026-10-15T12:00:00Z", "en")).toMatch(/2026/);
     expect(formatDate("2026-10-15T12:00:00Z", "ar")).toMatch(/2026/);
+  });
+  it("names the time zone of every time of day and renders the zone it is given", () => {
+    expect(formatDateTime("2026-10-15T14:15:00Z", "en")).toMatch(/2:15.*UTC/);
+    expect(formatDateTime("2026-10-15T14:15:00Z", "en", "Asia/Riyadh")).toMatch(/5:15.*GMT\+3/);
+    expect(formatDateTime("2026-10-15T14:15:00Z", "ar", "Asia/Riyadh")).toMatch(/5:15/);
   });
 });

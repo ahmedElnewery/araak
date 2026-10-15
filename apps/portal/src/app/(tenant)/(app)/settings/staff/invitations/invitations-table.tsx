@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { formatDateTime, type Dictionary, type Locale } from "@workspace/i18n";
 import { Button } from "@workspace/ui/components/button";
 import { LtrText } from "@workspace/ui/components/ltr-text";
+import { useTimeZone } from "@workspace/ui/hooks/use-time-zone";
 import { resendInvitationAction } from "@/features/invitations/resend-action";
 import type { FormState } from "@/features/form-state";
 
@@ -16,6 +17,7 @@ export type PendingInvitation = {
 export function InvitationsTable({ rows, canResend, t, locale }: { rows: PendingInvitation[]; canResend: boolean; t: Dictionary; locale: Locale }) {
   const [result, setResult] = useState<{ id: string; state: FormState } | null>(null);
   const [pending, start] = useTransition();
+  const timeZone = useTimeZone();
   if (rows.length === 0) return <p className="text-muted-foreground">{t.portal.staff.pendingEmpty}</p>;
   return (
     <div className="space-y-3">
@@ -34,7 +36,7 @@ export function InvitationsTable({ rows, canResend, t, locale }: { rows: Pending
             <tr key={r.invitationId} className="border-b" data-testid="pending-invitation">
               <td className="p-2"><LtrText>{r.email}</LtrText></td>
               <td className="p-2"><span dir="auto">{r.roles.join(", ")}</span></td>
-              <td className="p-2">{formatDateTime(r.expiresAt, locale)}</td>
+              <td className="p-2">{formatDateTime(r.expiresAt, locale, timeZone)}</td>
               <td className="p-2">{r.expired ? t.portal.staff.statusExpired : t.portal.staff.statusPending}</td>
               {canResend ? (
                 <td className="p-2">
@@ -51,7 +53,7 @@ export function InvitationsTable({ rows, canResend, t, locale }: { rows: Pending
                   </Button>
                   {!r.canResend ? (
                     <p id={`next-${r.invitationId}`} className="mt-1 text-xs text-muted-foreground">
-                      {t.portal.staff.resendAvailableAt} {formatDateTime(r.nextResendAt, locale)}
+                      {t.portal.staff.resendAvailableAt} {formatDateTime(r.nextResendAt, locale, timeZone)}
                     </p>
                   ) : null}
                   {result?.id === r.invitationId && result.state.error ? <p role="alert" className="text-xs text-destructive">{t.portal.errors[result.state.error]}</p> : null}

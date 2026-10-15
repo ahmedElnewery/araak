@@ -9,6 +9,7 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
+import { useTimeZone } from "@workspace/ui/hooks/use-time-zone";
 import { revokeOtherSessionsAction, revokeSessionAction, type SessionActionResult } from "@/features/account/sessions-actions";
 
 export type SessionRow = {
@@ -18,6 +19,7 @@ export type SessionRow = {
 // No password field and no IP/location anywhere: confirmation is enough (CL-037..CL-039).
 export function SessionsTable({ rows, t, locale }: { rows: SessionRow[]; t: Dictionary; locale: Locale }) {
   const s = t.portal.sessions;
+  const timeZone = useTimeZone();
   const [result, setResult] = useState<{ kind: "one" | "all"; r: SessionActionResult } | null>(null);
   const [pending, start] = useTransition();
   const run = (kind: "one" | "all", work: () => Promise<SessionActionResult>) => { start(async () => { setResult({ kind, r: await work() }); }); };
@@ -42,8 +44,8 @@ export function SessionsTable({ rows, t, locale }: { rows: SessionRow[]; t: Dict
                 {row.is_current ? <Badge>{s.current}</Badge> : null}
               </TableCell>
               <TableCell>{row.browser ?? s.unknownBrowser}</TableCell>
-              <TableCell>{formatDateTime(row.created_at, locale)}</TableCell>
-              <TableCell>{formatDateTime(row.verified_activity_at, locale)}</TableCell>
+              <TableCell>{formatDateTime(row.created_at, locale, timeZone)}</TableCell>
+              <TableCell>{formatDateTime(row.verified_activity_at, locale, timeZone)}</TableCell>
               <TableCell>
                 {row.is_current ? null : (
                   <AlertDialog>

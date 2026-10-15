@@ -57,7 +57,8 @@ export async function revokeSessions(filter: RevokeFilter, reason: RevokeReason)
       ? await admin.rpc("svc_revoke_sessions", { p_session_ids: filter.providerSessionIds, p_reason: reason })
       : await admin.rpc("svc_revoke_user_sessions", {
           p_auth_user_id: filter.authUserId,
-          p_except_session_id: filter.exceptProviderSessionId as string,
+          // an explicit null: an undefined key is dropped from the JSON body and the RPC no longer resolves (PGRST202)
+          p_except_session_id: (filter.exceptProviderSessionId ?? null) as string,
           p_reason: reason,
         });
   if (error) throw new Error("session_revocation_failed");
