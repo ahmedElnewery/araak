@@ -634,7 +634,7 @@ Protected manager authority stays platform-only.
 
 ### Tests for User Story 4 (write first, must FAIL) ⚠️
 
-- [ ] T135 [P] [US4] Write pgTAP `supabase/tests/040_roles.test.sql`:
+- [X] T135 [P] [US4] Write pgTAP `supabase/tests/040_roles.test.sql`:
   - **Ceiling**: create and update succeed only within the ceiling; a manager-only or non-grantable key is rejected.
   - **Self-edit**: an actor assigned to role R cannot change R's name, description, grants or scopes, even when reducing them (CL-027).
   - **Archive**: an assigned role (including one held only by disabled staff) is denied with no assignment removed; a zero-assignment role archives; archived roles disappear from active lists and cannot be assigned (CL-028, CL-029).
@@ -643,7 +643,7 @@ Protected manager authority stays platform-only.
   - **Tenancy**: cross-tenant role ids are rejected.
 
   (FR-023, FR-026)
-- [ ] T136 [P] [US4] Write pgTAP `supabase/tests/041_staff_admin.test.sql`:
+- [X] T136 [P] [US4] Write pgTAP `supabase/tests/041_staff_admin.test.sql`:
   - `set_staff_roles` with target = actor is denied for add, remove, swap and bulk, and writes a security event (CL-044).
   - Another authorized actor can add or remove within the ceiling.
   - Disable and enable affect only the same tenant; disabling self is denied; disabling the last active manager of an active tenant is denied.
@@ -652,22 +652,22 @@ Protected manager authority stays platform-only.
   - Multi-role union holds: `has_permission` is true for keys from either role, and an `own` grant does not imply `all` (FR-024).
 
   (FR-008, FR-022, FR-023)
-- [ ] T137 [P] [US4] Write pgTAP `supabase/tests/042_record_scope.test.sql`. Inside the test transaction, create a temporary fixture table (`tenant_id`, `owner_staff_id`, `assignee_staff_ids uuid[]`); no business schema is added. Prove that `private.has_permission_for_record(key, tenant_id, owner_staff_id, assignee_ids)` respects tenant isolation and the All/Own/Assigned scopes for two tenants (FR-028, US4 scenario 6)
-- [ ] T138 [P] [US4] Write `tests/security/role-races.test.ts`:
+- [X] T137 [P] [US4] Write pgTAP `supabase/tests/042_record_scope.test.sql`. Inside the test transaction, create a temporary fixture table (`tenant_id`, `owner_staff_id`, `assignee_staff_ids uuid[]`); no business schema is added. Prove that `private.has_permission_for_record(key, tenant_id, owner_staff_id, assignee_ids)` respects tenant isolation and the All/Own/Assigned scopes for two tenants (FR-028, US4 scenario 6)
+- [X] T138 [P] [US4] Write `tests/security/role-races.test.ts`:
   - Archive racing a concurrent assignment never leaves an archived role with assignments.
   - A role edit racing the editor's own concurrent assignment to that role is denied at commit.
   - Restore racing the creation of a same-name role leaves exactly one active role.
   - Concurrent disables of the last two managers leave ≥1 active manager.
 
   (CL-027, CL-028, CL-031, FR-008)
-- [ ] T139 [P] [US4] Write `tests/security/privilege-escalation.test.ts`:
+- [X] T139 [P] [US4] Write `tests/security/privilege-escalation.test.ts`:
   - A delegate grants a key or scope above their ceiling → denied, with a `authz.privilege_escalation_denied` security event.
   - Direct PostgREST INSERT/UPDATE/DELETE on `roles`, `permission_grants`, `staff_roles`, `tenant_manager_grants` and `tenant_staff` with a staff JWT → denied by RLS.
   - A tenant JWT calling platform RPCs → denied.
   - Granting `platform_admins.invite` or manager authority via any tenant path → impossible.
 
   (FR-026, SC-005, security-matrix tests 4–5)
-- [ ] T140 [P] [US4] Write Playwright `tests/e2e/us4-staff-roles.spec.ts`:
+- [X] T140 [P] [US4] Write Playwright `tests/e2e/us4-staff-roles.spec.ts`:
   - The manager creates two roles and assigns both to staff X; X's navigation shows the union.
   - Self-assignment controls are absent on one's own staff page, and the server action is denied if forged.
   - The edit form is read-only for a role you hold.
@@ -679,14 +679,14 @@ Protected manager authority stays platform-only.
 
 ### Implementation for User Story 4
 
-- [ ] T141 [US4] Create migration `supabase/migrations/<ts>_rbac_rpcs.sql`:
+- [X] T141 [US4] Create migration `supabase/migrations/<ts>_rbac_rpcs.sql`:
   - Uses `private.rbac_lock`, `private.actor_can_grant` and `private.actor_can_grant_role` from Foundational (T034); do not redefine them.
   - `public.create_role(p_name, p_description, p_grants jsonb)`: requires `roles.create` or manager, plus the ceiling.
   - `public.update_role(p_role_id, p_name, p_description, p_grants jsonb)`: requires `roles.update` or manager. After `rbac_lock`, it denies when the actor is assigned to the role (CL-027) and writes a security event on that denial. It applies the ceiling to both added and removed grants and allows renaming archived roles.
   - `public.archive_role(p_role_id)`: requires `roles.archive` or manager. After `rbac_lock`, it requires zero `staff_roles` rows, including disabled staff (CL-028, CL-029).
   - `public.restore_role(p_role_id)`: requires a manager or `roles.restore`, plus `actor_can_grant_role`. It fails with `role_name_conflict` if the active name is taken, and restores no memberships (CL-030, CL-031).
   - Every outcome, including denials, is audited under the `roles` category.
-- [ ] T142 [US4] Create migration `supabase/migrations/<ts>_staff_admin_rpcs.sql`:
+- [X] T142 [US4] Create migration `supabase/migrations/<ts>_staff_admin_rpcs.sql`:
   - `public.set_staff_roles(p_staff_id, p_add uuid[], p_remove uuid[])`. It requires `staff.roles.assign` or manager authority. After `rbac_lock`, it denies when `p_staff_id = current_staff().id` and writes a security event (CL-044). The target must be in the same tenant; added roles must be active; every added and removed role must pass `actor_can_grant_role`. Each change is audited.
   - `public.disable_staff(p_staff_id)`: requires `staff.disable` or manager; not self; refuses the last active manager of an active tenant (locks the tenant row); sets `enabled=false`; calls `revoke_sessions('disabled')`; audited.
   - `public.enable_staff(p_staff_id)`: requires `staff.enable` or manager; audited.
@@ -694,24 +694,31 @@ Protected manager authority stays platform-only.
   - `public.get_staff(p_staff_id)`.
 
   No other editable staff attributes are defined by the spec; do not add any (FR-008, FR-022, FR-023)
-- [ ] T143 [US4] Create migration `supabase/migrations/<ts>_record_scope_helper.sql` with `private.has_permission_for_record(p_key text, p_tenant_id uuid, p_owner_staff_id uuid, p_assignee_ids uuid[]) returns boolean`. It returns true when the actor is in the same tenant and holds `p_key` with scope `all`, `own` with `owner = actor`, or `assigned` with the actor in the assignees. It is for future modules; there are no business tables (FR-028)
-- [ ] T144 [P] [US4] Implement `packages/authorization/src/scope.ts` (`scopeAllows`, mirroring the SQL helper) with `packages/authorization/src/scope.test.ts`
-- [ ] T145 [US4] Regenerate `packages/db/src/types.gen.ts` after T141–T143
-- [ ] T146 [US4] Implement the staff directory `apps/portal/src/app/(app)/settings/staff/page.tsx` (`list_staff`, link to pending invitations from T111, manager badge read-only) and staff details `apps/portal/src/app/(app)/settings/staff/[staffId]/page.tsx`:
+- [X] T143 [US4] Create migration `supabase/migrations/<ts>_record_scope_helper.sql` with `private.has_permission_for_record(p_key text, p_tenant_id uuid, p_owner_staff_id uuid, p_assignee_ids uuid[]) returns boolean`. It returns true when the actor is in the same tenant and holds `p_key` with scope `all`, `own` with `owner = actor`, or `assigned` with the actor in the assignees. It is for future modules; there are no business tables (FR-028)
+- [X] T144 [P] [US4] Implement `packages/authorization/src/scope.ts` (`scopeAllows`, mirroring the SQL helper) with `packages/authorization/src/scope.test.ts`
+- [X] T145 [US4] Regenerate `packages/db/src/types.gen.ts` after T141–T143
+- [X] T146 [US4] Implement the staff directory `apps/portal/src/app/(app)/settings/staff/page.tsx` (`list_staff`, link to pending invitations from T111, manager badge read-only) and staff details `apps/portal/src/app/(app)/settings/staff/[staffId]/page.tsx`:
   - The role assignment editor, with only grantable active roles; hidden for one's own record and still denied server-side.
   - Disable/enable via `AlertDialog`.
   - The reset-password entry point from T120.
   - No email edit and no manager grant controls.
 
   Add `apps/portal/src/features/staff/actions.ts` (`setStaffRoles`, `disableStaff`, `enableStaff`) (FR-008, CL-044)
-- [ ] T147 [US4] Implement roles UI in `apps/portal/src/app/(app)/settings/roles/` and `apps/portal/src/features/roles/actions.ts`:
+- [X] T147 [US4] Implement roles UI in `apps/portal/src/app/(app)/settings/roles/` and `apps/portal/src/features/roles/actions.ts`:
   - `apps/portal/src/app/(app)/settings/roles/page.tsx`: Active and Archived tabs.
   - `apps/portal/src/app/(app)/settings/roles/new/page.tsx`.
   - `apps/portal/src/app/(app)/settings/roles/[roleId]/page.tsx`: a permission picker limited to grantable catalog keys within the ceiling, a scope selector (All/Own/Assigned) where the catalog supports it, and an audit-category selector for `audit_logs.view`. The form is read-only with an explanation when the actor holds the role. Archive and Restore buttons show error mapping for `role_assigned`, `role_name_conflict` and `forbidden`.
 
   Add `apps/portal/src/features/roles/actions.ts` (FR-023, FR-026, FR-027)
-- [ ] T148 [P] [US4] Add AR/EN strings for staff, roles, permissions (per catalog key), scopes and errors to `packages/i18n/src/dictionaries/{ar,en}.ts`
-- [ ] T149 [US4] Run `supabase/tests/040_roles.test.sql`–`042_record_scope.test.sql`, `tests/security/role-races.test.ts`, `tests/security/privilege-escalation.test.ts` and `tests/e2e/us4-staff-roles.spec.ts` until T135–T140 pass
+- [X] T148 [P] [US4] Add AR/EN strings for staff, roles, permissions (per catalog key), scopes and errors to `packages/i18n/src/dictionaries/{ar,en}.ts`
+- [X] T149 [US4] Run `supabase/tests/040_roles.test.sql`–`042_record_scope.test.sql`, `tests/security/role-races.test.ts`, `tests/security/privilege-escalation.test.ts` and `tests/e2e/us4-staff-roles.spec.ts` until T135–T140 pass
+
+**Implementation notes (Phase 6)**:
+- Role and staff RPCs return `{ok:false,error}` for audited business denials (ceiling, self-edit, assigned role, name conflict, self-membership, last manager) because a raised error would roll the audit/security event back. Missing authority still raises `42501`.
+- `staff_roles_guard` now share-locks the role row and `archive_role` locks it `FOR UPDATE`, so archive can never race an assignment (including invitation redemption).
+- A delegate cannot disable a manager (`manager_protected`); a manager can, while another active manager remains.
+- `list_grantable_roles` also serves `staff.roles.assign` (migration 033) so the staff role editor needs no `roles.view`.
+- Role screens use the four plain switches (`packages/authorization/src/role-switches.ts`).
 
 **Checkpoint**: The RBAC foundation is centrally enforced in the database and server, and is ready for future business modules.
 
@@ -734,7 +741,7 @@ Protected manager authority stays platform-only.
 
 ### Tests for User Story 5 (write first, must FAIL) ⚠️
 
-- [ ] T150 [P] [US5] Write Playwright `tests/e2e/us5-branding.spec.ts`:
+- [X] T150 [P] [US5] Write Playwright `tests/e2e/us5-branding.spec.ts`:
   - Login and shell show the correct tenant name and logo per host; the no-logo tenant shows the neutral icon.
   - `<title>`, the `icon` link and the manifest show only the tenant name or neutral assets.
   - The DOM, title and metadata contain none of the provider/product denylist strings (`tests/helpers/branding-denylist.ts`), nor "ERAK"/"إراك" on non-ERAK tenants.
@@ -742,60 +749,69 @@ Protected manager authority stays platform-only.
   - Staff and delegates get no branding nav item, and a forged server action is denied.
 
   (FR-035–FR-037, SC-008)
-- [ ] T151 [P] [US5] Write `tests/security/logo-storage.test.ts`:
+- [X] T151 [P] [US5] Write `tests/security/logo-storage.test.ts`:
   - Server-side rejection of a disallowed MIME, an extension/magic-byte mismatch, an oversized file, corrupt image data and oversized dimensions.
   - A tenant-A JWT cannot list or read `tenant-logos/<B>/…` or `tenant-private/<B>/…` through the Storage API.
   - The `/branding/logo` route on host A never serves B's logo.
   - Buckets are not public.
 
   (FR-034, Constitution IX)
-- [ ] T152 [P] [US5] Write Playwright `tests/e2e/us5-i18n-theme.spec.ts`:
+- [X] T152 [P] [US5] Write Playwright `tests/e2e/us5-i18n-theme.spec.ts`:
   - Default Arabic with `dir="rtl"`; switching to English gives `dir="ltr"` and survives a reload.
   - Usernames and emails render inside `bdi[dir=ltr]` and data is not rewritten.
   - System theme follows an emulated `prefers-color-scheme`; explicit Dark/Light persists across reload and across a second browser context (server-stored preference).
   - Before sign-in, preferences come from a cookie only.
 
   (FR-038, FR-039, US5 scenarios 3–4)
-- [ ] T153 [P] [US5] Write Playwright + `@axe-core/playwright` `tests/accessibility/shell.a11y.spec.ts`:
+- [X] T153 [P] [US5] Write Playwright + `@axe-core/playwright` `tests/accessibility/shell.a11y.spec.ts`:
   - Scan with WCAG 2.2 AA tags: login, invitation acceptance, recovery, shell, account, sessions, staff, roles, branding, audit and security logs (portal) and login, tenants and tenant details (admin), each in AR/RTL and EN/LTR × Light and Dark.
   - A keyboard-only traversal script asserts visible focus and dialog focus trap and return.
   - Reduced motion is respected.
 
   (FR-041, SC-007)
-- [ ] T154 [P] [US5] Write the unit test `packages/ui/src/components/tenant-identity.test.tsx`: the neutral icon renders when there is no logo, alt text equals the organization name, and no default artwork exists (FR-035)
+- [X] T154 [P] [US5] Write the unit test `packages/ui/src/components/tenant-identity.test.tsx`: the neutral icon renders when there is no logo, alt text equals the organization name, and no default artwork exists (FR-035)
 
 ### Implementation for User Story 5
 
-- [ ] T155 [US5] Create migration `supabase/migrations/<ts>_preferences_branding.sql`:
+- [X] T155 [US5] Create migration `supabase/migrations/<ts>_preferences_branding.sql`:
   - `public.tenant_preferences`: `tenant_id`, `staff_id` pk, `locale text check (locale in ('ar','en'))`, `theme_mode text check (theme_mode in ('system','light','dark'))`, `updated_at`, with a composite FK.
   - `public.get_my_preferences()` and `public.set_my_preferences(p_locale, p_theme)`.
   - `public.update_tenant_branding(p_display_name text, p_logo_object_path text, p_remove_logo bool)`: requires `is_active_tenant_manager()` only, never a grantable permission; validates the name; increments `logo_version`; audited under `tenant_settings`.
   - `public.platform_update_tenant_logo(p_tenant_id, p_logo_object_path, p_remove bool)`: requires `tenants.manage`; audited on both sides.
 
   (FR-036, FR-039)
-- [ ] T156 [US5] Implement `packages/config/src/branding.ts` (approved logo MIME allowlist, max bytes, max dimensions and name constraints, sourced from `docs/decisions/branding.md`) and `apps/portal/src/features/branding/validate-logo.ts` (magic-byte sniffing, dimension read via `sharp`, metadata stripped by re-encoding) ⛔ GATE-BRAND (Constitution IX)
-- [ ] T157 [US5] Implement the branding settings page `apps/portal/src/app/(app)/settings/branding/page.tsx` (behind `requireManager()`: name field, logo upload/replace/remove with preview and accessible labels) and `apps/portal/src/features/branding/actions.ts`:
+- [X] T156 [US5] Implement `packages/config/src/branding.ts` (approved logo MIME allowlist, max bytes, max dimensions and name constraints, sourced from `docs/decisions/branding.md`) and `apps/portal/src/features/branding/validate-logo.ts` (magic-byte sniffing, dimension read via `sharp`, metadata stripped by re-encoding) ⛔ GATE-BRAND (Constitution IX)
+- [X] T157 [US5] Implement the branding settings page `apps/portal/src/app/(app)/settings/branding/page.tsx` (behind `requireManager()`: name field, logo upload/replace/remove with preview and accessible labels) and `apps/portal/src/features/branding/actions.ts`:
   1. Validate the logo.
   2. Upload via the service role to `tenant-logos/<tenant_id>/<uuid>.<ext>`.
   3. Call `update_tenant_branding`.
   4. Delete the previous object after commit.
 
   (FR-036, US5 scenario 2)
-- [ ] T158 [P] [US5] Implement logo delivery `apps/portal/src/app/branding/logo/route.ts`. Resolve the tenant from the host only, stream the object with the service role, set `Cache-Control` keyed by `?v=<logo_version>` and `X-Content-Type-Options: nosniff`, and return 404 when no logo exists. Mark the route `passive` so it never counts as activity (FR-035, CL-036)
-- [ ] T159 [P] [US5] Implement admin logo intervention: `apps/admin/src/app/(app)/tenants/[tenantId]/branding-panel.tsx`, `apps/admin/src/features/tenants/logo-actions.ts` and a preview route `apps/admin/src/app/(app)/tenants/[tenantId]/logo/route.ts` (FR-036)
-- [ ] T160 [US5] Implement tenant identity on the portal surfaces in `apps/portal/src/app/`:
+- [X] T158 [P] [US5] Implement logo delivery `apps/portal/src/app/branding/logo/route.ts`. Resolve the tenant from the host only, stream the object with the service role, set `Cache-Control` keyed by `?v=<logo_version>` and `X-Content-Type-Options: nosniff`, and return 404 when no logo exists. Mark the route `passive` so it never counts as activity (FR-035, CL-036)
+- [X] T159 [P] [US5] Implement admin logo intervention: `apps/admin/src/app/(app)/tenants/[tenantId]/branding-panel.tsx`, `apps/admin/src/features/tenants/logo-actions.ts` and a preview route `apps/admin/src/app/(app)/tenants/[tenantId]/logo/route.ts` (FR-036)
+- [X] T160 [US5] Implement tenant identity on the portal surfaces in `apps/portal/src/app/`:
   - `apps/portal/src/app/(public)/layout.tsx`: `TenantIdentity` on login, invitation and recovery pages.
   - `generateMetadata` in `apps/portal/src/app/layout.tsx`: title = tenant display name, no provider name.
   - `apps/portal/src/app/icon.tsx`: tenant logo or neutral generated icon.
   - `apps/portal/src/app/manifest.ts`: tenant name, neutral icon.
 
   (FR-035, FR-037, Constitution IX)
-- [ ] T161 [US5] Implement navigation `apps/portal/src/lib/navigation.ts`. Primary items: Home, Account, Settings (secondary sidebar: Staff, Roles, Branding), Audit Log, Security Logs. Each item declares its required permission or manager check and is filtered by `my_effective_permissions`. Home is a minimal welcome with no KPIs, charts, dashboard widgets or global search. Account is direct-entry with no empty secondary sidebar (FR-040, Constitution X, US5 scenario 6)
-- [ ] T162 [US5] Implement the authenticated shell `apps/portal/src/app/(app)/layout.tsx` (`requireStaff()`, `AppShell` with filtered navigation, header with `TenantIdentity`, language and theme selectors, sign-out) and `apps/portal/src/app/(app)/page.tsx` (minimal localized home) (FR-040)
-- [ ] T163 [US5] Implement preference persistence in `apps/portal/src/features/preferences/actions.ts`. Signed-in users write to `set_my_preferences` plus the `locale`/`theme` cookies; before sign-in, cookies only. The root layout reads the stored preference first. The admin app uses cookie persistence in `apps/admin/src/features/preferences/actions.ts` (FR-039, Constitution VIII)
-- [ ] T164 [P] [US5] Audit both apps for mixed-direction content: wrap usernames, emails and record IDs with `LtrText` in `apps/portal/src/**` and `apps/admin/src/**`. Confirm every user-visible string comes from `packages/i18n` dictionaries (no hard-coded literals; add an ESLint `i18next/no-literal-string`-style rule in `eslint.config.mjs` scoped to `apps/*/src/app/**/*.tsx`) (FR-038, FR-041)
-- [ ] T165 [P] [US5] Finalize the `packages/ui/src/styles/globals.css` palette with the owner-approved values. Verify contrast ratios with `scripts/check-contrast.mjs`, which computes WCAG ratios for every foreground/background token pair in both themes ⛔ GATE-BRAND (FR-037, FR-041)
+- [X] T161 [US5] Implement navigation `apps/portal/src/lib/navigation.ts`. Primary items: Home, Account, Settings (secondary sidebar: Staff, Roles, Branding), Audit Log, Security Logs. Each item declares its required permission or manager check and is filtered by `my_effective_permissions`. Home is a minimal welcome with no KPIs, charts, dashboard widgets or global search. Account is direct-entry with no empty secondary sidebar (FR-040, Constitution X, US5 scenario 6)
+- [X] T162 [US5] Implement the authenticated shell `apps/portal/src/app/(app)/layout.tsx` (`requireStaff()`, `AppShell` with filtered navigation, header with `TenantIdentity`, language and theme selectors, sign-out) and `apps/portal/src/app/(app)/page.tsx` (minimal localized home) (FR-040)
+- [X] T163 [US5] Implement preference persistence in `apps/portal/src/features/preferences/actions.ts`. Signed-in users write to `set_my_preferences` plus the `locale`/`theme` cookies; before sign-in, cookies only. The root layout reads the stored preference first. The admin app uses cookie persistence in `apps/admin/src/features/preferences/actions.ts` (FR-039, Constitution VIII)
+- [X] T164 [P] [US5] Audit both apps for mixed-direction content: wrap usernames, emails and record IDs with `LtrText` in `apps/portal/src/**` and `apps/admin/src/**`. Confirm every user-visible string comes from `packages/i18n` dictionaries (no hard-coded literals; add an ESLint `i18next/no-literal-string`-style rule in `eslint.config.mjs` scoped to `apps/*/src/app/**/*.tsx`) (FR-038, FR-041)
+- [X] T165 [P] [US5] Finalize the `packages/ui/src/styles/globals.css` palette with the owner-approved values. Verify contrast ratios with `scripts/check-contrast.mjs`, which computes WCAG ratios for every foreground/background token pair in both themes ⛔ GATE-BRAND (FR-037, FR-041)
 - [ ] T166 [US5] Run `tests/e2e/us5-branding.spec.ts`, `tests/e2e/us5-i18n-theme.spec.ts`, `tests/security/logo-storage.test.ts`, `tests/accessibility/shell.a11y.spec.ts` and `packages/ui/src/components/tenant-identity.test.tsx` until T150–T154 pass
+
+**Implementation notes (Phase 7)**:
+- T166 stays open: the Development project ref (`SUPABASE_DEV_PROJECT_REF`) was not configured in the implementing session, so migration `20261015150030_preferences_branding.sql`, `supabase/tests/030_preferences_branding.test.sql` and the E2E, a11y and storage suites have not been run against it. Apply the migration, run `pnpm db:types:check` and `pnpm test:db 030`, then run the five suites listed in T166. `packages/db/src/types.gen.ts` was extended by hand for the new table and RPCs; regenerate it with `pnpm db:types`.
+- T160: `PublicShell` already wraps every signed-out page, so the tenant identity is added there (no separate `(public)/layout.tsx`).
+- Logo validation lives in `@workspace/config/server` (`processLogo`) so the portal and the admin app share one implementation; `apps/portal/src/features/branding/validate-logo.ts` wraps it.
+- `TenantIdentity` now uses the organization name as the logo's alt text (T154); the `logoAlt` prop and its callers were removed.
+- Theme: `next-themes` is forced to the stored/cookie mode and uses a per-mode storage key, so a stale browser-local value never overrides the server-stored preference.
+- `platform_get_tenant` gained `has_logo` and `logo_version` (metadata only).
+- Navigation items carry a `built` flag (`apps/portal/src/lib/navigation.ts`); Roles, Audit Log and Security Logs stay hidden until their stories ship, then flip the flag.
 
 **Checkpoint**: A white-label, bilingual, accessible shell with manager-only branding works for two tenants.
 

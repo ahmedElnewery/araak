@@ -6,7 +6,7 @@ import { sql } from "../helpers/db";
 
 const jar = new Map<string, { value: string; options: Record<string, unknown> }>();
 const setCalls: { name: string; options: Record<string, unknown> }[] = [];
-let currentTenant: { id: string; subdomain: string; displayName: string; state: "active"; logoVersion: number } | null = null;
+let currentTenant: { id: string; subdomain: string; displayName: string; state: "active"; logoVersion: number; hasLogo: boolean } | null = null;
 
 vi.mock("next/headers", () => ({
   cookies: async () => ({
@@ -49,7 +49,7 @@ async function signInAs(staff: TwoTenantFixture["staffA"]) {
   await registerSession({ supabase, owner: { kind: "staff", authUserId: staff.userId, tenantId: staff.tenantId, staffId: staff.id } });
 }
 
-const tenantOf = (t: TwoTenantFixture["tenantA"]) => ({ id: t.id, subdomain: t.subdomain, displayName: "x", state: "active" as const, logoVersion: 0 });
+const tenantOf = (t: TwoTenantFixture["tenantA"]) => ({ id: t.id, subdomain: t.subdomain, displayName: "x", state: "active" as const, logoVersion: 0, hasLogo: false });
 const redirectOf = async (p: Promise<unknown>) => {
   try {
     await p;

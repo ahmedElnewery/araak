@@ -3,7 +3,7 @@ import { ar } from "./dictionaries/ar";
 import { en } from "./dictionaries/en";
 import { dir, DEFAULT_LOCALE } from "./config";
 import { formatDate, formatNumber } from "./format";
-import { resolveLocale } from "./resolve-locale";
+import { resolveLocale, resolveTheme } from "./resolve-locale";
 
 const keys = (o: Record<string, unknown>, p = ""): string[] =>
   Object.entries(o).flatMap(([k, v]) => (v && typeof v === "object" ? keys(v as Record<string, unknown>, `${p}${k}.`) : [`${p}${k}`]));
@@ -32,6 +32,12 @@ describe("locale helpers", () => {
     expect(resolveLocale({ stored: null, cookie: "en" })).toBe("en");
     expect(resolveLocale({ stored: "fr", cookie: "xx" })).toBe("ar");
     expect(resolveLocale({})).toBe("ar");
+  });
+  it("resolves the theme stored -> cookie -> system and ignores invalid values", () => {
+    expect(resolveTheme({ stored: "dark", cookie: "light" })).toBe("dark");
+    expect(resolveTheme({ stored: null, cookie: "light" })).toBe("light");
+    expect(resolveTheme({ stored: "blue", cookie: "x" })).toBe("system");
+    expect(resolveTheme({})).toBe("system");
   });
   it("formats with an explicit locale and Latin digits", () => {
     expect(formatNumber(1234.5, "ar")).toBe("1,234.5");

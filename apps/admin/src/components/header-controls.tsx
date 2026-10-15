@@ -1,25 +1,25 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { useTransition } from "react";
+import type { Locale, ThemeMode } from "@workspace/i18n";
 import { LanguageSelect } from "@workspace/ui/components/language-select";
-import { ThemeSelect, type ThemeMode } from "@workspace/ui/components/theme-select";
-import { setLocaleAction } from "@/features/locale/set-locale-action";
+import { ThemeSelect } from "@workspace/ui/components/theme-select";
+import { setPreferencesAction } from "@/features/preferences/actions";
 
 type Props = {
-  locale: "ar" | "en";
+  locale: Locale;
+  theme: ThemeMode;
   labels: { language: string; theme: string; themeSystem: string; themeLight: string; themeDark: string };
 };
 
-export function HeaderControls({ locale, labels }: Props) {
-  const { theme = "system", setTheme } = useTheme();
+export function HeaderControls({ locale, theme, labels }: Props) {
   const [, start] = useTransition();
   return (
     <div className="flex items-center gap-2">
-      <LanguageSelect value={locale} label={labels.language} onChange={(v) => { start(() => setLocaleAction(v)); }} />
+      <LanguageSelect value={locale} label={labels.language} onChange={(v) => { start(() => setPreferencesAction({ locale: v })); }} />
       <ThemeSelect
-        value={theme as ThemeMode}
-        onChange={setTheme}
+        value={theme}
+        onChange={(v) => { start(() => setPreferencesAction({ theme: v })); }}
         labels={{ label: labels.theme, system: labels.themeSystem, light: labels.themeLight, dark: labels.themeDark }}
       />
     </div>
