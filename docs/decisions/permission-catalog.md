@@ -64,7 +64,7 @@ Staff and managers want the simplest possible screens. The permission engine abo
   4. عرض سجل العمليات = `audit_logs.view`
 - **Hidden from every screen:** record scopes, the grant-ceiling explanation, and the permission keys themselves. A delegate only sees the switches they hold themselves; the database still enforces the ceiling.
 - Staff without any permission do not see the roles section at all. An invitation picks one role from a simple list.
-- **Proposed, awaiting owner confirmation:** the fourth switch grants all five audit categories (no category picker). The Security Log stays manager-only.
+- **Confirmed by the owner (2026-10-15):** the fourth switch grants all five audit categories (no category picker). The Security Log stays manager-only.
 
 ## Approval
 
