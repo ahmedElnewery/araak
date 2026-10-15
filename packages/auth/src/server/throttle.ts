@@ -2,7 +2,9 @@ import "server-only";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getClientIp, normalizeIdentifier, throttleHmac } from "./client-ip";
 
-export type ThrottleKind = "sign_in" | "recovery";
+export type ThrottleKind = "sign_in" | "recovery" | "platform_sign_in";
+/** Throttle scope of the platform-admin sign-in (no tenant): its counters never mix with a tenant's. */
+export const PLATFORM_THROTTLE_SCOPE = "00000000-0000-0000-0000-000000000000";
 export type ThrottleKeys = { tenantId: string; kind: ThrottleKind; identifierHmac: string; clientIpHmac: string | null };
 
 export function buildThrottleKeys(args: {

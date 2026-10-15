@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@workspace/config/server";
 import type { Mailer } from "../email/mailer";
 import { renderPasswordReset } from "../email/templates/password-reset";
 import type { Locale } from "../email/templates/shared";
@@ -93,7 +94,12 @@ export async function redeemRecovery(args: { rawToken: string; newPassword: stri
     return { ok: false, reason: "failed" };
   }
   const { error: completeError } = await admin.rpc("svc_complete_recovery_redemption", { p_request_id: begin.requestId });
-  if (completeError) await revokeSessions({ authUserId: begin.authUserId }, "recovery"); // the password already changed: old sessions must not survive
+  if (completeError) {
+    // the password already changed: old sessions must not survive, and the user must not see an error page for it
+    await revokeSessions({ authUserId: begin.authUserId }, "recovery").catch(() => {
+      logger.error("recovery.session_revocation_failed", { requestId: begin.requestId });
+    });
+  }
   return { ok: true };
 }
 

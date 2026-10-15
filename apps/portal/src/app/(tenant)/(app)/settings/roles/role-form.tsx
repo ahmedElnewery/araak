@@ -19,7 +19,8 @@ type Props = {
 export function RoleForm({ roleId, name, description, offered, on, readOnly, extra, t }: Props) {
   const [state, action, pending] = useActionState<FormState, FormData>(saveRoleAction.bind(null, roleId), initialFormState);
   const r = t.portal.roles;
-  // a switch the role already has but the actor could not grant stays visible (disabled), never silently dropped
+  // A switch the role already has but the actor could not grant stays visible (disabled). Disabled inputs are not
+  // submitted, so the save action keeps that switch's stored grants unchanged instead of reading it as switched off.
   const shown = (["viewStaff", "manageStaff", "manageRoles", "viewAudit"] as const).filter((s) => offered.includes(s) || on.includes(s));
   const nameError = state.fieldErrors?.name;
   return (

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { ROLE_SWITCHES, switchesToGrants } from "@workspace/authorization";
+import { ROLE_SWITCHES, applySwitchEdit, offerableSwitches } from "@workspace/authorization";
 import { requirePermission } from "@/lib/guards";
 import { unwrapRpc } from "../rpc-result";
 import { field, type FormState } from "../form-state";
@@ -18,7 +18,17 @@ export async function saveRoleAction(roleId: string | null, _prev: FormState, fo
   const on = switches.safeParse(formData.getAll("switches").map(String));
   if (!on.success) return { error: "grants_invalid" };
   if (name.length < 1 || name.length > 80) return { fieldErrors: { name: "role_name_invalid" } };
-  const grants = switchesToGrants(on.data);
+  const offered = offerableSwitches(ctx.permissions);
+  let grants = applySwitchEdit([], on.data, offered);
+  if (roleId) {
+    // Switches the actor cannot offer are shown disabled and never submitted: keep their stored grants as they are.
+    const { data: stored, error } = await ctx.supabase
+      .from("permission_grants").select("permission_key, scope, audit_categories").eq("role_id", roleId);
+    if (error) return { error: "generic" };
+    grants = applySwitchEdit(
+      stored.map((g) => ({ key: g.permission_key, scope: g.scope, auditCategories: g.audit_categories })), on.data, offered,
+    );
+  }
   const res = roleId
     ? await ctx.supabase.rpc("update_role", { p_role_id: roleId, p_name: name, p_description: description, p_grants: grants })
     : await ctx.supabase.rpc("create_role", { p_name: name, p_description: description, p_grants: grants });

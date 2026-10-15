@@ -4,7 +4,7 @@ import { buildThrottleKeys, checkAndRecordAttempt, recordAuthSuccess } from "./t
 import { registerSession, revokeSessions } from "./session-registry";
 import type { ServerClient } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { padFailedSignIn } from "./timing-pad";
+import { padFailedSignIn, recordPasswordCheckDuration } from "./timing-pad";
 
 export type TenantSignInInput = {
   tenantId: string;
@@ -26,7 +26,7 @@ export async function signInTenantStaff(i: TenantSignInInput): Promise<TenantSig
   });
   const admin = getSupabaseAdmin();
   const fail = async (event: "auth.login_failed" | "auth.login_throttled", pad: boolean): Promise<TenantSignInResult> => {
-    if (pad) await padFailedSignIn(); // same cost as a real failed password check
+    if (pad) await padFailedSignIn(); // same duration as a real failed password check, without an Auth call
     // hashed identifier only; a logging failure never changes the response
     await recordSecurityEvent({ tenantId: i.tenantId, event, metadata: { identifierHmac: keys.identifierHmac } }).catch(() => undefined);
     return { ok: false };
@@ -37,8 +37,13 @@ export async function signInTenantStaff(i: TenantSignInInput): Promise<TenantSig
   const email = resolved; // null for unknown, disabled, other-tenant or suspended
   if (!email) return fail("auth.login_failed", true);
 
+  const started = performance.now();
   const { data, error } = await i.supabase.auth.signInWithPassword({ email, password: i.password });
-  if (error) return fail("auth.login_failed", false);
+  if (error) {
+    // calibrates the padded failure paths; only a real wrong-password check counts (not a rate limit or outage)
+    if (error.code === "invalid_credentials") recordPasswordCheckDuration(performance.now() - started);
+    return fail("auth.login_failed", false);
+  }
 
   const sessionId = (await i.supabase.auth.getClaims()).data?.claims.session_id;
   const endSession = async () => {

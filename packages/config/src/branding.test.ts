@@ -5,6 +5,7 @@ describe("display name", () => {
   it("trims and accepts Arabic, Latin, digits and the allowed punctuation", () => {
     expect(validateDisplayName("  جمعية الأمل  ")).toEqual({ ok: true, value: "جمعية الأمل" });
     expect(validateDisplayName("Hope & Co. (2026), Ltd-1")).toEqual({ ok: true, value: "Hope & Co. (2026), Ltd-1" });
+    expect(validateDisplayName("جمعية الأمل، فرع القاهرة").ok).toBe(true); // Arabic comma
   });
   it("rejects empty, markup, control characters and over-long names", () => {
     expect(validateDisplayName("   ")).toEqual({ ok: false, code: "name_required" });

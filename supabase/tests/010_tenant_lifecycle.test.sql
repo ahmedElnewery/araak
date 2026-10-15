@@ -80,6 +80,11 @@ select tests.throws_ok(format($$update public.tenants set subdomain = 'other' wh
   null, null, 'subdomain immutable at table level too');
 select tests.claims((select uid from pa), (select sid from ps));
 select tests.throws_ok(format($$select public.platform_update_tenant_name(%L, '   ')$$, (select b from fx)), 'P0001', 'name_required', 'blank rename rejected');
+-- the platform applies the same name rule as the manager's branding form (docs/decisions/branding.md §3)
+select tests.throws_ok(format($$select public.platform_update_tenant_name(%L, %L)$$, (select b from fx), repeat('n', 81)), 'P0001', 'name_invalid', 'over-long rename rejected');
+select tests.throws_ok(format($$select public.platform_update_tenant_name(%L, '<b>B</b>')$$, (select b from fx)), 'P0001', 'name_invalid', 'markup in a rename rejected');
+select tests.throws_ok($$select public.platform_create_tenant(repeat('n', 81), 'life-x', 'active', 'x@life.test', repeat('a',64))$$,
+  'P0001', 'name_invalid', 'over-long name rejected at creation');
 select tests.reset();
 select is((select count(*)::int from public.tenant_audit_events where tenant_id = (select b from fx) and category = 'tenant_settings' and event = 'tenant.name_updated'), 1, 'rename audited under tenant_settings');
 

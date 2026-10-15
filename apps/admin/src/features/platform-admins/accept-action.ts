@@ -7,6 +7,7 @@ import {
   createSupabaseServerClient, getSupabaseAdmin, hashToken, registerSession,
 } from "@workspace/auth/server";
 import { checkPasswordPolicy } from "@/lib/password-policy";
+import { landingPath } from "@/lib/platform-guards";
 import type { FormState } from "../form-state";
 
 const token = z.string().min(20).max(200);
@@ -47,10 +48,17 @@ export async function acceptInvitationAction(rawToken: string, _prev: FormState,
   const supabase = await createSupabaseServerClient("admin");
   const { error: signInError } = await supabase.auth.signInWithPassword({ email: peek.email, password });
   if (signInError) redirect("/login");
-  await registerSession({
-    supabase,
-    owner: { kind: "platform_admin", authUserId: created.user.id },
-    userAgent: (await headers()).get("user-agent"),
-  });
-  redirect("/tenants");
+  try {
+    await registerSession({
+      supabase,
+      owner: { kind: "platform_admin", authUserId: created.user.id },
+      userAgent: (await headers()).get("user-agent"),
+    });
+  } catch {
+    // the account exists now: end the unregistered session and let the person sign in normally
+    await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
+    redirect("/login");
+  }
+  const { data: row } = await admin.from("platform_admins").select("capabilities").eq("auth_user_id", created.user.id).maybeSingle();
+  redirect(landingPath(row?.capabilities ?? []));
 }

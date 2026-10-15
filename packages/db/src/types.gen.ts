@@ -893,7 +893,7 @@ export type Database = {
       list_roles: { Args: never; Returns: Json };
       list_staff: { Args: never; Returns: Json };
       my_effective_permissions: { Args: never; Returns: Json };
-      set_my_preferences: { Args: { p_locale: string; p_theme: string }; Returns: undefined };
+      set_my_preferences: { Args: { p_locale?: string; p_theme?: string }; Returns: undefined };
       update_tenant_branding: {
         Args: { p_display_name: string; p_logo_object_path: string; p_remove_logo: boolean };
         Returns: Json;
@@ -920,6 +920,7 @@ export type Database = {
         Args: { p_tenant_id: string };
         Returns: Json;
       };
+      platform_list_tenant_staff: { Args: { p_tenant_id: string }; Returns: Json };
       platform_grant_tenant_manager: {
         Args: { p_staff_id: string; p_tenant_id: string };
         Returns: undefined;

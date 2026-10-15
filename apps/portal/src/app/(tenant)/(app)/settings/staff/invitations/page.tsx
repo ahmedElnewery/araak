@@ -1,12 +1,12 @@
-import { can, loadEffectivePermissions } from "@workspace/authorization";
-import { renewSession, requireStaff } from "@/lib/guards";
+import { can } from "@workspace/authorization";
+import { loadPermissions, renewSession, requireStaff } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 import { redirect } from "next/navigation";
 import { InvitationsTable, type PendingInvitation } from "./invitations-table";
 
 export default async function PendingInvitationsPage() {
   const ctx = await requireStaff({ touch: false });
-  const perms = await loadEffectivePermissions(ctx);
+  const perms = await loadPermissions(ctx);
   if (!can(perms, "staff.invite") && !can(perms, "staff.view")) redirect("/forbidden");
   await renewSession(ctx);
   const { locale, t } = await getI18n();

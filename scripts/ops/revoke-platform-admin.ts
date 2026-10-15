@@ -9,9 +9,15 @@ if (!/^[^@\s]+@[^@\s]+$/.test(email)) fail("TARGET_EMAIL (or the first argument)
 const emergency = process.env.EMERGENCY === "yes";
 const admin = serviceClient(env);
 
-const { data: users, error: listError } = await admin.auth.admin.listUsers({ perPage: 1000 });
-if (listError) fail("could not look up the user.");
-const user = users.users.find((u) => u.email?.toLowerCase() === email);
+// Every page: tenant staff are Auth users too, so the target can sit far beyond the first page.
+const PER_PAGE = 1000;
+let user: { id: string } | undefined;
+for (let page = 1; !user; page++) {
+  const { data, error: listError } = await admin.auth.admin.listUsers({ page, perPage: PER_PAGE });
+  if (listError) fail("could not look up the user.");
+  user = data.users.find((u) => u.email?.toLowerCase() === email);
+  if (data.users.length < PER_PAGE) break;
+}
 if (!user) fail("no such platform admin.");
 
 const { data: ok, error } = await admin.rpc("svc_ops_revoke_platform_admin", {

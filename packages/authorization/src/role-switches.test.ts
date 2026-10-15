@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isTenantGrantable } from "./catalog";
 import type { EffectivePermissions } from "./evaluate";
-import { grantsToSwitches, offerableSwitches, switchesToGrants } from "./role-switches";
+import { applySwitchEdit, grantsToSwitches, offerableSwitches, switchesToGrants } from "./role-switches";
 
 describe("role switches", () => {
   it("only ever maps to tenant-grantable keys", () => {
@@ -39,5 +39,22 @@ describe("role switches", () => {
     expect(offerableSwitches(held("staff.view"))).toEqual(["viewStaff"]);
     expect(offerableSwitches(held("roles.view", "roles.create", "roles.update", "roles.archive", "roles.restore"))).toEqual(["manageRoles"]);
     expect(offerableSwitches(held("roles.view"))).toEqual([]);
+  });
+  it("an edit keeps the stored grants of switches the actor cannot offer, exactly as stored", () => {
+    const audit = { key: "audit_logs.view", scope: "all", auditCategories: ["staff", "roles"] };
+    const stored = [{ key: "staff.view", scope: "all", auditCategories: null }, audit];
+    // a delegate who can only offer viewStaff renames the role without touching anything
+    const same = applySwitchEdit(stored, ["viewStaff"], ["viewStaff"]);
+    expect(same).toEqual([{ key: "staff.view", scope: "all" }, audit]);
+    // switching viewStaff off removes only that grant; the locked audit grant survives
+    expect(applySwitchEdit(stored, [], ["viewStaff"])).toEqual([audit]);
+    // a forged submission of a locked switch is ignored
+    expect(applySwitchEdit([], ["viewAudit", "viewStaff"], ["viewStaff"])).toEqual([{ key: "staff.view", scope: "all" }]);
+  });
+  it("an actor who can offer every switch fully controls the grants", () => {
+    const all = ["viewStaff", "manageStaff", "manageRoles", "viewAudit"] as const;
+    const stored = [{ key: "audit_logs.view", scope: "all", auditCategories: ["staff"] }];
+    expect(applySwitchEdit(stored, ["viewAudit"], all)).toEqual(switchesToGrants(["viewAudit"]));
+    expect(applySwitchEdit(stored, [], all)).toEqual([]);
   });
 });

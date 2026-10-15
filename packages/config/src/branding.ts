@@ -14,8 +14,9 @@ export const LOGO_MIN_DIMENSION = 64;
 export const LOGO_BUCKET = "tenant-logos";
 
 export const DISPLAY_NAME_MAX = 80;
-// Unicode letters, marks, digits, spaces and . , - ' & ( ); no control characters or markup.
-const DISPLAY_NAME_RE = /^[\p{L}\p{M}\p{N} .,\-'&()]+$/u;
+// Unicode letters, marks, digits, spaces and . , - ' & ( ) (the comma in its Latin and Arabic forms: `,` and `،`);
+// no control characters or markup.
+const DISPLAY_NAME_RE = /^[\p{L}\p{M}\p{N} .,\u060c\-'&()]+$/u;
 
 export type DisplayNameError = "name_required" | "name_invalid";
 

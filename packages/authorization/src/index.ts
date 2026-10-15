@@ -2,4 +2,7 @@ export * from "./catalog";
 export { loadEffectivePermissions, can, auditCategoriesFor, type EffectivePermissions, type EffectiveGrant } from "./evaluate";
 export { canGrant, type RequestedGrant, type CeilingResult } from "./grant-ceiling";
 export { scopeAllows, type RecordRef, type ScopeActor } from "./scope";
-export { ROLE_SWITCHES, switchesToGrants, grantsToSwitches, offerableSwitches, type RoleSwitch, type GrantPayload, type StoredGrant } from "./role-switches";
+export {
+  ROLE_SWITCHES, switchesToGrants, grantsToSwitches, offerableSwitches, applySwitchEdit,
+  type RoleSwitch, type GrantPayload, type StoredGrant, type RoleGrantPayload,
+} from "./role-switches";
