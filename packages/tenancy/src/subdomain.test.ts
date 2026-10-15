@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { validateSubdomain } from "./subdomain";
 
 describe("validateSubdomain", () => {
-  // `portal` is the Araak organization's label (owner decision 2026-10-15), not a reserved name.
+  // `portal` is the Araak organization's label (owner decision 2026-10-15, seeded tenant), not a reserved name.
   it.each(["a", "tenant-a", "a1", "abc-123", "x".repeat(63), "portal"])("accepts %s", (s) => {
     expect(validateSubdomain(s)).toEqual({ ok: true });
   });

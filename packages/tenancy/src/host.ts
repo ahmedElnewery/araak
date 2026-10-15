@@ -1,7 +1,7 @@
 import { validateSubdomain } from "./subdomain";
 
 export type HostConfig = {
-  /** e.g. `portal.localhost:3000` or `portal.example.org` (port is ignored when matching) */
+  /** tenants are `<subdomain>.<this>`: `localhost:3000` locally, the bare domain in production (port is ignored when matching) */
   portalBaseDomain: string;
   /** exact admin host, e.g. `admin.localhost:3001` */
   adminHost: string;

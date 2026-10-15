@@ -4,9 +4,11 @@ Organizations are created by a platform admin with the `tenants.manage` capabili
 
 ## DNS and TLS
 
-A wildcard DNS record and a wildcard TLS certificate for the portal base domain cover every new subdomain, so provisioning needs **no** DNS or certificate change. Hostnames are in `docs/decisions/operations.md`. Locally, `*.portal.localhost` resolves to loopback.
+A wildcard DNS record and a wildcard TLS certificate for the portal base domain cover every new subdomain, so provisioning needs **no** DNS or certificate change. Hostnames are in `docs/decisions/operations.md`. Locally, `*.localhost` resolves to loopback (`docs/operations/local-development.md`).
 
-Tenants live directly under the domain: `<subdomain>.<domain>` (`PORTAL_BASE_DOMAIN=<domain>`, no `portal.` level). The Araak organization uses the subdomain `portal` (`portal.<domain>`); create it first in Production. The admin app is `admin.<domain>` (`ADMIN_HOST`).
+Tenants live directly under the domain: `<subdomain>.<domain>` (`PORTAL_BASE_DOMAIN=<domain>`, no `portal.` level). The admin app is `admin.<domain>` (`ADMIN_HOST`).
+
+The Araak organization is a permanent tenant with the subdomain `portal` (`portal.<domain>`). Migration `*_araak_portal_tenant.sql` creates it in every environment, so nobody creates it by hand and no other organization can take `portal` (the admin app answers "subdomain taken"). Its first manager is invited from its organization page (Managers, Invite), like for any other organization. `portal` is deliberately not in the reserved list: the host classifier rejects reserved labels, which would make `portal.<domain>` unreachable.
 
 One-time setup when the domain is bought (Cloudflare Registrar keeps DNS at Cloudflare, so Vercel's nameservers cannot be used):
 
@@ -20,7 +22,7 @@ The wildcard covers one level only (`x.<domain>`, not `a.b.<domain>`); the host 
 ## Subdomain rules
 
 - 1 to 63 characters: lowercase `a-z`, digits and hyphens, not starting or ending with a hyphen.
-- Not reserved: `admin`, `www`, `api`, `app`, `mail`, `smtp`, `auth`, `static`, `assets`, `status`, `support`, `araak`, `send`, `email`, `docs`, `help`, `blog`, `dev`, `staging`, `test`, `preview`, `cdn`, `id`, `login`, `account`, `dashboard`, `billing`. Tenants share one namespace with platform hosts, so a name the platform may need must be reserved before any tenant claims it (adding a reserved name later does not affect an existing tenant). `portal` is not reserved: it is the Araak organization's subdomain.
+- Not reserved: `admin`, `www`, `api`, `app`, `mail`, `smtp`, `auth`, `static`, `assets`, `status`, `support`, `araak`, `send`, `email`, `docs`, `help`, `blog`, `dev`, `staging`, `test`, `preview`, `cdn`, `id`, `login`, `account`, `dashboard`, `billing`. Tenants share one namespace with platform hosts, so a name the platform may need must be reserved before any tenant claims it (the database check runs on insert only, but the host classifier rejects reserved labels, so reserving a name an existing tenant uses makes that tenant unreachable). `portal` is not reserved: it is held by the Araak organization, which a migration creates.
 - Unique across the platform.
 - **Immutable.** It is fixed at creation by a database trigger, and the admin app shows it read-only. If an organization needs another address, create a new organization; do not try to edit the old one.
 

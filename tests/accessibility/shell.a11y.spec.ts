@@ -7,7 +7,7 @@ import { en } from "../../packages/i18n/src/dictionaries/en";
 import { sql } from "../helpers/db";
 import { createTwoTenantFixture, PASSWORD, type TwoTenantFixture } from "../helpers/fixtures";
 
-const base = process.env.PORTAL_BASE_DOMAIN ?? "portal.localhost:3000";
+const base = process.env.PORTAL_BASE_DOMAIN ?? "localhost:3000";
 const adminUrl = process.env.E2E_ADMIN_URL ?? "http://admin.localhost:3001";
 const host = (sub: string) => `http://${sub}.${base}`;
 test.describe.configure({ mode: "serial" });

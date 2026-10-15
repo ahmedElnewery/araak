@@ -6,7 +6,7 @@ import { sql } from "../helpers/db";
 import { createTwoTenantFixture, PASSWORD, type TwoTenantFixture } from "../helpers/fixtures";
 import { clearMail, extractLink, waitForMail } from "../helpers/mail";
 
-const base = process.env.PORTAL_BASE_DOMAIN ?? "portal.localhost:3000";
+const base = process.env.PORTAL_BASE_DOMAIN ?? "localhost:3000";
 const scheme = "http";
 const host = (sub: string) => `${scheme}://${sub}.${base}`;
 test.beforeEach(({}, testInfo) => {
