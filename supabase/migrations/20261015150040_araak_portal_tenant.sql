@@ -1,4 +1,4 @@
--- Owner decision (2026-10-15): the Araak organization (جمعية إراك) is a permanent tenant at `portal.<domain>`;
+-- Owner decision (2026-10-15): the Araak organization (أراك) is a permanent tenant at `portal.<domain>`;
 -- `admin.<domain>` is the platform admin app and every other organization is `<label>.<domain>`. It is created here so
 -- it exists in every environment from the first deploy, and no other tenant can ever take `portal`: subdomains are
 -- unique and immutable, and tenants are never deleted. Idempotent: an existing `portal` tenant is kept as it is.
@@ -11,7 +11,7 @@
 do $$
 declare v_id uuid;
 begin
-  insert into public.tenants (display_name, subdomain) values ('جمعية إراك', 'portal')
+  insert into public.tenants (display_name, subdomain) values ('أراك', 'portal')
   on conflict (subdomain) do nothing
   returning id into v_id;
   if v_id is not null then
