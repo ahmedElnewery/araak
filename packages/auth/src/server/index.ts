@@ -7,6 +7,7 @@ export { registerSession, revokeSessions, describeDevice, type SessionOwner, typ
 export { getTenantStaffContext, getPlatformAdminContext, type TenantStaffContext, type PlatformAdminContext, type HostTenant } from "./context";
 export { recordTenantAudit, recordSecurityEvent, recordPlatformAudit } from "./audit";
 export { issueStaffInvitation, type IssueInvitationInput } from "./invitations/issue";
+export { issuePlatformInvitation, type IssuePlatformInvitationInput } from "./invitations/platform";
 export { createMailer, SmtpMailer, UnconfiguredProductionMailer, type Mailer, type MailMessage } from "../email/mailer";
 export { renderStaffInvitation } from "../email/templates/staff-invitation";
 export { renderPlatformInvitation } from "../email/templates/platform-invitation";

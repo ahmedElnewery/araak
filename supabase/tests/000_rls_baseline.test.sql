@@ -59,7 +59,10 @@ select is((select count(*)::int from pg_policies where schemaname = 'storage' an
 
 select is((select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
            where n.nspname = 'public' and p.prokind = 'f' and has_function_privilege('authenticated', p.oid, 'EXECUTE')
-             and p.proname <> all (array['my_effective_permissions'])),
+             and p.proname <> all (array['my_effective_permissions',
+               'platform_create_tenant','platform_set_tenant_state','platform_update_tenant_name','platform_list_tenants',
+               'platform_get_tenant','platform_get_tenant_managers','platform_grant_tenant_manager',
+               'platform_invite_tenant_manager','platform_revoke_tenant_manager','platform_invite_admin'])),
           null::text[], 'public functions executable by authenticated are exactly the allowlisted RPCs');
 select is((select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
            where n.nspname = 'public' and p.proname like 'svc\_%' and has_function_privilege('service_role', p.oid, 'EXECUTE') = false),
