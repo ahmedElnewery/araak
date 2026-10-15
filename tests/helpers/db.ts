@@ -1,8 +1,7 @@
 import { loadTestEnv } from "./env";
 
 /**
- * Runs SQL on the Development project through the Supabase Management API (the same
- * channel the Supabase MCP uses). No database URL, Docker or CLI. Locked to the Dev ref.
+ * Runs SQL on the Development project through the Supabase Management API. No database URL, Docker, CLI or MCP. Locked to the Dev ref.
  * Statements run as the `postgres` role in a single request; use it for fixtures,
  * inspection and role-impersonating assertions (`set local role ...`).
  */

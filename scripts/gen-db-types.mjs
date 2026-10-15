@@ -1,5 +1,5 @@
 // Generates packages/db/src/types.gen.ts from the Development project through the Supabase
-// Management API (same channel as the MCP; no database URL, Docker or CLI).
+// Management API (no database URL, Docker, CLI or MCP).
 // `--check` exits non-zero when the committed file is stale.
 import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
