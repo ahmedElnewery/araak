@@ -207,6 +207,47 @@ export type Database = {
           },
         ];
       };
+      platform_invitations: {
+        Row: {
+          capabilities: string[];
+          consumed_at: string | null;
+          expires_at: string;
+          id: string;
+          invited_by: string;
+          issued_at: string;
+          recipient_email_normalized: string;
+          token_hash: string;
+        };
+        Insert: {
+          capabilities: string[];
+          consumed_at?: string | null;
+          expires_at: string;
+          id?: string;
+          invited_by: string;
+          issued_at?: string;
+          recipient_email_normalized: string;
+          token_hash: string;
+        };
+        Update: {
+          capabilities?: string[];
+          consumed_at?: string | null;
+          expires_at?: string;
+          id?: string;
+          invited_by?: string;
+          issued_at?: string;
+          recipient_email_normalized?: string;
+          token_hash?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "platform_invitations_invited_by_fkey";
+            columns: ["invited_by"];
+            isOneToOne: false;
+            referencedRelation: "platform_admins";
+            referencedColumns: ["auth_user_id"];
+          },
+        ];
+      };
       roles: {
         Row: {
           archived_at: string | null;
@@ -736,6 +777,62 @@ export type Database = {
     };
     Functions: {
       my_effective_permissions: { Args: never; Returns: Json };
+      platform_create_tenant: {
+        Args: {
+          p_display_name: string;
+          p_manager_email: string;
+          p_state: Database["public"]["Enums"]["tenant_state"];
+          p_subdomain: string;
+          p_token_hash: string;
+        };
+        Returns: string;
+      };
+      platform_get_tenant: { Args: { p_tenant_id: string }; Returns: Json };
+      platform_get_tenant_managers: {
+        Args: { p_tenant_id: string };
+        Returns: Json;
+      };
+      platform_grant_tenant_manager: {
+        Args: { p_staff_id: string; p_tenant_id: string };
+        Returns: undefined;
+      };
+      platform_invite_admin: {
+        Args: {
+          p_capabilities: string[];
+          p_email: string;
+          p_token_hash: string;
+        };
+        Returns: string;
+      };
+      platform_invite_tenant_manager: {
+        Args: { p_email: string; p_tenant_id: string; p_token_hash: string };
+        Returns: string;
+      };
+      platform_list_tenants: {
+        Args: never;
+        Returns: {
+          created_at: string;
+          display_name: string;
+          id: string;
+          state: Database["public"]["Enums"]["tenant_state"];
+          subdomain: string;
+        }[];
+      };
+      platform_revoke_tenant_manager: {
+        Args: { p_staff_id: string; p_tenant_id: string };
+        Returns: undefined;
+      };
+      platform_set_tenant_state: {
+        Args: {
+          p_state: Database["public"]["Enums"]["tenant_state"];
+          p_tenant_id: string;
+        };
+        Returns: undefined;
+      };
+      platform_update_tenant_name: {
+        Args: { p_display_name: string; p_tenant_id: string };
+        Returns: undefined;
+      };
       svc_load_platform_context: {
         Args: { p_auth_user_id: string; p_session_id: string };
         Returns: Json;
@@ -743,6 +840,27 @@ export type Database = {
       svc_load_staff_context: {
         Args: { p_auth_user_id: string; p_session_id: string };
         Returns: Json;
+      };
+      svc_ops_bootstrap_platform_admin: {
+        Args: { p_auth_user_id: string; p_operator_ref: string };
+        Returns: boolean;
+      };
+      svc_ops_revoke_platform_admin: {
+        Args: {
+          p_auth_user_id: string;
+          p_emergency: boolean;
+          p_operator_ref: string;
+          p_ticket_ref: string;
+        };
+        Returns: boolean;
+      };
+      svc_peek_platform_invitation: {
+        Args: { p_token_hash: string };
+        Returns: Json;
+      };
+      svc_redeem_platform_invitation: {
+        Args: { p_auth_user_id: string; p_token_hash: string };
+        Returns: boolean;
       };
       svc_revoke_sessions: {
         Args: {

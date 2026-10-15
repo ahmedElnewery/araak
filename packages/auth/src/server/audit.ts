@@ -5,12 +5,15 @@ export type AuditCategory = "staff" | "invitations" | "roles" | "tenant_settings
 export type TenantAuditEvent =
   | "staff.disabled" | "staff.enabled" | "staff.activated" | "invitation.issued" | "invitation.delivery_failed"
   | "invitation.resent" | "role.created" | "role.updated" | "role.archived" | "role.restored" | "role.assigned"
-  | "role.unassigned" | "tenant.branding_updated" | "session.revoked" | "password.reset_initiated";
+  | "role.unassigned" | "tenant.branding_updated" | "session.revoked" | "password.reset_initiated"
+  | "tenant.created" | "tenant.suspended" | "tenant.activated" | "tenant.name_updated" | "manager.granted" | "manager.revoked";
 export type SecurityEvent =
   | "auth.login_failed" | "auth.login_throttled" | "authz.denied" | "session.invalid" | "tenant.cross_access_denied";
 export type PlatformAuditEvent =
   | "tenant.created" | "tenant.suspended" | "tenant.activated" | "manager.granted" | "manager.revoked"
-  | "platform_admin.invited" | "platform_admin.bootstrapped" | "restore.rehearsed" | "authz.denied";
+  | "platform_admin.invited" | "platform_admin.bootstrapped" | "platform_admin.invitation_accepted"
+  | "platform_admin.invitation_rejected" | "platform_admin.revoked_by_ops" | "tenant.name_updated" | "manager.invited"
+  | "auth.login_failed" | "restore.rehearsed" | "authz.denied";
 
 type Meta = Record<string, unknown>;
 

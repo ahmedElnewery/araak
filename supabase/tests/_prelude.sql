@@ -39,6 +39,16 @@ begin
   return sid;
 end $$;
 
+-- registers a live platform-admin session (platform_admins row must exist)
+create function tests.mk_psession(p_user uuid, p_activity timestamptz default now()) returns uuid
+language plpgsql as $$
+declare sid uuid := gen_random_uuid();
+begin
+  insert into public.session_registry (provider_session_id, auth_user_id, platform_admin_id, verified_activity_at)
+  values (sid, p_user, p_user, p_activity);
+  return sid;
+end $$;
+
 create function tests.mk_role(p_tenant uuid, p_name text) returns uuid
 language sql as $$ insert into public.roles (tenant_id, name) values (p_tenant, p_name) returning id $$;
 

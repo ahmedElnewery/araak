@@ -271,7 +271,7 @@ Bootstrap and platform-admin removal stay operations-only.
 
 ### Tests for User Story 1 (write first, must FAIL) ⚠️
 
-- [ ] T073 [P] [US1] Write pgTAP `supabase/tests/010_tenant_lifecycle.test.sql`:
+- [X] T073 [P] [US1] Write pgTAP `supabase/tests/010_tenant_lifecycle.test.sql`:
   - Only a platform admin with `tenants.manage` can call `platform_create_tenant`.
   - Missing name, invalid, reserved or duplicate subdomain return stable error codes.
   - The subdomain is immutable even via platform RPCs.
@@ -280,7 +280,7 @@ Bootstrap and platform-admin removal stay operations-only.
   - Tenant staff and anon cannot call platform RPCs.
 
   (FR-002–FR-007, SC-002)
-- [ ] T074 [P] [US1] Write pgTAP `supabase/tests/011_manager_authority.test.sql`:
+- [X] T074 [P] [US1] Write pgTAP `supabase/tests/011_manager_authority.test.sql`:
   - Grant and revoke require `tenants.managers.manage`.
   - Tenant managers and delegates cannot grant or revoke via any RPC or direct table write.
   - Revoking the last activated active manager is rejected; a pending manager invitation does not count.
@@ -288,14 +288,14 @@ Bootstrap and platform-admin removal stay operations-only.
   - Grant and revoke events appear in both platform and tenant audit.
 
   (FR-008, FR-026, CL-023–CL-026, SC-005)
-- [ ] T075 [P] [US1] Write `tests/security/manager-revocation-race.test.ts`:
+- [X] T075 [P] [US1] Write `tests/security/manager-revocation-race.test.ts`:
   - Two parallel revocations of a tenant's two managers succeed at most once.
   - After demotion commits, a request racing on the pre-demotion session is denied.
   - The old refresh token cannot be refreshed.
   - The demoted user can sign in again and holds only non-manager grants.
 
   (CL-024, CL-026, FR-022)
-- [ ] T076 [P] [US1] Write pgTAP `supabase/tests/012_platform_admin_invitations.test.sql`:
+- [X] T076 [P] [US1] Write pgTAP `supabase/tests/012_platform_admin_invitations.test.sql`:
   - Only `platform_admins.invite` holders can invite.
   - Redemption works at `issued_at + 23:59:59` and fails at exactly `+24:00:00`, after redemption, and with a mismatched recipient email.
   - No `platform_admins` row exists before redemption.
@@ -303,8 +303,8 @@ Bootstrap and platform-admin removal stay operations-only.
   - No platform-admin removal function is executable by `authenticated`.
 
   (FR-001, CL-040–CL-042, SC-002)
-- [ ] T077 [P] [US1] Write `tests/security/platform-bootstrap.test.ts`. `scripts/ops/bootstrap-platform-admin.ts` succeeds once without creating any invitation. A second run and 5 concurrent runs refuse and leave no orphan Auth users. No admin or portal HTTP route can create a platform admin (probe POSTs to every app route). Platform audit contains the bootstrap event with no secrets (CL-043, SC-002)
-- [ ] T078 [P] [US1] Write Playwright `tests/e2e/us1-tenant-onboarding.spec.ts`:
+- [X] T077 [P] [US1] Write `tests/security/platform-bootstrap.test.ts`. `scripts/ops/bootstrap-platform-admin.ts` succeeds once without creating any invitation. A second run and 5 concurrent runs refuse and leave no orphan Auth users. No admin or portal HTTP route can create a platform admin (probe POSTs to every app route). Platform audit contains the bootstrap event with no secrets (CL-043, SC-002)
+- [X] T078 [P] [US1] Write Playwright `tests/e2e/us1-tenant-onboarding.spec.ts`:
   - Admin sign-in on the admin host.
   - Create tenants A and B; duplicate/invalid subdomain errors appear in AR and EN.
   - Initial manager emails are captured from the mail catcher.
@@ -317,50 +317,50 @@ Bootstrap and platform-admin removal stay operations-only.
 
 ### Implementation for User Story 1
 
-- [ ] T079 [US1] Create migration `supabase/migrations/<ts>_platform_tenant_rpcs.sql`:
+- [X] T079 [US1] Create migration `supabase/migrations/<ts>_platform_tenant_rpcs.sql`:
   - `public.platform_create_tenant(p_display_name text, p_subdomain text, p_state tenant_state, p_manager_email text, p_token_hash text) returns uuid`. It requires `private.is_platform_admin('tenants.manage')`, validates name and subdomain (stable codes `name_required|subdomain_invalid|subdomain_reserved|subdomain_taken`), inserts the tenant, issues the initial manager invitation via `private.issue_staff_invitation(..., p_grants_manager => true, ...)` in the same transaction (rolled back on `email_unavailable`), and writes `tenant.created` to both platform and tenant audit.
   - `public.platform_set_tenant_state(p_tenant_id, p_state)`: active/suspended only, audited.
   - `public.platform_update_tenant_name(p_tenant_id, p_display_name)`: audited `tenant_settings`, and never touches the subdomain.
   - `public.platform_list_tenants()` and `public.platform_get_tenant(p_tenant_id)`, which return only tenant metadata (no tenant-private data).
 
   (FR-002–FR-007, FR-029, FR-036)
-- [ ] T080 [US1] Create migration `supabase/migrations/<ts>_platform_manager_rpcs.sql`, all requiring `is_platform_admin('tenants.managers.manage')` and taking `select … from tenants where id = p_tenant_id for update` to serialize manager changes per tenant:
+- [X] T080 [US1] Create migration `supabase/migrations/<ts>_platform_manager_rpcs.sql`, all requiring `is_platform_admin('tenants.managers.manage')` and taking `select … from tenants where id = p_tenant_id for update` to serialize manager changes per tenant:
   - `public.platform_grant_tenant_manager(p_tenant_id, p_staff_id)`: promotes existing activated enabled staff in that tenant.
   - `public.platform_invite_tenant_manager(p_tenant_id, p_email, p_token_hash)`: an invitation with `grants_manager => true`.
   - `public.platform_revoke_tenant_manager(p_tenant_id, p_staff_id)`. It rejects with `last_active_manager` when no other activated, enabled, unrevoked manager remains. Pending invitations do not count. The same check applies to suspended tenants, flagged for owner confirmation in T021. It sets `revoked_at`, keeps `staff_roles` and `enabled` unchanged, calls `private.revoke_sessions(<all sessions of that staff>, 'manager_demoted')`, and writes platform and tenant audit events.
 
   (FR-008, CL-023–CL-026)
-- [ ] T081 [US1] Create migration `supabase/migrations/<ts>_platform_invitations.sql`:
+- [X] T081 [US1] Create migration `supabase/migrations/<ts>_platform_invitations.sql`:
   - `public.platform_invitations`: `id`, `recipient_email_normalized`, `capabilities text[]`, `invited_by uuid not null`, `token_hash unique`, `issued_at`, `expires_at` (always `issued_at + interval '24 hours'`), `consumed_at`.
   - `public.platform_invite_admin(p_email, p_capabilities, p_token_hash)`: requires `platform_admins.invite`; capabilities ⊆ the caller's.
   - `private.peek_platform_invitation(p_token_hash)`: service_role only; returns validity and the recipient email.
   - `private.redeem_platform_invitation(p_token_hash, p_auth_user_id)`: service_role only. It locks the row, requires `now() < expires_at` and `consumed_at is null`, requires the auth user's email to equal the recipient, inserts `platform_admins` and audits acceptance. Rejected attempts are audited without the token.
 
   (FR-001, CL-040, CL-042)
-- [ ] T082 [US1] Create migration `supabase/migrations/<ts>_platform_ops_functions.sql`, with all functions service_role only and no `public` RPC:
+- [X] T082 [US1] Create migration `supabase/migrations/<ts>_platform_ops_functions.sql`, with all functions service_role only and no `public` RPC:
   - `private.bootstrap_platform_admin(p_auth_user_id uuid, p_operator_ref text) returns boolean`. It locks `private.platform_bootstrap_state` and returns false if `bootstrapped_at` is set or any `platform_admins` row exists. Otherwise it inserts `platform_admins` with all capabilities and `created_via = 'bootstrap'`, sets `bootstrapped_at` and `operator_ref`, and writes platform audit. It creates no invitation, so no application screen takes part in bootstrap (CL-043).
   - `private.ops_revoke_platform_admin(p_auth_user_id, p_operator_ref, p_ticket_ref, p_emergency bool)`. It refuses to remove the last enabled admin holding `tenants.manage` unless `p_emergency`. It sets `enabled=false`, revokes all platform sessions via `private.revoke_sessions` and writes platform audit.
 
   (CL-041, CL-043)
-- [ ] T083 [US1] Regenerate `packages/db/src/types.gen.ts` (`pnpm db:types`) after T079–T082
-- [ ] T084 [US1] Implement admin sign-in in `apps/admin/src/app/login/` and `apps/admin/src/features/auth/`:
+- [X] T083 [US1] Regenerate `packages/db/src/types.gen.ts` (`pnpm db:types`) after T079–T082
+- [X] T084 [US1] Implement admin sign-in in `apps/admin/src/app/login/` and `apps/admin/src/features/auth/`:
   - `apps/admin/src/app/login/page.tsx`: localized email + password form using `@workspace/ui`.
   - `apps/admin/src/features/auth/sign-in-action.ts`: `signInWithPassword` via the admin SSR client. It requires an enabled `platform_admins` row (otherwise it revokes the new session and returns a neutral error), calls `registerSession` with a platform owner, and records failures to platform audit.
   - `apps/admin/src/features/auth/sign-out-action.ts`: revokes the current registry session and calls `signOut({scope:'local'})`.
 
   (FR-001)
-- [ ] T085 [US1] Implement the admin shell `apps/admin/src/app/(app)/layout.tsx`: `AppShell` with platform navigation (Tenants, Platform admins, Platform audit), filtered by capability, behind `requirePlatformAdmin()`. Admin wording and assets stay inside `apps/admin` and never in shared tenant-facing templates (Constitution IX)
-- [ ] T086 [P] [US1] Implement the tenant directory `apps/admin/src/app/(app)/tenants/page.tsx`: name, subdomain, state, created date, using `platform_list_tenants`. It shows no tenant-private data (FR-029)
-- [ ] T087 [US1] Implement tenant creation: `apps/admin/src/app/(app)/tenants/new/page.tsx` (fields: display name, subdomain, initial state, first manager email; client and server zod validation reusing `validateSubdomain`) and `apps/admin/src/features/tenants/create-tenant-action.ts`, which calls `issueInvitation` (T058) with `platform_create_tenant` and maps error codes to localized, non-sensitive messages (US1 scenarios 1–2)
-- [ ] T088 [US1] Implement tenant details `apps/admin/src/app/(app)/tenants/[tenantId]/page.tsx`:
+- [X] T085 [US1] Implement the admin shell `apps/admin/src/app/(app)/layout.tsx`: `AppShell` with platform navigation (Tenants, Platform admins, Platform audit), filtered by capability, behind `requirePlatformAdmin()`. Admin wording and assets stay inside `apps/admin` and never in shared tenant-facing templates (Constitution IX)
+- [X] T086 [P] [US1] Implement the tenant directory `apps/admin/src/app/(app)/tenants/page.tsx`: name, subdomain, state, created date, using `platform_list_tenants`. It shows no tenant-private data (FR-029)
+- [X] T087 [US1] Implement tenant creation: `apps/admin/src/app/(app)/tenants/new/page.tsx` (fields: display name, subdomain, initial state, first manager email; client and server zod validation reusing `validateSubdomain`) and `apps/admin/src/features/tenants/create-tenant-action.ts`, which calls `issueInvitation` (T058) with `platform_create_tenant` and maps error codes to localized, non-sensitive messages (US1 scenarios 1–2)
+- [X] T088 [US1] Implement tenant details `apps/admin/src/app/(app)/tenants/[tenantId]/page.tsx`:
   - Name edit, with the subdomain displayed read-only.
   - State switch behind a confirmation `AlertDialog`.
   - A managers section: active managers and pending manager invitations.
 
   Server actions go in `apps/admin/src/features/tenants/update-tenant-actions.ts` (`platform_update_tenant_name`, `platform_set_tenant_state`) (US1 scenarios 3–6)
-- [ ] T089 [US1] Implement manager controls. `apps/admin/src/features/managers/actions.ts` provides `promoteManager`, `inviteManager` and `revokeManager`, mapping `last_active_manager` to a localized message. Add matching UI in `apps/admin/src/app/(app)/tenants/[tenantId]/managers-panel.tsx`; promotion picks an existing activated staff member by username/email within that tenant only (US1 scenarios 7–11)
-- [ ] T090 [US1] Implement platform-admin invitation: `apps/admin/src/app/(app)/admins/invite/page.tsx` and `apps/admin/src/features/platform-admins/invite-action.ts` (capability checkboxes limited to the actor's own capabilities, 24h link to `https://<ADMIN_HOST>/admins/accept?token=…`). Do NOT add any list action that removes, demotes or disables an admin (CL-040, CL-041)
-- [ ] T091 [US1] Implement platform-admin acceptance: `apps/admin/src/app/admins/accept/page.tsx` (public) and `apps/admin/src/features/platform-admins/accept-action.ts`:
+- [X] T089 [US1] Implement manager controls. `apps/admin/src/features/managers/actions.ts` provides `promoteManager`, `inviteManager` and `revokeManager`, mapping `last_active_manager` to a localized message. Add matching UI in `apps/admin/src/app/(app)/tenants/[tenantId]/managers-panel.tsx`; promotion picks an existing activated staff member by username/email within that tenant only (US1 scenarios 7–11)
+- [X] T090 [US1] Implement platform-admin invitation: `apps/admin/src/app/(app)/admins/invite/page.tsx` and `apps/admin/src/features/platform-admins/invite-action.ts` (capability checkboxes limited to the actor's own capabilities, 24h link to `https://<ADMIN_HOST>/admins/accept?token=…`). Do NOT add any list action that removes, demotes or disables an admin (CL-040, CL-041)
+- [X] T091 [US1] Implement platform-admin acceptance: `apps/admin/src/app/admins/accept/page.tsx` (public) and `apps/admin/src/features/platform-admins/accept-action.ts`:
   1. `peek_platform_invitation`; an invalid or expired token shows a neutral message and no form.
   2. The recipient sets a password.
   3. `auth.admin.createUser({email, password, email_confirm:true})`.
@@ -368,16 +368,16 @@ Bootstrap and platform-admin removal stay operations-only.
   5. Sign in and call `registerSession`.
 
   Reject recipients whose email belongs to tenant staff ⛔ GATE-COLLIDE (CL-042)
-- [ ] T092 [P] [US1] Implement `scripts/ops/bootstrap-platform-admin.ts` (run only with `OPS_CONFIRM=yes`, `OPERATOR_REF`, the target email and a service-role key from the secret manager; never from app code):
+- [X] T092 [P] [US1] Implement `scripts/ops/bootstrap-platform-admin.ts` (run only with `OPS_CONFIRM=yes`, `OPERATOR_REF`, the target email and a service-role key from the secret manager; never from app code):
   1. Refuse early if bootstrap already happened.
   2. The target administrator types their password at a hidden TTY prompt (no echo; never passed via argv or env, never logged or stored by the script) and it is checked against the password policy.
   3. `auth.admin.createUser({email, password, email_confirm:true})`. The operator has verified the target's identity and mailbox out of band.
   4. `private.bootstrap_platform_admin`. If it returns false (lost race or already bootstrapped), delete the created Auth user.
 
   The first admin then signs in through the normal admin login (T084); no invitation link or setup screen is used. Document it in `docs/operations/bootstrap-platform-admin.md`: who may run it, verification of the target identity, credential handling, and evidence to record (CL-043)
-- [ ] T093 [P] [US1] Implement `scripts/ops/revoke-platform-admin.ts` (`OPS_CONFIRM`, `OPERATOR_REF`, `TICKET_REF`; calls `private.ops_revoke_platform_admin`). Document it in `docs/operations/revoke-platform-admin.md`: the authorization chain, identity verification, emergency path, and evidence (CL-041)
-- [ ] T094 [P] [US1] Write `docs/operations/tenant-provisioning.md`: wildcard DNS/TLS covers new subdomains, subdomain naming rules, immutability, suspension/reactivation effects, and the rule that no tenant deletion exists (FR-003–FR-007)
-- [ ] T095 [US1] Run `supabase test db` (`supabase/tests/010_*.test.sql`–`012_*.test.sql`), `pnpm vitest tests/security/manager-revocation-race.test.ts tests/security/platform-bootstrap.test.ts` and `pnpm e2e tests/e2e/us1-tenant-onboarding.spec.ts` until T073–T078 pass. Fix the implementation, never the assertions, unless a spec-traceable error is found in a test
+- [X] T093 [P] [US1] Implement `scripts/ops/revoke-platform-admin.ts` (`OPS_CONFIRM`, `OPERATOR_REF`, `TICKET_REF`; calls `private.ops_revoke_platform_admin`). Document it in `docs/operations/revoke-platform-admin.md`: the authorization chain, identity verification, emergency path, and evidence (CL-041)
+- [X] T094 [P] [US1] Write `docs/operations/tenant-provisioning.md`: wildcard DNS/TLS covers new subdomains, subdomain naming rules, immutability, suspension/reactivation effects, and the rule that no tenant deletion exists (FR-003–FR-007)
+- [X] T095 [US1] Run `supabase test db` (`supabase/tests/010_*.test.sql`–`012_*.test.sql`), `pnpm vitest tests/security/manager-revocation-race.test.ts tests/security/platform-bootstrap.test.ts` and `pnpm e2e tests/e2e/us1-tenant-onboarding.spec.ts` until T073–T078 pass. Fix the implementation, never the assertions, unless a spec-traceable error is found in a test
 
 **Checkpoint**: The US1 independent test passes. The admin app can onboard and control tenants without any portal staff features.
 
