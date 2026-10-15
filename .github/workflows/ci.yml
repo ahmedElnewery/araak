@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: node scripts/check-client-bundles.mjs
+      - run: node scripts/check-contrast.mjs
+  db-security:
+    # Runs against the Supabase Cloud DEVELOPMENT project only. Opt-in: set repo variable RUN_DB_SECURITY=true after adding the SUPABASE_DEV_* secrets.
+    if: vars.RUN_DB_SECURITY == 'true' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    concurrency:
+      group: supabase-dev-project
+      cancel-in-progress: false
+    env:
+      SUPABASE_ENV: development
+      SUPABASE_DEV_PROJECT_REF: ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
+      SUPABASE_PROD_PROJECT_REF: ${{ secrets.SUPABASE_PROD_PROJECT_REF }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_DEV_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_DEV_PUBLISHABLE_KEY }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_DEV_SECRET_KEY }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_DEV_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:check-env
+      - run: pnpm db:types:check
+      - run: pnpm test:db
+      - name: Start both apps against the Development project
+        env:
+          APP_ENV: development
+          PORTAL_BASE_DOMAIN: portal.localhost:3000
+          ADMIN_HOST: admin.localhost:3001
+          TRUSTED_PROXY_HOPS: "0"
+        run: |
+          export AUTH_THROTTLE_HMAC_KEY="$(openssl rand -hex 32)"
+          pnpm build
+          (cd apps/portal && pnpm exec next start -p 3000 &)
+          (cd apps/admin && pnpm exec next start -p 3001 &)
+          for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:3000 && curl -s -o /dev/null http://127.0.0.1:3001 && break; sleep 2; done
+      - run: pnpm vitest run --root tests/security
+      - run: pnpm e2e
