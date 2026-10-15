@@ -16,7 +16,7 @@ const id = z.uuid();
  * Platform-assisted reset, mirroring the manager variant (CL-015, Constitution III): needs `tenants.staff.manage`, the
  * platform admin's OWN password (verified with a throwaway client whose session is ended at once), and sends the link
  * to the employee only. The platform admin never sees or chooses the employee's password.
- * ⛔ GATE-RBAC: the owner confirms this platform variant (docs/decisions/permission-catalog.md).
+ * GATE-RBAC closed: the owner approved this platform variant.
  */
 export async function platformResetStaffAction(tenantId: string, staffId: string, _prev: FormState, formData: FormData): Promise<FormState> {
   const ctx = await requirePlatformAdmin("tenants.staff.manage");
