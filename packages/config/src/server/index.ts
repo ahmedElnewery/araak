@@ -34,3 +34,4 @@ export function getServerEnv(app: AppName, source: Record<string, string | undef
   if (source === process.env) cached = { ...cached, [app]: env };
   return env;
 }
+export { processLogo, sniffLogoMime, type ProcessedLogo, type LogoResult } from "./logo";

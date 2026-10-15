@@ -3,10 +3,12 @@ import { PublicShell } from "@/components/public-shell";
 import { getI18n } from "@/lib/locale";
 import { LoginForm } from "./login-form";
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ reason?: string }> }) {
+  const { reason } = await searchParams;
   const { t } = await getI18n();
   return (
     <PublicShell title={t.portal.auth.title}>
+      {reason === "expired" ? <p role="status" className="text-sm">{t.portal.auth.sessionExpired}</p> : null}
       <LoginForm labels={t.portal.auth} />
       <p className="text-sm">
         <Link className="underline" href="/recover">{t.portal.auth.forgotPassword}</Link>

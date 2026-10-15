@@ -1,14 +1,21 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { LOCALE_COOKIE, dir, getDictionary, resolveLocale, type Locale } from "@workspace/i18n";
+import { LOCALE_COOKIE, THEME_COOKIE, dir, getDictionary, resolveLocale, resolveTheme } from "@workspace/i18n";
 
-/** Guests have no stored preference: cookie, then Arabic. Signed-in preference joins here in the shell story. */
-export async function getLocale(): Promise<Locale> {
+/** The admin app has no per-person stored preference: language and theme persist in cookies (FR-039). */
+export async function getPreferences() {
   const store = await cookies();
-  return resolveLocale({ cookie: store.get(LOCALE_COOKIE)?.value ?? null });
+  return {
+    locale: resolveLocale({ cookie: store.get(LOCALE_COOKIE)?.value ?? null }),
+    theme: resolveTheme({ cookie: store.get(THEME_COOKIE)?.value ?? null }),
+  };
+}
+
+export async function getLocale() {
+  return (await getPreferences()).locale;
 }
 
 export async function getI18n() {
-  const locale = await getLocale();
-  return { locale, dir: dir(locale), t: getDictionary(locale) };
+  const { locale, theme } = await getPreferences();
+  return { locale, theme, dir: dir(locale), t: getDictionary(locale) };
 }

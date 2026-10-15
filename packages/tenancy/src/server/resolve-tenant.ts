@@ -11,6 +11,8 @@ export type ResolvedTenant = {
   displayName: string;
   state: "active" | "suspended";
   logoVersion: number;
+  /** True when a logo object exists; the bytes are served by the portal logo route, never a public URL. */
+  hasLogo: boolean;
 };
 
 /**
@@ -27,9 +29,9 @@ export const resolveTenantFromHost = cache(async (): Promise<ResolvedTenant | nu
   if (host.kind !== "tenant") return null;
   const { data } = await getSupabaseAdmin()
     .from("tenants")
-    .select("id, subdomain, display_name, state, logo_version")
+    .select("id, subdomain, display_name, state, logo_version, logo_object_path")
     .eq("subdomain", host.subdomain)
     .maybeSingle();
   if (!data) return null;
-  return { id: data.id, subdomain: data.subdomain, displayName: data.display_name, state: data.state, logoVersion: data.logo_version };
+  return { id: data.id, subdomain: data.subdomain, displayName: data.display_name, state: data.state, logoVersion: data.logo_version, hasLogo: data.logo_object_path !== null };
 });

@@ -1,13 +1,14 @@
 import { can, loadEffectivePermissions } from "@workspace/authorization";
-import { requireStaff } from "@/lib/guards";
+import { renewSession, requireStaff } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 import { redirect } from "next/navigation";
 import { InvitationsTable, type PendingInvitation } from "./invitations-table";
 
 export default async function PendingInvitationsPage() {
-  const ctx = await requireStaff();
+  const ctx = await requireStaff({ touch: false });
   const perms = await loadEffectivePermissions(ctx);
   if (!can(perms, "staff.invite") && !can(perms, "staff.view")) redirect("/forbidden");
+  await renewSession(ctx);
   const { locale, t } = await getI18n();
   const { data } = await ctx.supabase.rpc("list_pending_invitations");
   return (

@@ -30,9 +30,9 @@ describe("shell components", () => {
     expect(shell("S")).not.toMatch(/\b(?:ml|mr|pl|pr|left|right)-\d/);
   });
   it("TenantIdentity shows the logo with alt text, or a neutral decorative icon", () => {
-    const withLogo = renderToStaticMarkup(<TenantIdentity name="Hope" logoSrc="/logo?v=1" logoAlt="Organization logo" />);
-    expect(withLogo).toContain('alt="Organization logo"');
-    const without = renderToStaticMarkup(<TenantIdentity name="Hope" logoAlt="Organization logo" />);
+    const withLogo = renderToStaticMarkup(<TenantIdentity name="Hope" logoSrc="/logo?v=1" />);
+    expect(withLogo).toContain('alt="Hope"');
+    const without = renderToStaticMarkup(<TenantIdentity name="Hope" />);
     expect(without).toContain('aria-hidden="true"');
     expect(without).not.toContain("<img");
     expect(without).toContain("Hope");

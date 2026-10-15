@@ -18,6 +18,25 @@ const isServerOnly = (source) =>
 
 const localPlugin = {
   rules: {
+    "no-literal-string": {
+      meta: { type: "problem", schema: [], messages: { bad: "User-visible text must come from packages/i18n dictionaries, not a literal: {{text}}" } },
+      create(context) {
+        const LETTER = /\p{L}/u;
+        const A11Y_ATTRS = new Set(["aria-label", "placeholder", "title", "alt"]);
+        return {
+          JSXText(node) {
+            const text = node.value.trim();
+            if (LETTER.test(text)) context.report({ node, messageId: "bad", data: { text: text.slice(0, 30) } });
+          },
+          JSXAttribute(node) {
+            if (node.name.type !== "JSXIdentifier" || !A11Y_ATTRS.has(node.name.name)) return;
+            if (node.value?.type === "Literal" && typeof node.value.value === "string" && LETTER.test(node.value.value)) {
+              context.report({ node, messageId: "bad", data: { text: node.value.value.slice(0, 30) } });
+            }
+          },
+        };
+      },
+    },
     "no-server-import-in-client": {
       meta: { type: "problem", schema: [], messages: { bad: "Client components must not import server-only module '{{source}}'." } },
       create(context) {
@@ -109,5 +128,11 @@ export default tseslint.config(
     files: ["**/*.{ts,tsx}"],
     plugins: { local: localPlugin },
     rules: { "local/no-server-import-in-client": "error" },
+  },
+  // (d) FR-038/FR-041: no hard-coded user-visible strings in app routes; everything comes from packages/i18n
+  {
+    files: ["apps/*/src/{app,components}/**/*.tsx"],
+    plugins: { local: localPlugin },
+    rules: { "local/no-literal-string": "error" },
   },
 );
