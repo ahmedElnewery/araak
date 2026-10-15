@@ -4,6 +4,7 @@ import { renderStaffInvitation } from "../../email/templates/staff-invitation";
 import type { Locale } from "../../email/templates/shared";
 import { generateToken, hashToken } from "../../tokens";
 import { recordTenantAudit } from "../audit";
+import { buildStaffInvitationLink } from "./link";
 
 export type IssueInvitationInput = {
   /** `id` may be unknown before persisting (tenant creation); `persist` then returns it. */
@@ -27,8 +28,9 @@ export async function issueStaffInvitation(input: IssueInvitationInput): Promise
   const persisted = await input.persist(hashToken(token));
   const invitationId = typeof persisted === "string" ? persisted : persisted.invitationId;
   const tenantId = typeof persisted === "string" ? input.tenant.id : persisted.tenantId;
-  const scheme = input.appEnv === "development" ? "http" : "https";
-  const link = `${scheme}://${input.tenant.subdomain}.${input.portalBaseDomain}/invite/accept?token=${token}`;
+  const link = buildStaffInvitationLink({
+    appEnv: input.appEnv, subdomain: input.tenant.subdomain, portalBaseDomain: input.portalBaseDomain, token,
+  });
   const mail = renderStaffInvitation(input.locale, { tenantName: input.tenant.displayName, link, validHours: 168 });
   try {
     await input.mailer.send({ to: input.recipientEmail, ...mail });

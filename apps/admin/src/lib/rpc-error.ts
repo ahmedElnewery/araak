@@ -3,7 +3,7 @@ export const ERROR_CODES = [
   "name_required", "subdomain_invalid", "subdomain_reserved", "subdomain_taken", "email_invalid", "email_unavailable",
   "last_active_manager", "staff_not_found", "staff_not_eligible", "already_manager", "not_a_manager",
   "capabilities_invalid", "capabilities_exceed_inviter", "tenant_not_found", "tenant_unavailable",
-  "password_policy", "password_mismatch", "not_authorized", "generic",
+  "password_policy", "password_mismatch", "not_authorized", "confirmation_required", "recovery_rate_limited", "generic",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 

@@ -1,0 +1,14 @@
+/** Stable error codes the database raises (localized in `portal.errors`). */
+export const ERROR_CODES = [
+  "email_invalid", "email_unavailable", "role_not_grantable", "username_invalid", "username_taken", "invitation_invalid",
+  "resend_cooldown", "resend_cap_reached", "invitation_not_found", "invitation_not_pending", "confirmation_required",
+  "recovery_rate_limited", "cannot_reset_self", "staff_not_found", "staff_not_eligible", "password_policy",
+  "password_mismatch", "not_authorized", "invalid_credentials", "generic",
+] as const;
+export type ErrorCode = (typeof ERROR_CODES)[number];
+
+/** Maps a database error to a stable, non-sensitive code. Unknown errors become `generic` (never echoed). */
+export function toErrorCode(error: { message: string; code?: string }): ErrorCode {
+  if (error.code === "42501") return "not_authorized";
+  return (ERROR_CODES as readonly string[]).includes(error.message) ? (error.message as ErrorCode) : "generic";
+}
