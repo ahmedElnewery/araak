@@ -93,16 +93,8 @@ select tests.throws_ok(format($$select public.request_manager_assisted_reset(%L,
 select tests.reset();
 select is((select count(*)::int from public.recovery_requests where requested_by_staff_id = (select staff_id from st where k='mgr')), 2, 'only allowed manager-origin issuances exist (t4 and m5; every denied request stored nothing)');
 
--- ---- platform variant ------------------------------------------------------------------------------------------------
-select tests.confirm((select nocap_uid from pa));
-select tests.claims((select nocap_uid from pa), (select nocap_sid from ps));
-select tests.throws_ok(format($$select public.platform_request_staff_reset(%L, tests.th('p1'))$$, (select staff_id from st where k='s2')), '42501', null, 'platform reset needs tenants.staff.manage');
-select tests.reset();
-select tests.age_recovery((select staff_id from st where k='s2'), interval '301 seconds');
-select tests.confirm((select uid from pa));
-select tests.claims((select uid from pa), (select sid from ps));
-select is(public.platform_request_staff_reset((select staff_id from st where k='s2'), tests.th('p2')), 's2@rc.test', 'platform admin with the capability and a confirmation issues a reset');
-select tests.reset();
+-- ---- no platform-admin reset path (owner decision) ----
+select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname ~ 'platform.*reset'), 0, 'no platform-admin staff reset function exists');
 
 -- ---- completion revokes ALL sessions ----------------------------------------------------------------------------------
 create temp table extra as select tests.mk_session(user_id, (select a from fx), staff_id) sid from st where k = 'plain';

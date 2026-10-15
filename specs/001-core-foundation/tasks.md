@@ -528,7 +528,7 @@ Bootstrap and platform-admin removal stay operations-only.
   4. Emails the link to the employee only.
 
   The manager never sees the employee's password (CL-015, US2 scenarios 23–24)
-- [X] T121 [P] [US2] Implement platform-assisted reset, mirroring CL-015 controls (own-password confirmation of the platform admin; `tenants.staff.manage`). Add `public.platform_request_staff_reset(...)` in `supabase/migrations/<ts>_platform_staff_reset.sql`, plus an action in `apps/admin/src/features/tenants/staff-reset-action.ts` ⛔ GATE-RBAC (confirm the platform variant) (Constitution III, FR-015)
+- [X] T121 [P] [US2] Implement platform-assisted reset, mirroring CL-015 controls (own-password confirmation of the platform admin; `tenants.staff.manage`). Add `public.platform_request_staff_reset(...)` in `supabase/migrations/<ts>_platform_staff_reset.sql`, plus an action in `apps/admin/src/features/tenants/staff-reset-action.ts` ⛔ GATE-RBAC (confirm the platform variant) (Constitution III, FR-015) **Declined by the owner; removed.**
 - [X] T122 [US2] Add AR/EN strings for invitation, sign-in, recovery, username and the related errors to `packages/i18n/src/dictionaries/{ar,en}.ts`, with neutral wording and no provider names (FR-038, Constitution X)
 - [X] T123 [US2] Run `supabase test db` (`supabase/tests/020_*`–`022_*`), the `tests/security/` suites from T100–T102 and T104, `packages/auth/src/username.test.ts` and `tests/e2e/us2-invite-activate-login.spec.ts` until T096–T104 pass
 
@@ -540,7 +540,7 @@ Bootstrap and platform-admin removal stay operations-only.
 - Audit event names follow the existing `TenantAuditEvent` set (`invitation.issued`, `invitation.resent`, `staff.activated`, `password.reset_initiated`) plus `staff.username_changed` and `password.reset_completed`; sign-in failures use the existing `auth.login_failed` / `auth.login_throttled` security events with an HMAC identifier only.
 - The per-IP throttle key is (tenant, client IP) and is skipped when `TRUSTED_PROXY_HOPS = 0` (the forwarded header is then attacker-controlled).
 - Self-service recovery does its account-dependent work after the response (`after()`), so timing cannot reveal whether an account exists. Unknown/throttled/foreign sign-ins pay for one real failed password check against an internal timing-pad identity (excluded by `reconcile-auth-users`).
-- ⛔ GATE-RBAC is still open for the platform-assisted reset variant (T121): it is implemented behind `tenants.staff.manage` but needs the owner's confirmation.
+- T121 (platform-assisted reset) was **declined by the owner**: the function and admin action were removed (migration `<ts>_drop_platform_staff_reset.sql`). Only the tenant manager authority can request an assisted reset.
 
 ---
 

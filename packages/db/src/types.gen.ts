@@ -925,10 +925,6 @@ export type Database = {
           subdomain: string;
         }[];
       };
-      platform_request_staff_reset: {
-        Args: { p_target_staff_id: string; p_token_hash: string };
-        Returns: string;
-      };
       platform_resend_staff_invitation: {
         Args: { p_invitation_id: string; p_token_hash: string };
         Returns: string;
