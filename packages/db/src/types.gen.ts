@@ -873,6 +873,7 @@ export type Database = {
         Returns: string;
       };
       list_grantable_roles: { Args: never; Returns: Json };
+      list_my_sessions: { Args: never; Returns: Json };
       list_pending_invitations: { Args: never; Returns: Json };
       my_effective_permissions: { Args: never; Returns: Json };
       platform_create_tenant: {
@@ -885,6 +886,9 @@ export type Database = {
         };
         Returns: string;
       };
+      revoke_my_other_sessions: { Args: { p_reason?: Database["public"]["Enums"]["session_revoked_reason"] }; Returns: number };
+      revoke_my_session: { Args: { p_session_id: string }; Returns: undefined };
+      touch_session_activity: { Args: never; Returns: boolean };
       platform_get_tenant: { Args: { p_tenant_id: string }; Returns: Json };
       platform_get_tenant_managers: {
         Args: { p_tenant_id: string };

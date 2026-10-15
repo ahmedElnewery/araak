@@ -73,7 +73,7 @@ export type Dictionary = {
     nav: { menu: string; home: string; inviteStaff: string; invitations: string; account: string; signOut: string };
     auth: {
       title: string; identifier: string; identifierHint: string; password: string; signIn: string;
-      invalidCredentials: string; forgotPassword: string;
+      invalidCredentials: string; forgotPassword: string; sessionExpired: string;
     };
     invite: {
       acceptTitle: string; acceptIntro: string; email: string; password: string; confirmPassword: string;
@@ -94,7 +94,18 @@ export type Dictionary = {
     };
     account: {
       title: string; username: string; changeUsername: string; save: string; saved: string; email: string;
-      emailImmutable: string;
+      emailImmutable: string; sessionsLink: string; passwordLink: string;
+    };
+    sessions: {
+      title: string; intro: string; empty: string; colDevice: string; colBrowser: string; colSignedIn: string;
+      colActivity: string; current: string; unknownDevice: string; unknownBrowser: string; logout: string;
+      logoutAll: string; confirmTitle: string; confirmBody: string; confirm: string; cancel: string;
+      confirmAllTitle: string; confirmAllBody: string; confirmAll: string; revoked: string; allRevoked: string;
+      deviceTypes: Record<string, string>;
+    };
+    password: {
+      title: string; intro: string; current: string; new: string; confirm: string; submit: string; done: string;
+      wrongCurrent: string; signInAgain: string;
     };
     errors: {
       email_invalid: string; email_unavailable: string; role_not_grantable: string; username_invalid: string;
@@ -102,7 +113,7 @@ export type Dictionary = {
       invitation_not_found: string; invitation_not_pending: string; confirmation_required: string;
       recovery_rate_limited: string; cannot_reset_self: string; staff_not_found: string; staff_not_eligible: string;
       password_policy: string; password_mismatch: string; not_authorized: string; invalid_credentials: string;
-      generic: string;
+      session_not_found: string; generic: string;
     };
   };
 };

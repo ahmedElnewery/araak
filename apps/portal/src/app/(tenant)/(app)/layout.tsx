@@ -10,7 +10,7 @@ import { requireTenant } from "@/lib/tenant-context";
 
 // Minimal signed-in frame for this story; the full accessible shell replaces it in the shell story.
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const ctx = await requireStaff();
+  const ctx = await requireStaff({ touch: false }); // the page's own guard renews the session once authorized
   const tenant = await requireTenant();
   const { t } = await getI18n();
   const perms = await loadEffectivePermissions(ctx);

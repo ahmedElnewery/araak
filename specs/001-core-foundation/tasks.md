@@ -559,14 +559,14 @@ Bootstrap and platform-admin removal stay operations-only.
 
 ### Tests for User Story 3 (write first, must FAIL) ⚠️
 
-- [ ] T124 [P] [US3] Write pgTAP `supabase/tests/030_sessions.test.sql`:
+- [X] T124 [P] [US3] Write pgTAP `supabase/tests/030_sessions.test.sql`:
   - `list_my_sessions` returns only the caller's own tenant sessions, with columns limited to id, device_type, browser, created_at, verified_activity_at and is_current; no token or IP fields exist.
   - `revoke_my_session` refuses the current session, other accounts' sessions and stale or already-revoked ids, with a neutral not-found.
   - `revoke_my_other_sessions` keeps the current session only.
   - `touch_session_activity` does nothing for a dead or unauthorized session.
 
   (FR-020, CL-037–CL-039)
-- [ ] T125 [P] [US3] Write `tests/security/session-revocation.test.ts` (two sign-ins = two devices):
+- [X] T125 [P] [US3] Write `tests/security/session-revocation.test.ts` (two sign-ins = two devices):
   - Revoking the other session denies its access token on the next RPC/RLS read and makes its refresh fail, while the current session still works.
   - Revoke-all-others races 10 concurrent refreshes from the other sessions and none survive.
   - Password change revokes the others and the current session is revalidated.
@@ -575,13 +575,13 @@ Bootstrap and platform-admin removal stay operations-only.
   - Revoke requests targeting another tenant's or account's session are denied.
 
   (FR-020–FR-022, SC-004)
-- [ ] T126 [P] [US3] Write `tests/security/session-activity.test.ts`:
+- [X] T126 [P] [US3] Write `tests/security/session-activity.test.ts`:
   - `refreshSession()`, prefetch requests (`Next-Router-Prefetch: 1` / `Purpose: prefetch`), passive polling routes and denied requests do NOT change `verified_activity_at`.
   - A protected page navigation, a data read and a save do change it.
   - A session with `verified_activity_at = now() - 30 days` is denied and redirected to login; at 29d23h it is allowed.
 
   (FR-018, CL-036)
-- [ ] T127 [P] [US3] Write Playwright `tests/e2e/us3-sessions.spec.ts`:
+- [X] T127 [P] [US3] Write Playwright `tests/e2e/us3-sessions.spec.ts`:
   - Two contexts.
   - The sessions page shows device/browser (or the "Unknown" fallback), sign-in time, last activity and a Current badge; the DOM has no IP/location text and no geolocation permission is requested.
   - Cancel in the individual-revoke dialog changes nothing; confirm revokes and the other context is sent to login on its next navigation.
@@ -592,17 +592,17 @@ Bootstrap and platform-admin removal stay operations-only.
 
 ### Implementation for User Story 3
 
-- [ ] T128 [US3] Create migration `supabase/migrations/<ts>_session_rpcs.sql`:
+- [X] T128 [US3] Create migration `supabase/migrations/<ts>_session_rpcs.sql`:
   - `public.list_my_sessions()`.
   - `public.revoke_my_session(p_session_id uuid)`: owner check via `auth.uid()` plus the tenant; never the current `session_id`; calls `private.revoke_sessions(..., 'user')`; audited as `sessions` / `session.revoked` without token values.
   - `public.revoke_my_other_sessions()`: `'user_all_others'`, audited.
   - `public.touch_session_activity()`: sets `verified_activity_at = now()` only when `request_context_ok()` holds, at most once per 60s per session.
 
   (FR-018, FR-020, CL-036–CL-039)
-- [ ] T129 [US3] Implement `packages/auth/src/server/activity.ts`. `recordMeaningfulActivity(ctx, request)` calls `touch_session_activity` only for user-initiated requests. It skips prefetch headers, RSC background revalidation, HEAD/OPTIONS and route handlers flagged `passive`, and never runs from middleware (CL-036)
-- [ ] T130 [US3] Integrate activity into the guards in `apps/portal/src/lib/guards.ts`. Call `recordMeaningfulActivity` only after successful authorization in protected page renders and server actions. Map `session_expired` to a redirect to `/login?reason=expired` with a neutral localized notice (FR-018)
-- [ ] T131 [US3] Implement the Active Sessions page `apps/portal/src/app/(app)/account/sessions/page.tsx`: a table using `@workspace/ui`, the "Unknown device/browser" fallback, a Current badge, per-row Logout for other sessions, and a Logout All Other Sessions button. Both use `AlertDialog` confirmations with the CL-038/CL-039 wording and no password field. Add `apps/portal/src/features/account/sessions-actions.ts`, which double-submits idempotently (FR-020)
-- [ ] T132 [US3] Implement password change: `apps/portal/src/app/(app)/account/password/page.tsx` and `apps/portal/src/features/account/change-password-action.ts`:
+- [X] T129 [US3] Implement `packages/auth/src/server/activity.ts`. `recordMeaningfulActivity(ctx, request)` calls `touch_session_activity` only for user-initiated requests. It skips prefetch headers, RSC background revalidation, HEAD/OPTIONS and route handlers flagged `passive`, and never runs from middleware (CL-036)
+- [X] T130 [US3] Integrate activity into the guards in `apps/portal/src/lib/guards.ts`. Call `recordMeaningfulActivity` only after successful authorization in protected page renders and server actions. Map `session_expired` to a redirect to `/login?reason=expired` with a neutral localized notice (FR-018)
+- [X] T131 [US3] Implement the Active Sessions page `apps/portal/src/app/(app)/account/sessions/page.tsx`: a table using `@workspace/ui`, the "Unknown device/browser" fallback, a Current badge, per-row Logout for other sessions, and a Logout All Other Sessions button. Both use `AlertDialog` confirmations with the CL-038/CL-039 wording and no password field. Add `apps/portal/src/features/account/sessions-actions.ts`, which double-submits idempotently (FR-020)
+- [X] T132 [US3] Implement password change: `apps/portal/src/app/(app)/account/password/page.tsx` and `apps/portal/src/features/account/change-password-action.ts`:
   1. Verify the current password with a throwaway client and revoke that provider session.
   2. `supabase.auth.updateUser({password})`.
   3. `revoke_my_other_sessions` with reason `password_change`.
@@ -610,7 +610,7 @@ Bootstrap and platform-admin removal stay operations-only.
   5. Audit the change.
 
   (FR-021, US3 scenario 4)
-- [ ] T133 [P] [US3] Add AR/EN strings for sessions, password change and session-expired messages to `packages/i18n/src/dictionaries/{ar,en}.ts`
+- [X] T133 [P] [US3] Add AR/EN strings for sessions, password change and session-expired messages to `packages/i18n/src/dictionaries/{ar,en}.ts`
 - [ ] T134 [US3] Run `supabase/tests/030_sessions.test.sql`, `tests/security/session-revocation.test.ts`, `tests/security/session-activity.test.ts` and `tests/e2e/us3-sessions.spec.ts` until T124–T127 pass
 
 **Checkpoint**: Session semantics are proven end to end, including races. US1 suspension and US2 recovery revocation now also hold at the UI level.
