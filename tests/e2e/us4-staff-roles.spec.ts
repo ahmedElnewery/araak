@@ -4,7 +4,7 @@ import { en } from "../../packages/i18n/src/dictionaries/en";
 import { sql } from "../helpers/db";
 import { createTwoTenantFixture, PASSWORD, type TwoTenantFixture } from "../helpers/fixtures";
 
-const base = process.env.PORTAL_BASE_DOMAIN ?? "portal.localhost:3000";
+const base = process.env.PORTAL_BASE_DOMAIN ?? "localhost:3000";
 const host = (sub: string) => `http://${sub}.${base}`;
 test.beforeEach(({}, testInfo) => {
   test.skip(testInfo.project.name !== "portal-tenant-a", "one project drives the tenant host");

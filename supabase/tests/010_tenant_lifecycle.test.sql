@@ -41,6 +41,8 @@ select tests.throws_ok($$select public.platform_create_tenant('X', 'admin', 'act
   'P0001', 'subdomain_reserved', 'reserved subdomain rejected');
 select tests.throws_ok($$select public.platform_create_tenant('X', 'life-b', 'active', 'x@life.test', repeat('a',64))$$,
   'P0001', 'subdomain_taken', 'duplicate subdomain rejected');
+select tests.throws_ok($$select public.platform_create_tenant('X', 'portal', 'active', 'x@life.test', repeat('a',64))$$,
+  'P0001', 'subdomain_taken', 'portal belongs to the Araak organization');
 
 -- create: success issues the initial manager invitation and audits both streams
 insert into res select 'a', public.platform_create_tenant('Org A', 'life-a', 'active', 'Mgr-A@Life.test', repeat('b',64));

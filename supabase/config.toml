@@ -161,7 +161,7 @@ site_url = "http://portal.localhost:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["http://*.portal.localhost:3000/**", "http://admin.localhost:3001/**"]
+additional_redirect_urls = ["http://*.localhost:3000/**", "http://admin.localhost:3001/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 # Short lifetime is defense in depth only (research.md R-03, proposal 300s); live-session checks are authoritative.
 jwt_expiry = 300

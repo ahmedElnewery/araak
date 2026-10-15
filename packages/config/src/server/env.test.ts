@@ -11,9 +11,9 @@ const base = {
 
 describe("getServerEnv", () => {
   it("accepts a complete portal env and defaults proxy hops to 0", () => {
-    const env = getServerEnv("portal", { ...base, PORTAL_BASE_DOMAIN: "portal.localhost:3000" });
+    const env = getServerEnv("portal", { ...base, PORTAL_BASE_DOMAIN: "localhost:3000" });
     expect(env.TRUSTED_PROXY_HOPS).toBe(0);
-    expect(env.PORTAL_BASE_DOMAIN).toBe("portal.localhost:3000");
+    expect(env.PORTAL_BASE_DOMAIN).toBe("localhost:3000");
   });
   it("fails fast when a required value is missing or invalid", () => {
     expect(() => getServerEnv("portal", { ...base, PORTAL_BASE_DOMAIN: "p" , SUPABASE_SECRET_KEY: undefined })).toThrow();
@@ -23,10 +23,10 @@ describe("getServerEnv", () => {
   });
   it("requires the app-specific host variable", () => {
     expect(() => getServerEnv("portal", base)).toThrow(/PORTAL_BASE_DOMAIN/);
-    expect(() => getServerEnv("admin", { ...base, PORTAL_BASE_DOMAIN: "portal.localhost:3000" })).toThrow(/ADMIN_HOST/);
-    const admin = getServerEnv("admin", { ...base, ADMIN_HOST: "admin.localhost:3001", PORTAL_BASE_DOMAIN: "portal.localhost:3000" });
+    expect(() => getServerEnv("admin", { ...base, PORTAL_BASE_DOMAIN: "localhost:3000" })).toThrow(/ADMIN_HOST/);
+    const admin = getServerEnv("admin", { ...base, ADMIN_HOST: "admin.localhost:3001", PORTAL_BASE_DOMAIN: "localhost:3000" });
     expect(admin.ADMIN_HOST).toBe("admin.localhost:3001");
-    expect(admin.PORTAL_BASE_DOMAIN).toBe("portal.localhost:3000");
+    expect(admin.PORTAL_BASE_DOMAIN).toBe("localhost:3000");
   });
   it("requires PORTAL_BASE_DOMAIN in the admin app too (it builds tenant invitation and reset links)", () => {
     expect(() => getServerEnv("admin", { ...base, ADMIN_HOST: "admin.localhost:3001" })).toThrow(/PORTAL_BASE_DOMAIN/);

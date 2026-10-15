@@ -55,7 +55,7 @@ jobs:
       - name: Start both apps against the Development project
         env:
           APP_ENV: development
-          PORTAL_BASE_DOMAIN: portal.localhost:3000
+          PORTAL_BASE_DOMAIN: localhost:3000
           ADMIN_HOST: admin.localhost:3001
           TRUSTED_PROXY_HOPS: "0"
         run: |

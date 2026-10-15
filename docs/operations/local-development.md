@@ -4,12 +4,15 @@ Development uses a dedicated **Supabase Cloud Development project**. Docker and 
 
 ## Hosts
 
-`*.localhost` resolves to loopback, so no hosts-file edits are needed.
+`*.localhost` resolves to loopback, so no hosts-file edits are needed. The layout is the same as Production (`docs/operations/tenant-provisioning.md`), with `localhost:3000` in place of the domain: `PORTAL_BASE_DOMAIN=localhost:3000` in both apps, `ADMIN_HOST=admin.localhost:3001` in the admin app.
 
-| Surface | URL |
-| --- | --- |
-| Tenant portal | `http://<subdomain>.portal.localhost:3000` (e.g. `tenant-a.portal.localhost:3000`) |
-| Platform admin | `http://admin.localhost:3001` |
+| Surface | Local URL | Production |
+| --- | --- | --- |
+| Platform admin | `http://admin.localhost:3001` | `admin.<domain>` |
+| Araak organization (always exists) | `http://portal.localhost:3000` | `portal.<domain>` |
+| Any other organization | `http://<subdomain>.localhost:3000` (e.g. `noor.localhost:3000`) | `<subdomain>.<domain>` |
+
+The Araak tenant (subdomain `portal`) is created by migration `*_araak_portal_tenant.sql`, so it exists as soon as migrations are applied. `localhost:3000` itself and reserved labels (`www.localhost:3000`, `admin.localhost:3000`) return the neutral 404.
 
 Invitation emails sent by the apps go through `SMTP_URL`. Start a local mail catcher with `docker compose up -d mailpit`, set `SMTP_URL=smtp://127.0.0.1:1025` in `apps/admin/.env.local`, and read the mail at http://localhost:8025. Nothing is delivered to real addresses.
 
@@ -24,6 +27,14 @@ Auth emails sent by Supabase itself (recovery, etc.) come from the Development p
 5. Apply `supabase/migrations/*` in order through the Management API (`POST /v1/projects/{ref}/database/migrations`).
 6. `pnpm db:types` — regenerates `packages/db/src/database.types.ts`.
 7. `pnpm --filter @workspace/portal dev` and `pnpm --filter @workspace/admin dev`.
+
+## Manual check of the domain layout
+
+1. Sign in at `http://admin.localhost:3001` (first platform admin: `docs/operations/bootstrap-platform-admin.md`).
+2. Organizations: the Araak organization is already listed with subdomain `portal`. Open it, Managers, invite a manager email; the mail arrives in Mailpit with a `http://portal.localhost:3000/invite/accept?token=...` link. Accept it and sign in at `http://portal.localhost:3000`.
+3. New organization: name, subdomain `noor`, manager email. Accept that invitation and sign in at `http://noor.localhost:3000`.
+4. Trying to create another organization with `portal` fails ("subdomain taken"); `admin`, `www`, `araak` fail as reserved.
+5. Each host keeps its own sign-in: auth cookies are host-only, so a session on `portal.localhost` is not sent to `noor.localhost` or `admin.localhost`.
 
 ## Tests (all against the Development project)
 

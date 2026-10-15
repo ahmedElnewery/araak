@@ -9,7 +9,7 @@ import { createTwoTenantFixture, PASSWORD, type TwoTenantFixture } from "../help
 
 const PORTAL = new URL(process.env.E2E_PORTAL_URL ?? "http://127.0.0.1:3000");
 const ADMIN = new URL(process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:3001");
-const PORTAL_BASE = "portal.localhost:3000";
+const PORTAL_BASE = "localhost:3000";
 const ADMIN_HOST = "admin.localhost:3001";
 
 function get(base: URL, host: string, headers: Record<string, string> = {}, path = "/") {
@@ -36,6 +36,9 @@ describe("portal host trust", () => {
   it("serves a real tenant host", async () => {
     const r = await get(PORTAL, `${fx.tenantA.subdomain}.${PORTAL_BASE}`);
     expect(r.status).toBe(200);
+  });
+  it("always serves the Araak organization at portal.<base> (seeded tenant)", async () => {
+    expect((await get(PORTAL, `portal.${PORTAL_BASE}`)).status).toBe(200);
   });
   it("returns a neutral 404 for an unknown subdomain, with no tenant name in the HTML", async () => {
     const r = await get(PORTAL, `nosuch-${Date.now()}.${PORTAL_BASE}`);

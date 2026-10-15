@@ -30,6 +30,8 @@ select lives_ok(format($q$update public.tenants set state = 'suspended' where id
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'admin')$q$, 'P0001', 'subdomain_reserved', 'reserved subdomain rejected');
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'send')$q$, 'P0001', 'subdomain_reserved', 'mail-provider label is reserved');
 select ok(not exists (select 1 from private.reserved_subdomains where name = 'portal'), 'portal is a tenant label, not reserved');
+select ok(exists (select 1 from public.tenants where subdomain = 'portal'), 'the Araak organization always holds portal (seeded by migration)');
+select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'portal')$q$, '23505', null, 'no other tenant can take portal');
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'Upper')$q$, '23514', null, 'uppercase subdomain rejected');
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', '-lead')$q$, '23514', null, 'leading hyphen rejected');
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'trail-')$q$, '23514', null, 'trailing hyphen rejected');
