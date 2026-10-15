@@ -20,6 +20,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <TenantIdentity name={tenant.displayName} logoAlt={t.common.logoAlt} />
         <nav aria-label={t.portal.nav.menu} className="flex flex-wrap items-center gap-4 text-sm">
           <Link href="/">{t.portal.nav.home}</Link>
+          {can(perms, "staff.view") ? <Link href="/settings/staff">{t.portal.nav.staff}</Link> : null}
+          {can(perms, "roles.view") ? <Link href="/settings/roles">{t.portal.nav.roles}</Link> : null}
           {can(perms, "staff.invite") ? <Link href="/settings/staff/invite">{t.portal.nav.inviteStaff}</Link> : null}
           {can(perms, "staff.invite") || can(perms, "staff.view") ? <Link href="/settings/staff/invitations">{t.portal.nav.invitations}</Link> : null}
           <Link href="/account">{t.portal.nav.account}</Link>
