@@ -19,8 +19,9 @@ const DEFINITIONS: readonly Definition[] = [
   {
     id: "settings", href: "/settings", label: "settings", icon: "settings", requires: { kind: "any" }, built: true,
     children: [
-      { id: "staff", href: "/settings/staff/invitations", label: "staff", icon: "staff", requires: { kind: "permission", keys: ["staff.view", "staff.invite"] }, built: true },
-      { id: "roles", href: "/settings/roles", label: "roles", icon: "roles", requires: { kind: "permission", keys: ["roles.view"] }, built: false },
+      { id: "staff", href: "/settings/staff", label: "staff", icon: "staff", requires: { kind: "permission", keys: ["staff.view"] }, built: true },
+      { id: "invite", href: "/settings/staff/invite", label: "inviteStaff", icon: "staff", requires: { kind: "permission", keys: ["staff.invite"] }, built: true },
+      { id: "roles", href: "/settings/roles", label: "roles", icon: "roles", requires: { kind: "permission", keys: ["roles.view"] }, built: true },
       { id: "branding", href: "/settings/branding", label: "branding", icon: "branding", requires: { kind: "manager" }, built: true },
     ],
   },

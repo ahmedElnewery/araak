@@ -3,6 +3,8 @@ set local search_path = tests, public;
 select tests.no_plan();
 select tests.open_tap();
 
+-- admins that already exist in the target project (e.g. the real bootstrapped one) must not affect the assertions
+create temp table base_admins as select auth_user_id from public.platform_admins;
 create temp table pa as select tests.mk_user('root@pinv.test') uid, tests.mk_user('limited@pinv.test') lim_uid, tests.mk_user('noinv@pinv.test') noinv_uid;
 insert into public.platform_admins (auth_user_id, capabilities, created_via)
   select uid, '{tenants.manage,platform_admins.invite,platform_audit.view}'::text[], 'bootstrap' from pa
@@ -28,7 +30,7 @@ insert into inv select 'ok', public.platform_invite_admin('New.Admin@PInv.test',
 select tests.reset();
 select is((select count(*)::int from public.platform_invitations where recipient_email_normalized = 'new.admin@pinv.test' and consumed_at is null), 1, 'invitation stored with normalized email');
 select is((select (expires_at - issued_at) = interval '24 hours' from public.platform_invitations where id = (select id from inv where k='ok')), true, 'ttl is exactly 24h');
-select is((select count(*)::int from public.platform_admins a where a.auth_user_id not in (select uid from pa union select lim_uid from pa union select noinv_uid from pa)), 0, 'no platform_admins row before redemption');
+select is((select count(*)::int from public.platform_admins a where a.auth_user_id not in (select uid from pa union select lim_uid from pa union select noinv_uid from pa union select auth_user_id from base_admins)), 0, 'no platform_admins row before redemption');
 select is((select count(*)::int from public.platform_audit_events where event = 'platform_admin.invited'), 1, 'invitation audited');
 
 -- peek / redeem boundary

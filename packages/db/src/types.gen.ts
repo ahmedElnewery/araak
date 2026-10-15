@@ -873,7 +873,15 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      archive_role: { Args: { p_role_id: string }; Returns: Json };
       change_my_username: { Args: { p_username: string }; Returns: undefined };
+      create_role: {
+        Args: { p_description: string; p_grants: Json; p_name: string };
+        Returns: Json;
+      };
+      disable_staff: { Args: { p_staff_id: string }; Returns: Json };
+      enable_staff: { Args: { p_staff_id: string }; Returns: Json };
+      get_staff: { Args: { p_staff_id: string }; Returns: Json };
       invite_staff: {
         Args: { p_email: string; p_role_ids: string[]; p_token_hash: string };
         Returns: string;
@@ -881,6 +889,8 @@ export type Database = {
       list_grantable_roles: { Args: never; Returns: Json };
       list_pending_invitations: { Args: never; Returns: Json };
       get_my_preferences: { Args: never; Returns: Json };
+      list_roles: { Args: never; Returns: Json };
+      list_staff: { Args: never; Returns: Json };
       my_effective_permissions: { Args: never; Returns: Json };
       set_my_preferences: { Args: { p_locale: string; p_theme: string }; Returns: undefined };
       update_tenant_branding: {
@@ -971,6 +981,11 @@ export type Database = {
       resend_staff_invitation: {
         Args: { p_invitation_id: string; p_token_hash: string };
         Returns: string;
+      };
+      restore_role: { Args: { p_role_id: string }; Returns: Json };
+      set_staff_roles: {
+        Args: { p_add: string[]; p_remove: string[]; p_staff_id: string };
+        Returns: Json;
       };
       svc_begin_recovery_redemption: {
         Args: { p_token_hash: string };
@@ -1103,6 +1118,15 @@ export type Database = {
           p_tenant_id: string;
         };
         Returns: number;
+      };
+      update_role: {
+        Args: {
+          p_description: string;
+          p_grants: Json;
+          p_name: string;
+          p_role_id: string;
+        };
+        Returns: Json;
       };
     };
     Enums: {

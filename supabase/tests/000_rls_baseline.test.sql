@@ -42,7 +42,7 @@ select is((select array_agg(p.proname::text order by p.proname) from pg_proc p j
            where n.nspname = 'private' and has_function_privilege('authenticated', p.oid, 'EXECUTE')
              and p.proname <> all (array['current_staff_id','current_tenant_id','request_context_ok','my_role_ids',
                'has_permission','is_active_tenant_manager','audit_categories_for_actor','platform_context_ok',
-               'is_platform_admin','current_session_is_live'])),
+               'is_platform_admin','current_session_is_live','has_permission_for_record'])),
           null::text[], 'private functions executable by authenticated are exactly the allowlisted RLS helpers');
 
 select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
@@ -65,6 +65,8 @@ select is((select array_agg(p.proname::text order by p.proname) from pg_proc p j
                'platform_invite_tenant_manager','platform_revoke_tenant_manager','platform_invite_admin',
                'invite_staff','platform_invite_staff','resend_staff_invitation','platform_resend_staff_invitation',
                'list_pending_invitations','list_grantable_roles','change_my_username','request_manager_assisted_reset','platform_request_staff_reset',
+               'create_role','update_role','archive_role','restore_role','list_roles',
+               'set_staff_roles','disable_staff','enable_staff','list_staff','get_staff',
                'get_my_preferences','set_my_preferences','update_tenant_branding','platform_update_tenant_logo'])),
           null::text[], 'public functions executable by authenticated are exactly the allowlisted RPCs');
 select is((select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace

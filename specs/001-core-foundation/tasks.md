@@ -528,7 +528,7 @@ Bootstrap and platform-admin removal stay operations-only.
   4. Emails the link to the employee only.
 
   The manager never sees the employee's password (CL-015, US2 scenarios 23–24)
-- [X] T121 [P] [US2] Implement platform-assisted reset, mirroring CL-015 controls (own-password confirmation of the platform admin; `tenants.staff.manage`). Add `public.platform_request_staff_reset(...)` in `supabase/migrations/<ts>_platform_staff_reset.sql`, plus an action in `apps/admin/src/features/tenants/staff-reset-action.ts` ⛔ GATE-RBAC (confirm the platform variant) (Constitution III, FR-015)
+- [X] T121 [P] [US2] Implement platform-assisted reset, mirroring CL-015 controls (own-password confirmation of the platform admin; `tenants.staff.manage`). Add `public.platform_request_staff_reset(...)` in `supabase/migrations/<ts>_platform_staff_reset.sql`, plus an action in `apps/admin/src/features/tenants/staff-reset-action.ts` (Constitution III, FR-015) — GATE-RBAC for the platform variant closed: owner approved.
 - [X] T122 [US2] Add AR/EN strings for invitation, sign-in, recovery, username and the related errors to `packages/i18n/src/dictionaries/{ar,en}.ts`, with neutral wording and no provider names (FR-038, Constitution X)
 - [X] T123 [US2] Run `supabase test db` (`supabase/tests/020_*`–`022_*`), the `tests/security/` suites from T100–T102 and T104, `packages/auth/src/username.test.ts` and `tests/e2e/us2-invite-activate-login.spec.ts` until T096–T104 pass
 
@@ -540,7 +540,7 @@ Bootstrap and platform-admin removal stay operations-only.
 - Audit event names follow the existing `TenantAuditEvent` set (`invitation.issued`, `invitation.resent`, `staff.activated`, `password.reset_initiated`) plus `staff.username_changed` and `password.reset_completed`; sign-in failures use the existing `auth.login_failed` / `auth.login_throttled` security events with an HMAC identifier only.
 - The per-IP throttle key is (tenant, client IP) and is skipped when `TRUSTED_PROXY_HOPS = 0` (the forwarded header is then attacker-controlled).
 - Self-service recovery does its account-dependent work after the response (`after()`), so timing cannot reveal whether an account exists. Unknown/throttled/foreign sign-ins pay for one real failed password check against an internal timing-pad identity (excluded by `reconcile-auth-users`).
-- ⛔ GATE-RBAC is still open for the platform-assisted reset variant (T121): it is implemented behind `tenants.staff.manage` but needs the owner's confirmation.
+- GATE-RBAC for the platform-assisted reset variant (T121) is closed: the owner approved keeping it (behind `tenants.staff.manage`). Migration `20261015150031` restores the function after `20261015150030` dropped it.
 
 ---
 
@@ -634,7 +634,7 @@ Protected manager authority stays platform-only.
 
 ### Tests for User Story 4 (write first, must FAIL) ⚠️
 
-- [ ] T135 [P] [US4] Write pgTAP `supabase/tests/040_roles.test.sql`:
+- [X] T135 [P] [US4] Write pgTAP `supabase/tests/040_roles.test.sql`:
   - **Ceiling**: create and update succeed only within the ceiling; a manager-only or non-grantable key is rejected.
   - **Self-edit**: an actor assigned to role R cannot change R's name, description, grants or scopes, even when reducing them (CL-027).
   - **Archive**: an assigned role (including one held only by disabled staff) is denied with no assignment removed; a zero-assignment role archives; archived roles disappear from active lists and cannot be assigned (CL-028, CL-029).
@@ -643,7 +643,7 @@ Protected manager authority stays platform-only.
   - **Tenancy**: cross-tenant role ids are rejected.
 
   (FR-023, FR-026)
-- [ ] T136 [P] [US4] Write pgTAP `supabase/tests/041_staff_admin.test.sql`:
+- [X] T136 [P] [US4] Write pgTAP `supabase/tests/041_staff_admin.test.sql`:
   - `set_staff_roles` with target = actor is denied for add, remove, swap and bulk, and writes a security event (CL-044).
   - Another authorized actor can add or remove within the ceiling.
   - Disable and enable affect only the same tenant; disabling self is denied; disabling the last active manager of an active tenant is denied.
@@ -652,22 +652,22 @@ Protected manager authority stays platform-only.
   - Multi-role union holds: `has_permission` is true for keys from either role, and an `own` grant does not imply `all` (FR-024).
 
   (FR-008, FR-022, FR-023)
-- [ ] T137 [P] [US4] Write pgTAP `supabase/tests/042_record_scope.test.sql`. Inside the test transaction, create a temporary fixture table (`tenant_id`, `owner_staff_id`, `assignee_staff_ids uuid[]`); no business schema is added. Prove that `private.has_permission_for_record(key, tenant_id, owner_staff_id, assignee_ids)` respects tenant isolation and the All/Own/Assigned scopes for two tenants (FR-028, US4 scenario 6)
-- [ ] T138 [P] [US4] Write `tests/security/role-races.test.ts`:
+- [X] T137 [P] [US4] Write pgTAP `supabase/tests/042_record_scope.test.sql`. Inside the test transaction, create a temporary fixture table (`tenant_id`, `owner_staff_id`, `assignee_staff_ids uuid[]`); no business schema is added. Prove that `private.has_permission_for_record(key, tenant_id, owner_staff_id, assignee_ids)` respects tenant isolation and the All/Own/Assigned scopes for two tenants (FR-028, US4 scenario 6)
+- [X] T138 [P] [US4] Write `tests/security/role-races.test.ts`:
   - Archive racing a concurrent assignment never leaves an archived role with assignments.
   - A role edit racing the editor's own concurrent assignment to that role is denied at commit.
   - Restore racing the creation of a same-name role leaves exactly one active role.
   - Concurrent disables of the last two managers leave ≥1 active manager.
 
   (CL-027, CL-028, CL-031, FR-008)
-- [ ] T139 [P] [US4] Write `tests/security/privilege-escalation.test.ts`:
+- [X] T139 [P] [US4] Write `tests/security/privilege-escalation.test.ts`:
   - A delegate grants a key or scope above their ceiling → denied, with a `authz.privilege_escalation_denied` security event.
   - Direct PostgREST INSERT/UPDATE/DELETE on `roles`, `permission_grants`, `staff_roles`, `tenant_manager_grants` and `tenant_staff` with a staff JWT → denied by RLS.
   - A tenant JWT calling platform RPCs → denied.
   - Granting `platform_admins.invite` or manager authority via any tenant path → impossible.
 
   (FR-026, SC-005, security-matrix tests 4–5)
-- [ ] T140 [P] [US4] Write Playwright `tests/e2e/us4-staff-roles.spec.ts`:
+- [X] T140 [P] [US4] Write Playwright `tests/e2e/us4-staff-roles.spec.ts`:
   - The manager creates two roles and assigns both to staff X; X's navigation shows the union.
   - Self-assignment controls are absent on one's own staff page, and the server action is denied if forged.
   - The edit form is read-only for a role you hold.
@@ -679,14 +679,14 @@ Protected manager authority stays platform-only.
 
 ### Implementation for User Story 4
 
-- [ ] T141 [US4] Create migration `supabase/migrations/<ts>_rbac_rpcs.sql`:
+- [X] T141 [US4] Create migration `supabase/migrations/<ts>_rbac_rpcs.sql`:
   - Uses `private.rbac_lock`, `private.actor_can_grant` and `private.actor_can_grant_role` from Foundational (T034); do not redefine them.
   - `public.create_role(p_name, p_description, p_grants jsonb)`: requires `roles.create` or manager, plus the ceiling.
   - `public.update_role(p_role_id, p_name, p_description, p_grants jsonb)`: requires `roles.update` or manager. After `rbac_lock`, it denies when the actor is assigned to the role (CL-027) and writes a security event on that denial. It applies the ceiling to both added and removed grants and allows renaming archived roles.
   - `public.archive_role(p_role_id)`: requires `roles.archive` or manager. After `rbac_lock`, it requires zero `staff_roles` rows, including disabled staff (CL-028, CL-029).
   - `public.restore_role(p_role_id)`: requires a manager or `roles.restore`, plus `actor_can_grant_role`. It fails with `role_name_conflict` if the active name is taken, and restores no memberships (CL-030, CL-031).
   - Every outcome, including denials, is audited under the `roles` category.
-- [ ] T142 [US4] Create migration `supabase/migrations/<ts>_staff_admin_rpcs.sql`:
+- [X] T142 [US4] Create migration `supabase/migrations/<ts>_staff_admin_rpcs.sql`:
   - `public.set_staff_roles(p_staff_id, p_add uuid[], p_remove uuid[])`. It requires `staff.roles.assign` or manager authority. After `rbac_lock`, it denies when `p_staff_id = current_staff().id` and writes a security event (CL-044). The target must be in the same tenant; added roles must be active; every added and removed role must pass `actor_can_grant_role`. Each change is audited.
   - `public.disable_staff(p_staff_id)`: requires `staff.disable` or manager; not self; refuses the last active manager of an active tenant (locks the tenant row); sets `enabled=false`; calls `revoke_sessions('disabled')`; audited.
   - `public.enable_staff(p_staff_id)`: requires `staff.enable` or manager; audited.
@@ -694,24 +694,31 @@ Protected manager authority stays platform-only.
   - `public.get_staff(p_staff_id)`.
 
   No other editable staff attributes are defined by the spec; do not add any (FR-008, FR-022, FR-023)
-- [ ] T143 [US4] Create migration `supabase/migrations/<ts>_record_scope_helper.sql` with `private.has_permission_for_record(p_key text, p_tenant_id uuid, p_owner_staff_id uuid, p_assignee_ids uuid[]) returns boolean`. It returns true when the actor is in the same tenant and holds `p_key` with scope `all`, `own` with `owner = actor`, or `assigned` with the actor in the assignees. It is for future modules; there are no business tables (FR-028)
-- [ ] T144 [P] [US4] Implement `packages/authorization/src/scope.ts` (`scopeAllows`, mirroring the SQL helper) with `packages/authorization/src/scope.test.ts`
-- [ ] T145 [US4] Regenerate `packages/db/src/types.gen.ts` after T141–T143
-- [ ] T146 [US4] Implement the staff directory `apps/portal/src/app/(app)/settings/staff/page.tsx` (`list_staff`, link to pending invitations from T111, manager badge read-only) and staff details `apps/portal/src/app/(app)/settings/staff/[staffId]/page.tsx`:
+- [X] T143 [US4] Create migration `supabase/migrations/<ts>_record_scope_helper.sql` with `private.has_permission_for_record(p_key text, p_tenant_id uuid, p_owner_staff_id uuid, p_assignee_ids uuid[]) returns boolean`. It returns true when the actor is in the same tenant and holds `p_key` with scope `all`, `own` with `owner = actor`, or `assigned` with the actor in the assignees. It is for future modules; there are no business tables (FR-028)
+- [X] T144 [P] [US4] Implement `packages/authorization/src/scope.ts` (`scopeAllows`, mirroring the SQL helper) with `packages/authorization/src/scope.test.ts`
+- [X] T145 [US4] Regenerate `packages/db/src/types.gen.ts` after T141–T143
+- [X] T146 [US4] Implement the staff directory `apps/portal/src/app/(app)/settings/staff/page.tsx` (`list_staff`, link to pending invitations from T111, manager badge read-only) and staff details `apps/portal/src/app/(app)/settings/staff/[staffId]/page.tsx`:
   - The role assignment editor, with only grantable active roles; hidden for one's own record and still denied server-side.
   - Disable/enable via `AlertDialog`.
   - The reset-password entry point from T120.
   - No email edit and no manager grant controls.
 
   Add `apps/portal/src/features/staff/actions.ts` (`setStaffRoles`, `disableStaff`, `enableStaff`) (FR-008, CL-044)
-- [ ] T147 [US4] Implement roles UI in `apps/portal/src/app/(app)/settings/roles/` and `apps/portal/src/features/roles/actions.ts`:
+- [X] T147 [US4] Implement roles UI in `apps/portal/src/app/(app)/settings/roles/` and `apps/portal/src/features/roles/actions.ts`:
   - `apps/portal/src/app/(app)/settings/roles/page.tsx`: Active and Archived tabs.
   - `apps/portal/src/app/(app)/settings/roles/new/page.tsx`.
   - `apps/portal/src/app/(app)/settings/roles/[roleId]/page.tsx`: a permission picker limited to grantable catalog keys within the ceiling, a scope selector (All/Own/Assigned) where the catalog supports it, and an audit-category selector for `audit_logs.view`. The form is read-only with an explanation when the actor holds the role. Archive and Restore buttons show error mapping for `role_assigned`, `role_name_conflict` and `forbidden`.
 
   Add `apps/portal/src/features/roles/actions.ts` (FR-023, FR-026, FR-027)
-- [ ] T148 [P] [US4] Add AR/EN strings for staff, roles, permissions (per catalog key), scopes and errors to `packages/i18n/src/dictionaries/{ar,en}.ts`
-- [ ] T149 [US4] Run `supabase/tests/040_roles.test.sql`–`042_record_scope.test.sql`, `tests/security/role-races.test.ts`, `tests/security/privilege-escalation.test.ts` and `tests/e2e/us4-staff-roles.spec.ts` until T135–T140 pass
+- [X] T148 [P] [US4] Add AR/EN strings for staff, roles, permissions (per catalog key), scopes and errors to `packages/i18n/src/dictionaries/{ar,en}.ts`
+- [X] T149 [US4] Run `supabase/tests/040_roles.test.sql`–`042_record_scope.test.sql`, `tests/security/role-races.test.ts`, `tests/security/privilege-escalation.test.ts` and `tests/e2e/us4-staff-roles.spec.ts` until T135–T140 pass
+
+**Implementation notes (Phase 6)**:
+- Role and staff RPCs return `{ok:false,error}` for audited business denials (ceiling, self-edit, assigned role, name conflict, self-membership, last manager) because a raised error would roll the audit/security event back. Missing authority still raises `42501`.
+- `staff_roles_guard` now share-locks the role row and `archive_role` locks it `FOR UPDATE`, so archive can never race an assignment (including invitation redemption).
+- A delegate cannot disable a manager (`manager_protected`); a manager can, while another active manager remains.
+- `list_grantable_roles` also serves `staff.roles.assign` (migration 033) so the staff role editor needs no `roles.view`.
+- Role screens use the four plain switches (`packages/authorization/src/role-switches.ts`).
 
 **Checkpoint**: The RBAC foundation is centrally enforced in the database and server, and is ready for future business modules.
 
