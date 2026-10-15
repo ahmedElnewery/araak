@@ -12,7 +12,7 @@ type Props = {
 export function LanguageSelect({ value, onChange, label }: Props) {
   return (
     <Select value={value} onValueChange={(v) => { onChange(v as "ar" | "en"); }}>
-      <SelectTrigger aria-label={label} className="w-32">
+      <SelectTrigger aria-label={label} className="@lg:w-32">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

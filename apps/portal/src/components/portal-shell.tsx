@@ -26,13 +26,15 @@ type Props = {
 const isActive = (pathname: string, href: string) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
 
 function NavList({ items, pathname, label, secondary }: { items: NavItem[]; pathname: string; label: string; secondary?: boolean }) {
+  // Only the most specific match is current: /settings/staff/invite marks "Invite staff", not "Staff" as well
+  const current = items.filter((i) => isActive(pathname, i.href)).reduce<NavItem | undefined>((best, i) => (best && best.href.length >= i.href.length ? best : i), undefined);
   return (
     <nav aria-label={label}>
       <ul className="space-y-1">
         {items.map((item) => {
           const Icon = icons[item.icon];
           // a parent with children is active on any of its sections
-          const active = item.children.length > 0 ? item.children.some((c) => isActive(pathname, c.href)) || isActive(pathname, item.href) : isActive(pathname, item.href);
+          const active = item.children.length > 0 ? item.children.some((c) => isActive(pathname, c.href)) || isActive(pathname, item.href) : item.id === current?.id;
           return (
             <li key={item.id}>
               <Link

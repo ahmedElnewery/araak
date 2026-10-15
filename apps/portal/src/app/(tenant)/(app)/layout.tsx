@@ -1,3 +1,4 @@
+import { LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { loadEffectivePermissions } from "@workspace/authorization";
 import { Button } from "@workspace/ui/components/button";
@@ -28,15 +29,21 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       shellLabels={{ skipToContent: t.common.skipToContent, openMenu: t.common.openMenu, closeMenu: t.common.closeMenu }}
       header={
         <>
-          <LtrText className="text-sm text-muted-foreground">{ctx.username}</LtrText>
-          <div className="flex items-center gap-2">
+          {/* A narrow header (phones, or tablets with both sidebars) gets the design reference's compact form: no username, icon-only theme and sign-out */}
+          <LtrText className="hidden min-w-0 truncate text-sm text-muted-foreground @lg:block">{ctx.username}</LtrText>
+          <div className="ms-auto flex items-center gap-2">
             <HeaderControls
               locale={locale}
               theme={theme}
               labels={{ language: t.common.language, theme: t.common.theme, themeSystem: t.common.themeSystem, themeLight: t.common.themeLight, themeDark: t.common.themeDark }}
             />
             <form action={signOutAction}>
-              <Button type="submit" variant="outline">{t.portal.nav.signOut}</Button>
+              <Button type="submit" variant="outline" className="@max-lg:px-2.5">
+                <span aria-hidden="true" className="@lg:hidden">
+                  <LogOut className="size-4 rtl:-scale-x-100" />
+                </span>
+                <span className="@max-lg:sr-only">{t.portal.nav.signOut}</span>
+              </Button>
             </form>
           </div>
         </>
