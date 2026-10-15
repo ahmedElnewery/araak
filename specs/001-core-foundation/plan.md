@@ -44,7 +44,7 @@ Build the foundation for a white-label, multi-tenant charity management portal. 
 | XI/XII: controlled scope | Administrative foundation only; no invented domain dashboards or fields | Scope inspection |
 | XIII/XIV: operations | Separate Supabase projects; migrations, 30-day daily DB+file backups, initial/quarterly isolated restore tests | Go-live hard gate |
 
-**Specification alignment:** Corrected the former v1.0.0 references and obsolete email-reuse wording in spec.md (in-scope statement, FR-010, assumptions) to match Constitution v2.0.1 and FR-013/CL-048. These documentation edits do NOT constitute owner sign-off. The requirements checklist still lacks owner approval and G-02/G-03 implementation and operational details remain incomplete.
+**Specification alignment (resolved 2026-10-15):** Corrected the former v1.0.0 references and obsolete email-reuse wording in spec.md (in-scope statement, FR-010, assumptions) to match Constitution v2.0.1 and FR-013/CL-048, and the project owner then approved the revised spec. G-02/G-03 implementation and operational details remain incomplete; this plan does not mark them approved.
 
 ## Project Structure
 
@@ -136,7 +136,7 @@ S0–S1 can start after baseline review, but S2/S3/S4/S7 cannot be treated as se
 
 ## Open decisions / blockers (owner or feasibility approval required)
 
-- **SPEC-OWNER:** Global staff-email uniqueness conflicts in spec.md were corrected to Constitution v2.0.1; project-owner approval of the revised spec/checklist is still required before implementation.
+- **SPEC-OWNER (resolved 2026-10-15):** Global staff-email uniqueness conflicts in spec.md were corrected to Constitution v2.0.1, and the project owner signed off the revised spec.
 - **AUTH-PROOF:** Determine provider-compatible mechanism for per-session refresh revocation (not just application denial), SSR cookie/security model, account verification, email reservation failure recovery, anti-abuse/IP quotas and delivery provider.
 - **RBAC-APPROVAL:** Approve exhaustive foundation permission/action catalog and delegate grant-ceiling semantics; decide audit category-to-grant mapping.
 - **BRANDING:** Owner approves precise accessible palette, logo mime/size/dimension constraints and safe public-display delivery.
