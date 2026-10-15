@@ -139,7 +139,7 @@ S0–S1 can start after baseline review, but S2/S3/S4/S7 cannot be treated as se
 - **SPEC-OWNER (resolved 2026-10-15):** Global staff-email uniqueness conflicts in spec.md were corrected to Constitution v2.0.1, and the project owner signed off the revised spec.
 - **AUTH-PROOF:** Determine provider-compatible mechanism for per-session refresh revocation (not just application denial), SSR cookie/security model, account verification, email reservation failure recovery, anti-abuse/IP quotas and delivery provider.
 - **RBAC-APPROVAL:** Approve exhaustive foundation permission/action catalog and delegate grant-ceiling semantics; decide audit category-to-grant mapping.
-- **BRANDING:** Owner approves precise accessible palette, logo mime/size/dimension constraints and safe public-display delivery.
+- **BRANDING:** Owner approves the final accessible palette (basis, per-theme accent and Cairo/Inter fonts decided 2026-10-15; see docs/design-references/README.md), logo mime/size/dimension constraints and safe public-display delivery.
 - **OPERATIONS:** Choose portal/admin hostnames and DNS/TLS, compute/hosting, secrets/mail arrangements, backup method including Storage bytes, exact RPO/RTO, disaster runbook and responsible operators. Verify purchased Supabase capability.
 - **NON-ADMIN RETENTION:** Specify other event categories and lawful hold/retention before emitting those event types.
 - **POLICY COLLISION:** Decide whether platform-admin and tenant-staff emails may coincide, without violating global tenant-staff uniqueness or separate privilege boundaries.

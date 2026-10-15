@@ -78,9 +78,9 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
   - **Open questions to flag**: last-manager rule for suspended tenants, and platform-initiated staff reset mirroring CL-015.
 
   Mark the document "PENDING OWNER APPROVAL" (FR-027, CL-030, CL-032)
-- [ ] T022 [P] GATE-BRAND: Draft `docs/decisions/branding.md` for owner approval:
-  - A fixed light/dark palette and focus tokens that meet WCAG 2.2 AA contrast.
-  - An Arabic-capable font stack.
+- [ ] T022 [P] GATE-BRAND: Draft `docs/decisions/branding.md` for owner approval, starting from `docs/design-references/README.md`:
+  - The fixed light/dark palette from that README, including its contrast fixes, the new `--on-accent` and `--input-border` tokens, and focus tokens. All must meet WCAG 2.2 AA. The per-theme accent (green in Dark, teal in Light) is an owner decision (2026-10-15).
+  - Fonts: Cairo for Arabic and Inter for English/Latin (owner decision 2026-10-15), self-hosted via `next/font/google`.
   - Organization display-name constraints.
   - Logo MIME allowlist (proposal: PNG/JPEG/WebP; SVG excluded for script risk), maximum bytes and pixel dimensions.
   - Delivery through a portal route from a private bucket.
@@ -219,16 +219,16 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
   - `src/resolve-locale.ts`: stored user preference → `locale` cookie → `'ar'`.
   - `src/format.ts`: centralized `Intl` date/number formatting with an explicit locale, no currency inference (Constitution VIII).
 - [ ] T063 [P] Write `packages/i18n/src/dictionaries.test.ts`: AR and EN key sets are identical with no empty values (FR-038)
-- [ ] T064 [P] Implement design tokens in `packages/ui/src/styles/globals.css`. Tailwind v4 `@theme inline` CSS variables hold the fixed palette (light under `:root`, dark under `.dark`), typography, radii, spacing and focus-ring tokens, and `prefers-reduced-motion` rules. Use provisional values from `docs/decisions/branding.md`. Add no tenant overrides ⛔ GATE-BRAND (final values) (FR-037, Constitution VII)
+- [ ] T064 [P] Implement design tokens in `packages/ui/src/styles/globals.css`. Tailwind v4 `@theme inline` CSS variables hold the fixed palette (light under `:root`, dark under `.dark`), typography, radii, spacing and focus-ring tokens, and `prefers-reduced-motion` rules. Use the palette in `docs/design-references/README.md` (via `docs/decisions/branding.md`), with `--font-arabic` (Cairo) and `--font-latin` (Inter) font-family tokens; Arabic text uses Cairo first and Latin text uses Inter first. Add no tenant overrides ⛔ GATE-BRAND (final values) (FR-037, Constitution VII)
 - [ ] T065 [P] Add shadcn primitives into `packages/ui/src/components/` via the monorepo-aware CLI: button, input, label, form, dialog, alert-dialog, table, select, checkbox, dropdown-menu, sonner, sidebar, sheet, badge, card, separator, skeleton, tooltip, tabs, pagination. Convert any physical direction utilities (`ml/mr/pl/pr/left/right`) to logical ones (`ms/me/ps/pe/start/end`) for RTL (FR-041, FR-042)
 - [ ] T066 [P] Create presentational components in `packages/ui/src/components/`:
   - `packages/ui/src/components/tenant-identity.tsx`: name plus optional `logoSrc`, with a neutral accessible icon fallback and alt text.
-  - `packages/ui/src/components/app-shell.tsx`: primary sidebar, optional secondary sidebar slot, header slot.
+  - `packages/ui/src/components/app-shell.tsx`: primary sidebar, optional secondary sidebar slot (rendered only when a module has subsections), header slot with title/breadcrumb, and an off-canvas drawer on mobile. The general idea follows the non-binding `docs/design-references/README.md` "Shell idea"; it adds no business modules.
   - `packages/ui/src/components/ltr-text.tsx`: `<bdi dir="ltr">` for usernames/emails/IDs.
   - `packages/ui/src/components/theme-select.tsx` and `language-select.tsx`: controlled, with no persistence logic.
 
   These components contain no Supabase or authorization code (FR-035, FR-040, Constitution VII)
-- [ ] T067 Implement root layouts `apps/portal/src/app/layout.tsx` and `apps/admin/src/app/layout.tsx`. They set `<html lang dir>` from `resolveLocale()`, import `@workspace/ui/styles/globals.css`, load the Arabic-capable font with `next/font`, wrap content in `next-themes` `ThemeProvider` (`attribute="class"`, `defaultTheme="system"`, `enableSystem`), and use neutral metadata with no provider name or default icons (FR-038, FR-039, Constitution IX)
+- [ ] T067 Implement root layouts `apps/portal/src/app/layout.tsx` and `apps/admin/src/app/layout.tsx`. They set `<html lang dir>` from `resolveLocale()`, import `@workspace/ui/styles/globals.css`, load Cairo (subsets `arabic`, `latin`) and Inter (subset `latin`) with `next/font/google` as CSS variables bound to the `--font-arabic`/`--font-latin` tokens, wrap content in `next-themes` `ThemeProvider` (`attribute="class"`, `defaultTheme="system"`, `enableSystem`), and use neutral metadata with no provider name or default icons (FR-038, FR-039, Constitution IX)
 - [ ] T068 Implement `apps/portal/src/middleware.ts`. Use `classifyHost` and return a neutral localized 404 for any non-tenant host. Run the `@supabase/ssr` cookie refresh pattern WITHOUT touching session activity (CL-036). Set security headers (`X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, baseline CSP) (FR-004)
 - [ ] T069 [P] Implement `apps/admin/src/middleware.ts`. Accept only the exact `ADMIN_HOST` and give tenant subdomains and unknown hosts a neutral 404. Use the same cookie-refresh behaviour with the admin cookie prefix and the same security headers (FR-001, Constitution VII)
 - [ ] T070 [P] Create neutral, localized `not-found.tsx`, `error.tsx` and `loading.tsx` in `apps/portal/src/app/` and `apps/admin/src/app/`, with no provider branding and no tenant metadata on unknown hosts (Constitution IX)
@@ -918,7 +918,7 @@ Protected manager authority stays platform-only.
 - [ ] T196 [P] Write `tests/security/cross-tenant.test.ts`, a full two-tenant matrix. For every `public` table and every RPC, use a tenant-A staff JWT to attempt SELECT, INSERT, UPDATE and DELETE on tenant-B data, FK references to B ids, exports and Storage reads. Also check platform admin access to tenant-private data and the audit tables. All attempts must fail and leak nothing (SC-001, security-matrix tests 1, 8)
 - [ ] T197 [P] Write Playwright `tests/e2e/suspension-active-session.spec.ts`. A signed-in tenant-A browser session gets denied on the next navigation and server action once the platform suspends A; tenant B is unaffected; after reactivation, A signs in again under its existing roles (SC-002, US1 scenarios 4–5)
 - [ ] T198 [P] Write `tests/security/log-redaction.test.ts`. Run sign-in, invitation, recovery, reset and revocation flows with captured server logs and assert that no tokens, passwords, JWTs, service keys or cookie values appear (FR-017, Constitution XIV-7)
-- [ ] T199 [P] Write `scripts/check-scope.mjs` (wired into `pnpm lint`). It fails if migrations or code introduce tables or routes for beneficiaries, donors, donations, volunteers, accounts, services, subscriptions, plans, invoices or payments; a tenant color picker; custom domains; MFA/2FA; tenant deletion; tenant switching; dashboards/KPIs; or global search. Add the manual checklist `docs/operations/scope-review.md` (SC-010, Constitution XI/XII)
+- [ ] T199 [P] Write `scripts/check-scope.mjs` (wired into `pnpm lint`). It fails if migrations or code introduce tables or routes for beneficiaries, donors, donations, volunteers, accounts, services, subscriptions, plans, invoices or payments; a tenant color picker; custom domains; MFA/2FA; tenant deletion; tenant switching; dashboards/KPIs; or global search. Exclude `docs/design-references/**`, which holds non-binding prototypes that mention future modules by name. Add the manual checklist `docs/operations/scope-review.md` (SC-010, Constitution XI/XII)
 - [ ] T200 [P] Write `scripts/check-branding.mjs`. It scans built portal HTML, metadata, manifest, email template outputs and response headers for the provider/product denylist and default framework assets, and fails on a match. Wire it into `.github/workflows/ci.yml` (FR-037, SC-008, Constitution IX)
 - [ ] T201 [P] Write the manual screen-reader checklist `tests/accessibility/manual-checklist.md` (NVDA + VoiceOver, AR and EN, all foundation screens) and record the first pass results (FR-041, SC-007)
 - [ ] T202 Run `supabase db lint` and the Supabase security/performance advisors. Add missing indexes for policy and FK columns in `supabase/migrations/<ts>_indexes_and_advisors.sql`. Record `EXPLAIN ANALYZE` for `private.request_context_ok()`, `has_permission()` and `list_tenant_audit` on a seeded dataset in `docs/operations/performance-baseline.md` (a measured baseline, not an invented SLA) (plan "Performance")
@@ -938,7 +938,7 @@ Protected manager authority stays platform-only.
 | GATE-AUTH | T018, T019, T020 + security review | T032, T049, T117, T120, T132 and acceptance of US2, US3, US1 demotion revocation (T080) |
 | GATE-RBAC | T021 + owner approval | Final seed in T031, ceiling helpers in T034, T051, T121, T141, T172, and production grants |
 | GATE-ABUSE | T020 (`docs/decisions/auth-abuse-controls.md`) + owner approval | Limit values in T112, acceptance of T113, T119 and T102 |
-| GATE-BRAND | T022 + owner approval | T064 (final values), T156, T165 |
+| GATE-BRAND | T022 + owner approval (palette basis, per-theme accent and Cairo/Inter fonts already decided 2026-10-15) | T064 (final values), T156, T165 |
 | GATE-OPS | T023 + operator/owner approval | T056 production mail adapter, T187 deploy step, T188, T189, Production launch |
 | GATE-COLLIDE | T024 + owner decision | T028 trigger, T091 acceptance rule |
 
