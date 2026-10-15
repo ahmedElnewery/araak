@@ -29,7 +29,7 @@ export type Dictionary = {
     home: string;
   };
   admin: {
-    nav: { tenants: string; admins: string; menu: string };
+    nav: { tenants: string; admins: string; menu: string; brand: string };
     common: { cancel: string; created: string; state: string; actions: string; none: string; back: string };
     auth: {
       title: string; email: string; password: string; confirmPassword: string; signIn: string; signOut: string;
@@ -42,6 +42,7 @@ export type Dictionary = {
       reactivate: string; confirmSuspend: string; confirmReactivate: string; suspendTitle: string;
       suspendBody: string; reactivateTitle: string; reactivateBody: string; invitationNotDelivered: string;
       stateSaved: string; detailsTitle: string;
+      logoTitle: string; logoHint: string; noLogo: string; uploadLogo: string; removeLogo: string; logoSaved: string;
     };
     managers: {
       title: string; active: string; pending: string; none: string; staffMember: string; selectStaff: string;
@@ -63,14 +64,24 @@ export type Dictionary = {
       staff_not_eligible: string; already_manager: string; not_a_manager: string; capabilities_invalid: string;
       capabilities_exceed_inviter: string; tenant_not_found: string; tenant_unavailable: string;
       password_policy: string; password_mismatch: string; not_authorized: string; confirmation_required: string;
-      recovery_rate_limited: string; generic: string;
+      recovery_rate_limited: string; name_invalid: string; logo_type: string; logo_mismatch: string;
+      logo_too_large: string; logo_corrupt: string; logo_dimensions: string; logo_invalid: string; generic: string;
     };
   };
   username: {
     label: string; hint: string; errorLength: string; errorCharset: string; errorPlacement: string;
   };
   portal: {
-    nav: { menu: string; home: string; inviteStaff: string; invitations: string; account: string; signOut: string };
+    nav: {
+      menu: string; home: string; inviteStaff: string; invitations: string; account: string; signOut: string;
+      settings: string; staff: string; roles: string; branding: string; auditLog: string; securityLogs: string;
+      settingsMenu: string;
+    };
+    home: { welcome: string; intro: string };
+    branding: {
+      title: string; intro: string; nameLabel: string; logoLabel: string; logoHint: string; currentLogo: string;
+      noLogo: string; remove: string; save: string; saved: string; removeLogo: string;
+    };
     auth: {
       title: string; identifier: string; identifierHint: string; password: string; signIn: string;
       invalidCredentials: string; forgotPassword: string;
@@ -102,6 +113,8 @@ export type Dictionary = {
       invitation_not_found: string; invitation_not_pending: string; confirmation_required: string;
       recovery_rate_limited: string; cannot_reset_self: string; staff_not_found: string; staff_not_eligible: string;
       password_policy: string; password_mismatch: string; not_authorized: string; invalid_credentials: string;
+      name_required: string; name_invalid: string; logo_type: string; logo_mismatch: string; logo_too_large: string;
+      logo_corrupt: string; logo_dimensions: string; logo_invalid: string;
       generic: string;
     };
   };

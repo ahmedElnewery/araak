@@ -20,6 +20,7 @@
     "db:check-env": "node scripts/assert-dev-environment.mjs"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "9.39.5",
     "@next/eslint-plugin-next": "16.4.1",
     "@playwright/test": "1.64.1",
@@ -29,6 +30,7 @@
     "eslint-plugin-jsx-a11y": "6.10.2",
     "next": "16.4.1",
     "prettier": "3.9.10",
+    "sharp": "0.35.5",
     "turbo": "2.11.8",
     "typescript": "5.9.3",
     "typescript-eslint": "8.71.2",
