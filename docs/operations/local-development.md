@@ -25,7 +25,7 @@ Invitation and recovery emails come from the Development project's configured ma
 
 ## Safety rules
 
-- `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_URL`, `SUPABASE_ACCESS_TOKEN` are server/test-only secrets: never `NEXT_PUBLIC_`, never committed, never logged.
+- `SUPABASE_SECRET_KEY`, `SUPABASE_DB_URL`, `SUPABASE_ACCESS_TOKEN` are server/test-only secrets: never `NEXT_PUBLIC_`, never committed, never logged.
 - Destructive tests and DB pushes run through `scripts/assert-dev-environment.mjs`, which requires `SUPABASE_ENV=development` and a project ref that is not Production.
 - Production migrations and data changes need explicit owner approval and are never run from tests or from this workflow.
 - Tests create their own isolated tenants (two disjoint tenants minimum) and clean up what they create.

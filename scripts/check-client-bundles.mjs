@@ -24,7 +24,7 @@ function isServiceRoleJwt(token) {
 }
 
 const jwtRe = /eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g;
-const needles = ["SUPABASE_SERVICE_ROLE_KEY", "@workspace/auth/server", "@workspace/config/server"];
+const needles = ["SUPABASE_SECRET_KEY", "@workspace/auth/server", "@workspace/config/server"];
 
 for (const app of ["portal", "admin"]) {
   const dir = join(root, "apps", app, ".next/static");
@@ -32,6 +32,7 @@ for (const app of ["portal", "admin"]) {
     const text = readFileSync(f, "utf8");
     const rel = f.replace(root, "");
     for (const n of needles) if (text.includes(n)) failures.push(`${rel}: contains ${n}`);
+    if (/sb_secret_[A-Za-z0-9_-]{10,}/.test(text)) failures.push(`${rel}: contains a Supabase secret key`);
     for (const m of text.matchAll(jwtRe)) {
       if (isServiceRoleJwt(m[0])) failures.push(`${rel}: contains a service_role JWT`);
     }

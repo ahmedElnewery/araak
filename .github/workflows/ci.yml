@@ -26,8 +26,8 @@ jobs:
       - run: pnpm build
       - run: node scripts/check-client-bundles.mjs
   db-security:
-    # Runs against the Supabase Cloud DEVELOPMENT project only. Skipped for forks (no secrets).
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # Runs against the Supabase Cloud DEVELOPMENT project only. Opt-in: set repo variable RUN_DB_SECURITY=true after adding the SUPABASE_DEV_* secrets.
+    if: vars.RUN_DB_SECURITY == 'true' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     concurrency:
       group: supabase-dev-project
@@ -39,7 +39,7 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_DEV_URL }}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_DEV_PUBLISHABLE_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_DEV_SERVICE_ROLE_KEY }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_DEV_SECRET_KEY }}
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DEV_DB_URL }}
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
