@@ -11,7 +11,9 @@ Development uses a dedicated **Supabase Cloud Development project**. Docker and 
 | Tenant portal | `http://<subdomain>.portal.localhost:3000` (e.g. `tenant-a.portal.localhost:3000`) |
 | Platform admin | `http://admin.localhost:3001` |
 
-Invitation and recovery emails come from the Development project's configured mail provider (the built-in sender is rate-limited; configure custom SMTP for heavy testing).
+Invitation emails sent by the apps go through `SMTP_URL`. Start a local mail catcher with `docker compose up -d mailpit`, set `SMTP_URL=smtp://127.0.0.1:1025` in `apps/admin/.env.local`, and read the mail at http://localhost:8025. Nothing is delivered to real addresses.
+
+Auth emails sent by Supabase itself (recovery, etc.) come from the Development project's configured mail provider (the built-in sender is rate-limited; configure custom SMTP for heavy testing).
 
 ## Setup
 
