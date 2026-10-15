@@ -12,7 +12,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     env:
-      APP_ENV: ci
+      APP_ENV: test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

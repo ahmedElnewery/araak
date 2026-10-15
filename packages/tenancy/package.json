@@ -4,11 +4,23 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts"
   },
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@workspace/auth": "workspace:*",
+    "@workspace/config": "workspace:*",
+    "@workspace/db": "workspace:*",
+    "next": "16.4.1",
+    "react": "19.3.1",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0"
   }
 }

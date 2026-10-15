@@ -308,6 +308,151 @@ export type Database = {
           },
         ];
       };
+      staff_invitation_links: {
+        Row: {
+          consumed_at: string | null;
+          expires_at: string;
+          id: string;
+          invitation_id: string;
+          issued_at: string;
+          kind: string;
+          superseded_at: string | null;
+          tenant_id: string;
+          token_hash: string;
+        };
+        Insert: {
+          consumed_at?: string | null;
+          expires_at: string;
+          id?: string;
+          invitation_id: string;
+          issued_at?: string;
+          kind: string;
+          superseded_at?: string | null;
+          tenant_id: string;
+          token_hash: string;
+        };
+        Update: {
+          consumed_at?: string | null;
+          expires_at?: string;
+          id?: string;
+          invitation_id?: string;
+          issued_at?: string;
+          kind?: string;
+          superseded_at?: string | null;
+          tenant_id?: string;
+          token_hash?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_invitation_links_inv_fk";
+            columns: ["tenant_id", "invitation_id"];
+            isOneToOne: false;
+            referencedRelation: "staff_invitations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      staff_invitation_roles: {
+        Row: {
+          invitation_id: string;
+          role_id: string;
+          tenant_id: string;
+        };
+        Insert: {
+          invitation_id: string;
+          role_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          invitation_id?: string;
+          role_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_invitation_roles_inv_fk";
+            columns: ["tenant_id", "invitation_id"];
+            isOneToOne: false;
+            referencedRelation: "staff_invitations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "staff_invitation_roles_role_fk";
+            columns: ["tenant_id", "role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      staff_invitations: {
+        Row: {
+          created_at: string;
+          grants_manager: boolean;
+          id: string;
+          invited_by_platform_admin_id: string | null;
+          invited_by_staff_id: string | null;
+          recipient_email: string;
+          recipient_email_normalized: string;
+          redeemed_staff_id: string | null;
+          state: string;
+          tenant_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          grants_manager?: boolean;
+          id?: string;
+          invited_by_platform_admin_id?: string | null;
+          invited_by_staff_id?: string | null;
+          recipient_email: string;
+          recipient_email_normalized: string;
+          redeemed_staff_id?: string | null;
+          state?: string;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          grants_manager?: boolean;
+          id?: string;
+          invited_by_platform_admin_id?: string | null;
+          invited_by_staff_id?: string | null;
+          recipient_email?: string;
+          recipient_email_normalized?: string;
+          redeemed_staff_id?: string | null;
+          state?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_invitations_invited_by_platform_admin_id_fkey";
+            columns: ["invited_by_platform_admin_id"];
+            isOneToOne: false;
+            referencedRelation: "platform_admins";
+            referencedColumns: ["auth_user_id"];
+          },
+          {
+            foreignKeyName: "staff_invitations_inviter_fk";
+            columns: ["tenant_id", "invited_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "tenant_staff";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "staff_invitations_redeemed_fk";
+            columns: ["tenant_id", "redeemed_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "tenant_staff";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "staff_invitations_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       staff_roles: {
         Row: {
           assigned_at: string;
@@ -590,7 +735,62 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      my_effective_permissions: { Args: never; Returns: Json };
+      svc_load_platform_context: {
+        Args: { p_auth_user_id: string; p_session_id: string };
+        Returns: Json;
+      };
+      svc_load_staff_context: {
+        Args: { p_auth_user_id: string; p_session_id: string };
+        Returns: Json;
+      };
+      svc_revoke_sessions: {
+        Args: {
+          p_reason: Database["public"]["Enums"]["session_revoked_reason"];
+          p_session_ids: string[];
+        };
+        Returns: number;
+      };
+      svc_revoke_user_sessions: {
+        Args: {
+          p_auth_user_id: string;
+          p_except_session_id: string;
+          p_reason: Database["public"]["Enums"]["session_revoked_reason"];
+        };
+        Returns: number;
+      };
+      svc_write_platform_audit: {
+        Args: {
+          p_actor_operator_ref: string;
+          p_actor_platform_admin_id: string;
+          p_event: string;
+          p_metadata?: Json;
+        };
+        Returns: number;
+      };
+      svc_write_security_event: {
+        Args: {
+          p_actor_staff_id: string;
+          p_event: string;
+          p_metadata?: Json;
+          p_tenant_id: string;
+        };
+        Returns: number;
+      };
+      svc_write_tenant_audit: {
+        Args: {
+          p_actor_kind: string;
+          p_actor_platform_admin_id: string;
+          p_actor_staff_id: string;
+          p_category: string;
+          p_event: string;
+          p_metadata?: Json;
+          p_resource_id?: string;
+          p_resource_type?: string;
+          p_tenant_id: string;
+        };
+        Returns: number;
+      };
     };
     Enums: {
       record_scope: "all" | "own" | "assigned";

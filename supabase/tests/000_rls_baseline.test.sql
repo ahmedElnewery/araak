@@ -56,3 +56,11 @@ select ok(not exists (select 1 from storage.buckets where id in ('tenant-logos',
           'tenant storage buckets are private');
 select is((select count(*)::int from pg_policies where schemaname = 'storage' and tablename = 'objects' and 'anon' = any (roles)),
           0, 'no storage.objects policy grants anon access');
+
+select is((select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+           where n.nspname = 'public' and p.prokind = 'f' and has_function_privilege('authenticated', p.oid, 'EXECUTE')
+             and p.proname <> all (array['my_effective_permissions'])),
+          null::text[], 'public functions executable by authenticated are exactly the allowlisted RPCs');
+select is((select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+           where n.nspname = 'public' and p.proname like 'svc\_%' and has_function_privilege('service_role', p.oid, 'EXECUTE') = false),
+          null::text[], 'service wrappers are executable by service_role');

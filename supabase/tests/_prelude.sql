@@ -51,6 +51,26 @@ begin
   execute 'set local role authenticated';
 end $$;
 
+-- claims only (no role switch): for SECURITY DEFINER functions that read auth.uid()/auth.jwt() while the test runs as owner
+create function tests.claims(p_user uuid, p_session uuid default null) returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims',
+    jsonb_build_object('sub', p_user, 'role', 'authenticated', 'session_id', p_session)::text, true);
+  perform set_config('request.jwt.claim.sub', p_user::text, true);
+end $$;
+
+create function tests.seen_priv(p_role text, p_sql text) returns bigint language plpgsql as $$
+declare n bigint;
+begin
+  execute format('set local role %I', p_role);
+  begin
+    execute format('select count(*) from (%s) q', p_sql) into n;
+  exception when insufficient_privilege then n := -1;
+  end;
+  reset role;
+  return n;
+end $$;
+
 create function tests.act_anon() returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims', '{"role":"anon"}', true);
