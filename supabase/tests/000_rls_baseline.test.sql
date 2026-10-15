@@ -64,7 +64,7 @@ select is((select array_agg(p.proname::text order by p.proname) from pg_proc p j
                'platform_get_tenant','platform_get_tenant_managers','platform_grant_tenant_manager',
                'platform_invite_tenant_manager','platform_revoke_tenant_manager','platform_invite_admin',
                'invite_staff','platform_invite_staff','resend_staff_invitation','platform_resend_staff_invitation',
-               'list_pending_invitations','list_grantable_roles','change_my_username','request_manager_assisted_reset','platform_request_staff_reset',
+               'list_pending_invitations','list_grantable_roles','change_my_username','list_my_sessions','revoke_my_session','revoke_my_other_sessions','touch_session_activity','request_manager_assisted_reset','platform_request_staff_reset',
                'create_role','update_role','archive_role','restore_role','list_roles',
                'set_staff_roles','disable_staff','enable_staff','list_staff','get_staff',
                'get_my_preferences','set_my_preferences','update_tenant_branding','platform_update_tenant_logo'])),

@@ -84,7 +84,7 @@ export type Dictionary = {
     };
     auth: {
       title: string; identifier: string; identifierHint: string; password: string; signIn: string;
-      invalidCredentials: string; forgotPassword: string;
+      invalidCredentials: string; forgotPassword: string; sessionExpired: string;
     };
     invite: {
       acceptTitle: string; acceptIntro: string; email: string; password: string; confirmPassword: string;
@@ -119,7 +119,18 @@ export type Dictionary = {
     };
     account: {
       title: string; username: string; changeUsername: string; save: string; saved: string; email: string;
-      emailImmutable: string;
+      emailImmutable: string; sessionsLink: string; passwordLink: string;
+    };
+    sessions: {
+      title: string; intro: string; empty: string; colDevice: string; colBrowser: string; colSignedIn: string;
+      colActivity: string; current: string; unknownDevice: string; unknownBrowser: string; logout: string;
+      logoutAll: string; confirmTitle: string; confirmBody: string; confirm: string; cancel: string;
+      confirmAllTitle: string; confirmAllBody: string; confirmAll: string; revoked: string; allRevoked: string;
+      deviceTypes: Record<string, string>;
+    };
+    password: {
+      title: string; intro: string; current: string; new: string; confirm: string; submit: string; done: string;
+      wrongCurrent: string; signInAgain: string;
     };
     errors: {
       email_invalid: string; email_unavailable: string; role_not_grantable: string; username_invalid: string;
@@ -132,7 +143,7 @@ export type Dictionary = {
       role_name_conflict: string; role_name_invalid: string; role_assigned: string; role_self_edit: string;
       role_not_found: string; privilege_escalation: string; grants_invalid: string; cannot_change_own_roles: string;
       cannot_disable_self: string; manager_protected: string; last_active_manager: string; roles_invalid: string;
-      generic: string;
+      session_not_found: string; generic: string;
     };
   };
 };

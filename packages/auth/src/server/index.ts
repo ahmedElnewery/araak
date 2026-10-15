@@ -3,6 +3,8 @@ import "server-only";
 export { AuthError, type AuthErrorCode } from "../errors";
 export { createSupabaseServerClient, type AppName, type ServerClient } from "./supabase";
 export { getSupabaseAdmin, type AdminClient } from "./supabase-admin";
+export { recordMeaningfulActivity, isMeaningfulRequest, type ActivityRequest } from "./activity";
+export { changeOwnPassword, type ChangePasswordResult } from "./password";
 export { registerSession, revokeSessions, describeDevice, type SessionOwner, type RevokeFilter, type RevokeReason } from "./session-registry";
 export { getTenantStaffContext, getPlatformAdminContext, type TenantStaffContext, type PlatformAdminContext, type HostTenant } from "./context";
 export { recordTenantAudit, recordSecurityEvent, recordPlatformAudit } from "./audit";

@@ -14,7 +14,7 @@ import { requireTenant } from "@/lib/tenant-context";
 
 // The authenticated shell: tenant identity, permission-filtered navigation, language/theme controls, sign-out.
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const ctx = await requireStaff();
+  const ctx = await requireStaff({ touch: false }); // the page's own guard renews the session once authorized
   const tenant = await requireTenant();
   const { locale, theme, dir, t } = await getI18n();
   const perms = await loadEffectivePermissions(ctx);
