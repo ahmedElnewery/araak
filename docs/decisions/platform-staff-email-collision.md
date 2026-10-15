@@ -1,6 +1,6 @@
 # Decision: Platform admin vs tenant staff email collision
 
-**Status: PENDING OWNER DECISION** (⛔ GATE-COLLIDE). The proposed default below is enforced in the database by default until the owner decides otherwise (T028).
+**Status: APPROVED by the project owner (2026-10-15)** (⛔ GATE-COLLIDE). The proposed default below is enforced in the database by default until the owner decides otherwise (T028).
 
 ## Problem
 Supabase Auth keeps exactly one identity per email address per project. Platform admins and tenant staff both live in `auth.users`. If the same mailbox were both a platform admin and a tenant staff member, one Auth identity (one password, one session set) would hold two roles on two different surfaces, which breaks the independence the spec requires between platform and tenant accounts and violates the global email uniqueness decision (CL-048).
@@ -19,5 +19,5 @@ An email cannot belong to both a platform admin and a tenant staff account.
 
 | | |
 | --- | --- |
-| Owner decision | ☐ Approve default ☐ Choose alternative: |
+| Owner decision | ☑ Approve default (2026-10-15) |
 | Date / name | |

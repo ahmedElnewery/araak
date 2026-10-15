@@ -1,6 +1,6 @@
 # Decision: Sign-in and recovery abuse controls
 
-**Status: PENDING OWNER APPROVAL** (⛔ GATE-ABUSE). The T102/T103 throttling implementation and any "abuse-safe" claim wait for sign-off.
+**Status: APPROVED by the project owner (2026-10-15)** (⛔ GATE-ABUSE). The T102/T103 throttling implementation and any "abuse-safe" claim wait for sign-off.
 **Traces to:** FR-012, FR-014, FR-015, CL-012, CL-015; research R-02 results (item 6: Supabase Auth limits key on the server's egress IP when sign-in is proxied, so they cannot protect individual accounts).
 
 ## Proposed limits (the numbers are proposals)
@@ -31,5 +31,5 @@ Identical to every other failure: the same HTTP status, body, localized message 
 
 | | |
 | --- | --- |
-| Owner decision | ☐ Approved ☐ Changes requested |
+| Owner decision | ☑ Approved (2026-10-15) |
 | Date / name | |

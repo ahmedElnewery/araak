@@ -1,6 +1,6 @@
 # Decision: Branding, palette, fonts and logo policy
 
-**Status: PENDING OWNER APPROVAL** (⛔ GATE-BRAND, final values). Starts from the non-binding `docs/design-references/README.md`; owner decisions of 2026-10-15 are already recorded there.
+**Status: APPROVED by the project owner (2026-10-15)** (⛔ GATE-BRAND, final values). Starts from the non-binding `docs/design-references/README.md`; owner decisions of 2026-10-15 are already recorded there.
 **Traces to:** FR-035–FR-037, Constitution IX.
 
 ## 1. Fixed platform palette (not tenant-configurable)
@@ -31,5 +31,5 @@ Required. After `btrim`, 1–80 characters, Unicode letters, digits, spaces and 
 
 | | |
 | --- | --- |
-| Owner decision | ☐ Approved ☐ Changes requested |
+| Owner decision | ☑ Approved (2026-10-15) |
 | Date / name | |

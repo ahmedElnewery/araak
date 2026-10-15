@@ -1,6 +1,6 @@
 # Decision: Permission catalog and grant ceiling
 
-**Status: PENDING OWNER APPROVAL** (⛔ GATE-RBAC). `private`/`public` RBAC migrations (T031, T034, T035) seed from this draft; they must not be called "secure/complete" until the owner signs off.
+**Status: APPROVED by the project owner (2026-10-15)** (⛔ GATE-RBAC). `private`/`public` RBAC migrations (T031, T034, T035) seed from this draft; they must not be called "secure/complete" until the owner signs off.
 **Traces to:** FR-024–FR-027, CL-029, CL-030, CL-032, CL-035; research R-04.
 
 ## 1. Tenant-grantable permission keys
@@ -56,5 +56,5 @@ Further invariants: nobody changes their own role membership; a role editor may 
 
 | | |
 | --- | --- |
-| Owner decision | ☐ Approved ☐ Changes requested |
+| Owner decision | ☑ Approved (2026-10-15) |
 | Date / name | |

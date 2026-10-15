@@ -75,9 +75,9 @@ Method: `tests/proofs/session-revocation.proof.test.ts`, 9 tests, all passed (36
 
 ## Research gates before /speckit.tasks authorizes security-sensitive work
 Stop rule: if a proof fails, pause the dependent tasks listed in the tasks.md Gate Register and request an approved alternative before continuing.
-- [ ] Project owner approves corrected v2-aligned spec and permission catalog. Drafts: spec amendment (T017), [permission-catalog.md](../../docs/decisions/permission-catalog.md) (T021, PENDING OWNER APPROVAL), [platform-staff-email-collision.md](../../docs/decisions/platform-staff-email-collision.md) (T024, pending owner decision).
+- [ ] Project owner approves corrected v2-aligned spec and permission catalog. Drafts: spec amendment (T017), [permission-catalog.md](../../docs/decisions/permission-catalog.md) (T021, approved 2026-10-15), [platform-staff-email-collision.md](../../docs/decisions/platform-staff-email-collision.md) (T024, approved 2026-10-15).
 - [x] Identity email reservation/race and Supabase Auth mapping proof documented: R-01 "Proof results" (T019).
 - [x] Per-device refresh revocation and authorized operation denial proven: R-03 "Proof results" (T018); JWT 300 s approved by experiment.
-- [ ] Rate-limit, email verification and reset single-use security reviewed. Proof recorded in R-02 "Proof results" (T020); [auth-abuse-controls.md](../../docs/decisions/auth-abuse-controls.md) is PENDING OWNER APPROVAL (GATE-ABUSE).
-- [ ] RLS/Storage policy and privilege-limiting proof reviewed (pending T036-T041 and the Phase 2 RLS tests). Branding: [branding.md](../../docs/decisions/branding.md) (T022, pending).
-- [ ] Host deployment and backup/restore capability verified; RPO/RTO approved: [operations.md](../../docs/decisions/operations.md) (T023, PENDING OWNER AND OPERATOR APPROVAL).
+- [ ] Rate-limit, email verification and reset single-use security reviewed. Proof recorded in R-02 "Proof results" (T020); [auth-abuse-controls.md](../../docs/decisions/auth-abuse-controls.md) was approved 2026-10-15 (GATE-ABUSE).
+- [ ] RLS/Storage policy and privilege-limiting proof reviewed (pending T036-T041 and the Phase 2 RLS tests). Branding: [branding.md](../../docs/decisions/branding.md) (T022, approved 2026-10-15).
+- [ ] Host deployment and backup/restore capability verified; RPO/RTO approved: [operations.md](../../docs/decisions/operations.md) (T023, approved 2026-10-15; Production still needs backup/RPO answers).
