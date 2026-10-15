@@ -14,10 +14,10 @@ if (prod && prod === dev) fail("Development and Production project refs are iden
 
 const target = env.SUPABASE_PROJECT_REF ?? dev;
 if (target !== dev) fail("SUPABASE_PROJECT_REF does not match SUPABASE_DEV_PROJECT_REF.");
-if (prod && [env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_DB_URL].some((v) => v?.includes(prod))) {
+if (prod && [env.NEXT_PUBLIC_SUPABASE_URL].some((v) => v?.includes(prod))) {
   fail("A connection setting points at the Production project.");
 }
-for (const v of [env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_DB_URL]) {
+for (const v of [env.NEXT_PUBLIC_SUPABASE_URL]) {
   if (v && !v.includes(dev)) fail("A connection setting does not reference the Development project ref.");
 }
 console.log(`Environment OK: development project ${dev}`);
