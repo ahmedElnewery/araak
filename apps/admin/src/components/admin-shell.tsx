@@ -14,13 +14,14 @@ type Props = {
   dir: "rtl" | "ltr";
   nav: NavItem[];
   navLabel: string;
+  brandLabel: string;
   shellLabels: { skipToContent: string; openMenu: string; closeMenu: string };
   header: ReactNode;
   children: ReactNode;
 };
 
 /** Platform navigation. Wording and assets stay inside apps/admin (Constitution IX). */
-export function AdminShell({ dir, nav, navLabel, shellLabels, header, children }: Props) {
+export function AdminShell({ dir, nav, navLabel, brandLabel, shellLabels, header, children }: Props) {
   const pathname = usePathname();
   const primaryNav = (
     <nav aria-label={navLabel}>
@@ -50,7 +51,7 @@ export function AdminShell({ dir, nav, navLabel, shellLabels, header, children }
   return (
     <AppShell
       dir={dir}
-      brand={<span className="text-sm font-semibold">Administration</span>}
+      brand={<span className="text-sm font-semibold">{brandLabel}</span>}
       primaryNav={primaryNav}
       header={<div className="flex flex-1 items-center justify-end gap-2">{header}</div>}
       labels={shellLabels}

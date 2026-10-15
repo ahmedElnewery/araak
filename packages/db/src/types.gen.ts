@@ -380,6 +380,12 @@ export type Database = {
           },
         ];
       };
+      tenant_preferences: {
+        Row: { locale: string; staff_id: string; tenant_id: string; theme_mode: string; updated_at: string };
+        Insert: { locale?: string; staff_id: string; tenant_id: string; theme_mode?: string; updated_at?: string };
+        Update: { locale?: string; staff_id?: string; tenant_id?: string; theme_mode?: string; updated_at?: string };
+        Relationships: [];
+      };
       session_registry: {
         Row: {
           auth_user_id: string;
@@ -882,9 +888,19 @@ export type Database = {
       };
       list_grantable_roles: { Args: never; Returns: Json };
       list_pending_invitations: { Args: never; Returns: Json };
+      get_my_preferences: { Args: never; Returns: Json };
       list_roles: { Args: never; Returns: Json };
       list_staff: { Args: never; Returns: Json };
       my_effective_permissions: { Args: never; Returns: Json };
+      set_my_preferences: { Args: { p_locale: string; p_theme: string }; Returns: undefined };
+      update_tenant_branding: {
+        Args: { p_display_name: string; p_logo_object_path: string; p_remove_logo: boolean };
+        Returns: Json;
+      };
+      platform_update_tenant_logo: {
+        Args: { p_logo_object_path: string; p_remove: boolean; p_tenant_id: string };
+        Returns: Json;
+      };
       platform_create_tenant: {
         Args: {
           p_display_name: string;

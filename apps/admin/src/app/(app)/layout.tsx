@@ -7,7 +7,7 @@ import { requirePlatformSession } from "@/lib/platform-guards";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const ctx = await requirePlatformSession();
-  const { locale, dir, t } = await getI18n();
+  const { locale, theme, dir, t } = await getI18n();
   // Navigation is filtered by capability; routes still enforce it server-side.
   const nav = [
     ...(ctx.capabilities.includes("tenants.manage") ? [{ href: "/tenants", label: t.admin.nav.tenants, icon: "tenants" as const }] : []),
@@ -18,11 +18,13 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       dir={dir}
       nav={nav}
       navLabel={t.admin.nav.menu}
+      brandLabel={t.admin.nav.brand}
       shellLabels={{ skipToContent: t.common.skipToContent, openMenu: t.common.openMenu, closeMenu: t.common.closeMenu }}
       header={
         <>
           <HeaderControls
             locale={locale}
+            theme={theme}
             labels={{ language: t.common.language, theme: t.common.theme, themeSystem: t.common.themeSystem, themeLight: t.common.themeLight, themeDark: t.common.themeDark }}
           />
           <SignOutButton label={t.admin.auth.signOut} />
