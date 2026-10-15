@@ -31,6 +31,7 @@ description: "Dependency-ordered implementation tasks for 001-core-foundation"
 - **Errors**: use stable error codes and neutral, localized messages. Never reveal whether an account or email exists in another tenant (FR-014).
 - **Unit tests**: Vitest, co-located as `*.test.ts`. **DB tests**: pgTAP under `supabase/tests/*.test.sql`, run with `supabase test db`. **Security/integration tests**: Vitest in `tests/security/` against local Supabase. **E2E/a11y**: Playwright in `tests/e2e/` and `tests/accessibility/`.
 - **Cloud-only execution (owner decision for this phase):** there is no Docker, local Supabase, DB URL or CLI. Migrations are hand-written under `supabase/migrations/` (timestamp names) and applied to the **Development** project only, through the Supabase Management API with an access token (the Supabase MCP is not used). DB tests are pgTAP-style SQL files in `supabase/tests/` run by `pnpm test:db` (`scripts/run-db-tests.mjs`) inside a rolled-back transaction. "Local Supabase" in later task text means the Development project; `tests/helpers/env.ts` refuses anything else. Types come from `pnpm db:types`.
+- **Simplified roles UX (owner decision 2026-10-15, docs/decisions/permission-catalog.md section 6):** the role screens (Phase 6 and any invitation role picker) show four plain switches mapped to the existing permission keys, ship exactly one preset role (Association Manager = the protected manager authority), and hide scopes, ceiling text and raw keys. No schema change.
 
 ---
 

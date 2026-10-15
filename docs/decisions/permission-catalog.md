@@ -52,6 +52,20 @@ Further invariants: nobody changes their own role membership; a role editor may 
 1. **Suspended tenants and the last-manager rule:** may a platform admin demote or replace the last manager while the tenant is suspended? Proposed default: yes, via platform capability `tenants.managers.manage`, because the tenant cannot act for itself.
 2. **Platform-initiated staff password reset:** should `tenants.staff.manage` mirror CL-015 (platform admin re-enters their own password; employee alone chooses the new one)? Proposed default: yes.
 
+## 6. Simplified user experience (owner, 2026-10-15)
+
+Staff and managers want the simplest possible screens. The permission engine above does not change (database, RLS and tests stay as built); only what people see changes.
+
+- **One ready-made role: "مدير الجمعية" (Association Manager).** It is the protected manager authority (section 2), granted by a platform admin. No other preset roles are shipped. Everything else is a custom role the manager creates.
+- **Four plain switches instead of 11 permission keys** in the role editor:
+  1. عرض الموظفين = `staff.view`
+  2. إدارة الموظفين = `staff.invite` + `staff.disable` + `staff.enable` + `staff.roles.assign` (implies the first switch)
+  3. إدارة الأدوار = `roles.view` + `roles.create` + `roles.update` + `roles.archive` + `roles.restore`
+  4. عرض سجل العمليات = `audit_logs.view`
+- **Hidden from every screen:** record scopes, the grant-ceiling explanation, and the permission keys themselves. A delegate only sees the switches they hold themselves; the database still enforces the ceiling.
+- Staff without any permission do not see the roles section at all. An invitation picks one role from a simple list.
+- **Proposed, awaiting owner confirmation:** the fourth switch grants all five audit categories (no category picker). The Security Log stays manager-only.
+
 ## Approval
 
 | | |
