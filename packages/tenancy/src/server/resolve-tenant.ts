@@ -21,7 +21,7 @@ export const resolveTenantFromHost = cache(async (): Promise<ResolvedTenant | nu
   const env = getServerEnv("portal");
   const host = classifyHost(await headers(), {
     portalBaseDomain: env.PORTAL_BASE_DOMAIN,
-    adminHost: env.ADMIN_HOST || "admin.invalid",
+    adminHost: env.ADMIN_HOST,
     trustedProxyHops: env.TRUSTED_PROXY_HOPS,
   });
   if (host.kind !== "tenant") return null;

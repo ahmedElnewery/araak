@@ -26,8 +26,8 @@ function write(level: Level, event: string, fields: Record<string, unknown> = {}
 
 /** Never pass request bodies of auth routes as fields; log event names and safe identifiers only. */
 export const logger = {
-  debug: (event: string, fields?: Record<string, unknown>) => write("debug", event, fields),
-  info: (event: string, fields?: Record<string, unknown>) => write("info", event, fields),
-  warn: (event: string, fields?: Record<string, unknown>) => write("warn", event, fields),
-  error: (event: string, fields?: Record<string, unknown>) => write("error", event, fields),
+  debug: (event: string, fields?: Record<string, unknown>) => { write("debug", event, fields); },
+  info: (event: string, fields?: Record<string, unknown>) => { write("info", event, fields); },
+  warn: (event: string, fields?: Record<string, unknown>) => { write("warn", event, fields); },
+  error: (event: string, fields?: Record<string, unknown>) => { write("error", event, fields); },
 };

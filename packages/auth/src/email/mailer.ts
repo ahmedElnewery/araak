@@ -19,8 +19,8 @@ export class SmtpMailer implements Mailer {
 
 /** Production stays disabled until GATE-OPS selects a transport (docs/decisions/operations.md). */
 export class UnconfiguredProductionMailer implements Mailer {
-  async send(_message: MailMessage): Promise<void> {
-    throw new Error("MAIL_TRANSPORT_NOT_CONFIGURED");
+  send(): Promise<void> {
+    return Promise.reject(new Error("MAIL_TRANSPORT_NOT_CONFIGURED"));
   }
 }
 

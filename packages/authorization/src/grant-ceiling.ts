@@ -26,7 +26,7 @@ export function canGrant(actor: EffectivePermissions, requested: RequestedGrant[
     if (!held) return { ok: false, key: g.key, reason: "above_authority" };
     if (g.key === "audit_logs.view") {
       const mine = new Set(auditCategoriesFor(actor));
-      if (!g.auditCategories!.every((c) => mine.has(c))) return { ok: false, key: g.key, reason: "audit_categories" };
+      if (!(g.auditCategories ?? []).every((c) => mine.has(c))) return { ok: false, key: g.key, reason: "audit_categories" };
     }
   }
   return { ok: true };

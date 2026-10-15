@@ -40,7 +40,7 @@ const localPlugin = {
 
 export default tseslint.config(
   {
-    ignores: ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/.turbo/**", "**/coverage/**", "specs/**", "docs/**"],
+    ignores: ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/.turbo/**", "**/coverage/**", "specs/**", "docs/**", "**/types.gen.ts"],
   },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
@@ -84,6 +84,25 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+  // Generated shadcn primitives are kept close to upstream so `shadcn add` updates stay mergeable; the strictest
+  // type-aware stylistic rules are relaxed for these files only. Hand-written components stay fully strict.
+  {
+    files: [
+      "packages/ui/src/components/{alert-dialog,badge,button,card,checkbox,dialog,dropdown-menu,form,input,label,pagination,select,separator,sheet,sidebar,skeleton,sonner,table,tabs,tooltip}.tsx",
+      "packages/ui/src/hooks/*.ts",
+    ],
+    rules: {
+      "@typescript-eslint/no-confusing-void-expression": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/restrict-template-expressions": "off",
+      "@typescript-eslint/no-unnecessary-template-expression": "off",
+      "@typescript-eslint/no-unnecessary-type-conversion": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "jsx-a11y/anchor-has-content": "off",
+      "jsx-a11y/click-events-have-key-events": "off",
+      "jsx-a11y/no-static-element-interactions": "off",
     },
   },
   {

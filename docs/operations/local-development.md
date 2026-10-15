@@ -23,6 +23,21 @@ Invitation and recovery emails come from the Development project's configured ma
 6. `pnpm db:types` — regenerates `packages/db/src/database.types.ts`.
 7. `pnpm --filter @workspace/portal dev` and `pnpm --filter @workspace/admin dev`.
 
+## Tests (all against the Development project)
+
+Export `SUPABASE_ENV=development`, `SUPABASE_DEV_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN` (a personal access token, used like the MCP does) plus the three Supabase env vars from `.env.local`.
+
+| Command | What it runs |
+| --- | --- |
+| `pnpm test` | Unit tests of every package (no network) |
+| `pnpm test:db` | `supabase/tests/*.test.sql` (RLS, integrity, audit, sessions, reservations, grant ceiling) in rolled-back transactions through the Management API |
+| `pnpm vitest run --root tests/security` | Guard pipeline, RLS through the real API, parity, race, host/cookie tests. `hosts-and-cookies` needs both apps running (`next start -p 3000` / `-p 3001` with `APP_ENV=development`, `PORTAL_BASE_DOMAIN`, `ADMIN_HOST`, `AUTH_THROTTLE_HMAC_KEY`) |
+| `pnpm vitest run --root tests/proofs` | GATE-AUTH proofs R-01/R-02/R-03 (the R-03 file waits a real 300 s) |
+| `pnpm db:types` / `pnpm db:types:check` | Regenerate / verify `packages/db/src/types.gen.ts` |
+| `node scripts/check-contrast.mjs` | WCAG contrast of the fixed palette |
+
+Next.js 16 uses `src/proxy.ts` (the renamed `middleware.ts`).
+
 ## Safety rules
 
 - `SUPABASE_SECRET_KEY` are server/test-only secrets: never `NEXT_PUBLIC_`, never committed, never logged.

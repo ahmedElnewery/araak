@@ -8,14 +8,14 @@ export function renderStaffInvitation(locale: Locale, p: { tenantName: string; l
           subject: `دعوة للانضمام إلى ${p.tenantName}`,
           intro: `تمت دعوتك للانضمام إلى ${p.tenantName}.`,
           cta: "قبول الدعوة",
-          valid: `الرابط صالح لمدة ${days} أيام ولمرة واحدة فقط.`,
+          valid: `الرابط صالح لمدة ${String(days)} أيام ولمرة واحدة فقط.`,
           ignore: "إذا لم تكن تتوقع هذه الدعوة فتجاهل هذه الرسالة.",
         }
       : {
           subject: `Invitation to join ${p.tenantName}`,
           intro: `You have been invited to join ${p.tenantName}.`,
           cta: "Accept invitation",
-          valid: `This link is valid for ${days} days and can be used once.`,
+          valid: `This link is valid for ${String(days)} days and can be used once.`,
           ignore: "If you were not expecting this invitation, ignore this email.",
         };
   return {

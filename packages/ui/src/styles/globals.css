@@ -1,4 +1,139 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Fixed platform design tokens are added in the Foundational phase (2D). */
+/*
+ * Fixed platform design tokens (docs/decisions/branding.md, docs/design-references/README.md).
+ * Not tenant-configurable (FR-037). Light under :root, dark under .dark (next-themes attribute="class").
+ * Contrast pairs are verified by scripts/check-contrast.mjs. --font-arabic (Cairo) and --font-latin (Inter) are
+ * provided by next/font in each app's root layout.
+ */
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --bg: #f1f6f7;
+  --card: #ffffff;
+  --sidebar: #ffffff;
+  --secondary-bg: #f8fbfc;
+  --line: #d5e3e7;
+  --divider: #e4eef0;
+  --text: #183545;
+  --muted: #506b7a;
+  --subtle: #5c7480;
+  --accent: #087e89;
+  --accent-strong: #076a75;
+  --accent-soft: rgba(0, 143, 153, 0.09);
+  --hover: rgba(9, 94, 120, 0.055);
+  --on-accent: #ffffff;
+  --input-border: #6196a5;
+  --danger: #b42318;
+  --on-danger: #ffffff;
+  --focus-ring: var(--accent-strong);
+  --radius: 0.625rem;
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+.dark {
+  --bg: #212121;
+  --card: #2f2f2f;
+  --sidebar: #171717;
+  --secondary-bg: #1f1f1f;
+  --line: #414141;
+  --divider: #333333;
+  --text: #f2f2f2;
+  --muted: #bdbdbd;
+  --subtle: #a1a1a1;
+  --accent: #68b78b;
+  --accent-strong: #b2e3c7;
+  --accent-soft: rgba(104, 183, 139, 0.12);
+  --hover: rgba(255, 255, 255, 0.065);
+  --on-accent: #11262c;
+  --input-border: #787878;
+  --danger: #f97066;
+  --on-danger: #1a0b09;
+  --focus-ring: var(--accent-strong);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+@theme inline {
+  /* semantic tokens consumed by shadcn primitives */
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--card);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--on-accent);
+  --color-secondary: var(--secondary-bg);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--secondary-bg);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--accent-soft);
+  --color-accent-foreground: var(--accent-strong);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--on-danger);
+  --color-border: var(--line);
+  --color-input: var(--input-border);
+  --color-ring: var(--focus-ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--text);
+  --color-sidebar-primary: var(--accent);
+  --color-sidebar-primary-foreground: var(--on-accent);
+  --color-sidebar-accent: var(--hover);
+  --color-sidebar-accent-foreground: var(--text);
+  --color-sidebar-border: var(--divider);
+  --color-sidebar-ring: var(--focus-ring);
+  --color-subtle: var(--subtle);
+  --color-divider: var(--divider);
+  --color-hover: var(--hover);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-arabic), var(--font-latin), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Arabic text uses Cairo first; Latin text uses Inter first. */
+html[lang="ar"] body {
+  font-family: var(--font-arabic), var(--font-latin), ui-sans-serif, system-ui, sans-serif;
+}
+html[lang="en"] body {
+  font-family: var(--font-latin), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

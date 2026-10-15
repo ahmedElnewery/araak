@@ -45,4 +45,12 @@ describe("classifyHost", () => {
   it("rejects a missing host header", () => {
     expect(classifyHost(h({}), cfg)).toEqual({ kind: "invalid" });
   });
+  it("works when an app configures only its own side", () => {
+    const adminOnly: HostConfig = { portalBaseDomain: "", adminHost: "admin.localhost:3001", trustedProxyHops: 0 };
+    expect(classify("admin.localhost:3001", {}, adminOnly)).toEqual({ kind: "admin" });
+    expect(classify("tenant-a.portal.localhost:3000", {}, adminOnly)).toEqual({ kind: "invalid" });
+    const portalOnly: HostConfig = { portalBaseDomain: "portal.localhost:3000", adminHost: "", trustedProxyHops: 0 };
+    expect(classify("tenant-a.portal.localhost:3000", {}, portalOnly)).toEqual({ kind: "tenant", subdomain: "tenant-a" });
+    expect(classify("admin.localhost:3001", {}, portalOnly)).toEqual({ kind: "invalid" });
+  });
 });

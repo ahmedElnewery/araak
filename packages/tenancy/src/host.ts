@@ -50,13 +50,25 @@ function hostFromHeaders(headers: HeaderSource, trustedProxyHops: number): strin
 /** Server-side host trust (contracts "Host trust"). Anything unexpected is `invalid`. */
 export function classifyHost(headers: HeaderSource, config: HostConfig): HostClass {
   const host = normalizeHost(hostFromHeaders(headers, config.trustedProxyHops));
+  if (!host) return INVALID;
+  // Each app configures only its own side: the admin app has no base domain, the portal may have no admin host.
   const base = normalizeHost(config.portalBaseDomain);
   const admin = normalizeHost(config.adminHost);
-  if (!host || !base || !admin) return INVALID;
-  if (host === admin) return { kind: "admin" };
+  if (admin && host === admin) return { kind: "admin" };
+  if (!base) return INVALID;
   const suffix = `.${base}`;
   if (!host.endsWith(suffix)) return INVALID;
   const subdomain = host.slice(0, -suffix.length);
   if (subdomain.includes(".")) return INVALID; // nested labels
   return validateSubdomain(subdomain).ok ? { kind: "tenant", subdomain } : INVALID;
+}
+
+/** Host settings from process env, for the proxy (no secrets, no server-only import). */
+export function hostConfigFromEnv(env: Record<string, string | undefined>): HostConfig {
+  const hops = Number.parseInt(env.TRUSTED_PROXY_HOPS ?? "0", 10);
+  return {
+    portalBaseDomain: env.PORTAL_BASE_DOMAIN ?? "",
+    adminHost: env.ADMIN_HOST ?? "",
+    trustedProxyHops: Number.isFinite(hops) && hops > 0 ? Math.min(hops, 5) : 0,
+  };
 }

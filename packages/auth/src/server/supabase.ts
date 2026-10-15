@@ -28,13 +28,12 @@ export async function createSupabaseServerClient(app: AppName): Promise<ServerCl
       setAll: (list) => {
         try {
           for (const { name, value, options } of list) {
-            const { domain: _domain, ...host } = options ?? {};
-            store.set(name, value, host);
+            store.set(name, value, { ...options, domain: undefined }); // host-only: never a Domain attribute
           }
         } catch {
           // Called from a Server Component: middleware refreshes the session instead.
         }
       },
     },
-  }) as unknown as ServerClient;
+  });
 }

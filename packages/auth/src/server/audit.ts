@@ -10,7 +10,7 @@ export type SecurityEvent =
   | "auth.login_failed" | "auth.login_throttled" | "authz.denied" | "session.invalid" | "tenant.cross_access_denied";
 export type PlatformAuditEvent =
   | "tenant.created" | "tenant.suspended" | "tenant.activated" | "manager.granted" | "manager.revoked"
-  | "platform_admin.invited" | "platform_admin.bootstrapped" | "restore.rehearsed";
+  | "platform_admin.invited" | "platform_admin.bootstrapped" | "restore.rehearsed" | "authz.denied";
 
 type Meta = Record<string, unknown>;
 
