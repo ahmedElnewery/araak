@@ -72,7 +72,7 @@ select is((select count(*)::int from public.tenant_audit_events where event = 't
 select tests.mk_role((select a from fx), 'AllPerms');
 insert into public.permission_grants (tenant_id, role_id, permission_key)
   select (select a from fx), (select id from public.roles where name = 'AllPerms' and tenant_id = (select a from fx)), key
-  from public.permission_catalog where key like 'staff.%' or key like 'roles.%';
+  from public.permission_catalog where tenant_grantable and (key like 'staff.%' or key like 'roles.%');
 insert into public.staff_roles (tenant_id, staff_id, role_id)
   select (select a from fx), (select staff_id from st where k='staff'), (select id from public.roles where name = 'AllPerms' and tenant_id = (select a from fx));
 select tests.claims((select user_id from st where k='staff'), (select sid from st where k='staff'));

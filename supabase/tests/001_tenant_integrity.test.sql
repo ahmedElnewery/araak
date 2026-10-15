@@ -28,6 +28,8 @@ select throws_ok(format($q$update public.tenants set id = gen_random_uuid() wher
   'P0001', 'tenant_identity_immutable', 'tenant id cannot change');
 select lives_ok(format($q$update public.tenants set state = 'suspended' where id = %L$q$, (select a from fx)), 'state may change');
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'admin')$q$, 'P0001', 'subdomain_reserved', 'reserved subdomain rejected');
+select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'send')$q$, 'P0001', 'subdomain_reserved', 'mail-provider label is reserved');
+select ok(not exists (select 1 from private.reserved_subdomains where name = 'portal'), 'portal is a tenant label, not reserved');
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'Upper')$q$, '23514', null, 'uppercase subdomain rejected');
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', '-lead')$q$, '23514', null, 'leading hyphen rejected');
 select throws_ok($q$insert into public.tenants (display_name, subdomain) values ('x', 'trail-')$q$, '23514', null, 'trailing hyphen rejected');
