@@ -36,6 +36,7 @@ export function BrandingForm({ displayName, logoSrc, t }: Props) {
             <LogoUpload
               id="logo" name="logo" accept="image/png,image/jpeg,image/webp" alt={displayName}
               currentSrc={logoSrc} removeName="removeLogo" labels={{ prompt: b.uploadPrompt, remove: b.removeLogo }}
+              errors={{ type: t.portal.errors.logo_type, tooLarge: t.portal.errors.logo_too_large, corrupt: t.portal.errors.logo_corrupt, dimensions: t.portal.errors.logo_dimensions }}
               describedBy={logoError ? "logo-hint logo-error" : "logo-hint"} invalid={Boolean(logoError)}
             />
             {logoError ? <p id="logo-error" role="alert" className="text-sm text-destructive">{t.portal.errors[logoError]}</p> : null}
