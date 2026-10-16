@@ -33,7 +33,7 @@ async function newPage(browser: Browser, sub: string): Promise<Page> {
 async function signIn(page: Page, sub: string, identifier: string) {
   await page.goto(`${host(sub)}/login`);
   await page.getByLabel(t.auth.identifier).fill(identifier);
-  await page.getByLabel(t.auth.password).fill(PASSWORD);
+  await page.getByLabel(t.auth.password, { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: t.auth.signIn }).click();
   await page.waitForURL(`${host(sub)}/`);
 }

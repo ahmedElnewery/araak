@@ -42,7 +42,7 @@ async function signedIn(browser: Browser, username: string): Promise<Page> {
   const page = await context.newPage();
   await page.goto(`${host(sub)}/login`);
   await page.getByLabel(t.auth.identifier).fill(username);
-  await page.getByLabel(t.auth.password).fill(PASSWORD);
+  await page.getByLabel(t.auth.password, { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: t.auth.signIn }).click();
   await page.waitForURL(`${host(sub)}/`);
   return page;
@@ -147,7 +147,7 @@ test.describe("admin", () => {
     const signIn = async () => {
       await page.goto(`${adminUrl}/login`);
       await page.getByLabel(en.admin.auth.email).fill(u!.email);
-      await page.getByLabel(en.admin.auth.password).fill(PASSWORD);
+      await page.getByLabel(en.admin.auth.password, { exact: true }).fill(PASSWORD);
       await page.getByRole("button", { name: en.admin.auth.signIn }).click();
       await page.waitForURL("**/tenants");
     };

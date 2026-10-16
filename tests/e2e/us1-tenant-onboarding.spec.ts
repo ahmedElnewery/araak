@@ -32,7 +32,7 @@ async function useLocale(page: Page, locale: "ar" | "en") {
 async function signIn(page: Page) {
   await page.goto("/login");
   await page.getByLabel(en.admin.auth.email).fill(adminEmail);
-  await page.getByLabel(en.admin.auth.password).fill(adminPassword);
+  await page.getByLabel(en.admin.auth.password, { exact: true }).fill(adminPassword);
   await page.getByRole("button", { name: en.admin.auth.signIn }).click();
   await page.waitForURL("**/tenants");
 }
@@ -183,7 +183,7 @@ test("invites a platform admin and the invitee accepts", async ({ page, browser 
   const guest = await guestContext.newPage();
   await guest.goto(link.replace(/^https?:\/\/[^/]+/, process.env.E2E_ADMIN_URL ?? "http://admin.localhost:3001"));
   await guest.getByLabel(en.admin.auth.password, { exact: true }).fill("Invited-Pass-12345");
-  await guest.getByLabel(en.admin.auth.confirmPassword).fill("Invited-Pass-12345");
+  await guest.getByLabel(en.admin.auth.confirmPassword, { exact: true }).fill("Invited-Pass-12345");
   await guest.getByRole("button", { name: en.admin.admins.accept }).click();
   await guest.waitForURL("**/tenants");
   await expect(guest.getByRole("heading", { name: en.admin.tenants.title })).toBeVisible();
