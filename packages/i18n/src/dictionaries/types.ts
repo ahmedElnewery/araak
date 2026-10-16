@@ -71,7 +71,7 @@ export type Dictionary = {
       reactivate: string; confirmSuspend: string; confirmReactivate: string; suspendTitle: string;
       suspendBody: string; reactivateTitle: string; reactivateBody: string; invitationNotDelivered: string;
       stateSaved: string; detailsTitle: string;
-      logoTitle: string; logoHint: string; noLogo: string; uploadLogo: string; removeLogo: string; logoSaved: string;
+      logoTitle: string; logoHint: string; noLogo: string; uploadLogo: string; uploadPrompt: string; discardFile: string; removeLogo: string; logoSaved: string;
       intro: string; search: string; searchPlaceholder: string; filters: string; allStates: string; apply: string;
       clear: string; emptyFiltered: string; count: string; nameTitle: string; nameIntro: string; stateTitle: string;
       stateIntro: string; logoIntro: string; identityTitle: string; identityIntro: string; managerTitle: string;
@@ -129,7 +129,7 @@ export type Dictionary = {
     home: { welcome: string; greeting: string; intro: string };
     branding: {
       title: string; intro: string; nameLabel: string; logoLabel: string; logoHint: string; currentLogo: string;
-      noLogo: string; remove: string; save: string; saved: string; removeLogo: string; nameTitle: string; nameIntro: string;
+      noLogo: string; remove: string; save: string; saved: string; removeLogo: string; uploadPrompt: string; nameTitle: string; nameIntro: string;
       logoTitle: string;
     };
     auth: {

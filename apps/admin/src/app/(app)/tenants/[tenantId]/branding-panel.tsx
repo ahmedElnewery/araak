@@ -3,8 +3,8 @@
 import { useActionState } from "react";
 import type { Dictionary } from "@workspace/i18n";
 import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { LogoUpload } from "@workspace/ui/components/logo-upload";
 import { SettingsSection } from "@workspace/ui/components/settings-section";
 import { TenantIdentity } from "@workspace/ui/components/tenant-identity";
 import { initialFormState, type FormState } from "@/features/form-state";
@@ -25,7 +25,11 @@ export function BrandingPanel({ tenantId, displayName, hasLogo, logoVersion, t }
         </div>
         <div className="grid gap-2">
           <Label htmlFor="logo">{t.tenants.uploadLogo}</Label>
-          <Input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby={code ? "logo-hint logo-error" : "logo-hint"} aria-invalid={code ? true : undefined} />
+          <LogoUpload
+            id="logo" name="logo" accept="image/png,image/jpeg,image/webp" alt={displayName}
+            labels={{ prompt: t.tenants.uploadPrompt, remove: t.tenants.discardFile }}
+            describedBy={code ? "logo-hint logo-error" : "logo-hint"} invalid={Boolean(code)}
+          />
           {code ? <p id="logo-error" role="alert" className="text-sm text-destructive">{t.errors[code]}</p> : null}
         </div>
         <div className="flex flex-wrap items-center gap-3">

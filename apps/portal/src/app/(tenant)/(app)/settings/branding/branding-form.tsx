@@ -3,11 +3,10 @@
 import { useActionState } from "react";
 import type { Dictionary } from "@workspace/i18n";
 import { Button } from "@workspace/ui/components/button";
-import { Checkbox } from "@workspace/ui/components/checkbox";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { LogoUpload } from "@workspace/ui/components/logo-upload";
 import { SettingsFooter, SettingsSection, SettingsSections, settingsCard } from "@workspace/ui/components/settings-section";
-import { TenantIdentity } from "@workspace/ui/components/tenant-identity";
 import { saveBrandingAction } from "@/features/branding/actions";
 import { initialFormState, type FormState } from "@/features/form-state";
 
@@ -32,25 +31,15 @@ export function BrandingForm({ displayName, logoSrc, t }: Props) {
           </div>
         </SettingsSection>
         <SettingsSection id="branding-logo" title={b.logoTitle} description={<span id="logo-hint">{b.logoHint}</span>}>
-          {/* what staff see today: the logo, or the neutral mark that stands in for it */}
-          <div className="flex items-center gap-4 rounded-xl border border-dashed border-border p-4">
-            <TenantIdentity name={displayName} logoSrc={logoSrc} />
-            <span className="ms-auto text-xs text-subtle">{logoSrc ? b.currentLogo : b.noLogo}</span>
-          </div>
           <div className="grid gap-2">
             <Label htmlFor="logo">{b.logoLabel}</Label>
-            <Input
-              id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp"
-              aria-describedby={logoError ? "logo-hint logo-error" : "logo-hint"} aria-invalid={logoError ? true : undefined}
+            <LogoUpload
+              id="logo" name="logo" accept="image/png,image/jpeg,image/webp" alt={displayName}
+              currentSrc={logoSrc} removeName="removeLogo" labels={{ prompt: b.uploadPrompt, remove: b.removeLogo }}
+              describedBy={logoError ? "logo-hint logo-error" : "logo-hint"} invalid={Boolean(logoError)}
             />
             {logoError ? <p id="logo-error" role="alert" className="text-sm text-destructive">{t.portal.errors[logoError]}</p> : null}
           </div>
-          {logoSrc ? (
-            <div className="flex items-center gap-2">
-              <Checkbox id="removeLogo" name="removeLogo" />
-              <Label htmlFor="removeLogo">{b.removeLogo}</Label>
-            </div>
-          ) : null}
         </SettingsSection>
       </SettingsSections>
       <SettingsFooter>
