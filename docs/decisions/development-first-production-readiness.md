@@ -55,4 +55,4 @@ The Foundation `tasks.md` checkboxes remain the source of task completion status
 
 ## Change control
 
-This is an owner-approved scheduling decision, **not** a reduction in security, privacy, backup, or recovery requirements. A future change to the three-module sequence or live-data safety restrictions needs explicit owner approval. The Constitution delivery rule is clarified accordingly in v2.1.0; constitutional protections retain priority over this document.
+This is an owner-approved scheduling decision, **not** a reduction in security, privacy, backup, or recovery requirements. A future change to the three-module sequence or live-data safety restrictions needs explicit owner approval. The current Constitution already defers module ordering to the implementation roadmap; its safeguards retain priority over this decision. No constitutional amendment is required by this scheduling decision.
