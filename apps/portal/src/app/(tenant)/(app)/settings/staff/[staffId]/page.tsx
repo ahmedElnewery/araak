@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { can } from "@workspace/authorization";
 import { Badge } from "@workspace/ui/components/badge";
 import { LtrText } from "@workspace/ui/components/ltr-text";
-import { StaffName } from "@/components/staff-name";
+import { StaffName } from "@workspace/ui/components/staff-name";
 import { requirePermission } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 import { ResetPasswordDialog } from "./reset-password-dialog";

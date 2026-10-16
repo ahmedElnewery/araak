@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@workspace/ui/components/badge";
-import { StaffName } from "@/components/staff-name";
+import { StaffName } from "@workspace/ui/components/staff-name";
 import { requirePermission } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 

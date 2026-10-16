@@ -1,10 +1,10 @@
 import { LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@workspace/ui/components/button";
+import { StaffName } from "@workspace/ui/components/staff-name";
 import { TenantIdentity } from "@workspace/ui/components/tenant-identity";
 import { HeaderControls } from "@/components/header-controls";
 import { PortalShell } from "@/components/portal-shell";
-import { StaffName } from "@/components/staff-name";
 import { signOutAction } from "@/features/auth/sign-out-action";
 import { tenantLogoSrc } from "@/lib/branding";
 import { loadPermissions, requireStaff } from "@/lib/guards";

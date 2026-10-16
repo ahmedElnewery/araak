@@ -84,6 +84,22 @@ select is((select count(*)::int from public.tenant_audit_events where event = 's
 select is((select coalesce(metadata ->> 'oldFirstName', '-') || '>' || (metadata ->> 'newFirstName') from public.tenant_audit_events
            where event = 'staff.name_changed' order by id limit 1), '->Zed', 'audit records old and new values');
 
+-- ---- admin app lists -----------------------------------------------------------------------------------------------
+create temp table support as select tests.mk_user('support@nm.test') uid;
+insert into public.platform_admins (auth_user_id, capabilities, created_via)
+  select uid, '{tenants.staff.manage,tenants.managers.manage}'::text[], 'bootstrap' from support;
+create temp table support_s as select tests.mk_psession((select uid from support)) sid;
+select tests.claims((select uid from support), (select sid from support_s));
+select is((select jsonb_agg(x ->> 'username') from jsonb_array_elements(public.platform_list_tenant_staff((select a from fx))) x),
+          '["Manager", "Off", "Newbie", "Zed"]'::jsonb, 'the admin staff list is ordered by the shown name');
+select is((select x ->> 'firstName' || '|' || (x ->> 'lastName') from jsonb_array_elements(public.platform_list_tenant_staff((select a from fx))) x
+           where x ->> 'username' = 'Zed'), 'زياد|Zulu', 'the admin staff list carries the names');
+select is(public.platform_get_tenant_managers((select a from fx)) -> 'active' -> 0 -> 'firstName', 'null'::jsonb,
+          'an active manager without a name says null');
+select is((select jsonb_agg(x ->> 'firstName') from jsonb_array_elements(public.platform_get_tenant_managers((select a from fx)) -> 'eligible') x),
+          '["أحمد", "زياد"]'::jsonb, 'promotable staff carry their names, ordered by them');
+select tests.reset();
+
 -- ---- privileges ----------------------------------------------------------------------------------------------------
 select is(has_function_privilege('anon', 'public.change_my_name(text, text)', 'execute'), false, 'anon cannot change a name');
 select is(has_function_privilege('authenticated', 'public.svc_redeem_staff_invitation(text, uuid, text, text, text)', 'execute'), false,

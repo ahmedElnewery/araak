@@ -16,8 +16,3 @@ export function validatePersonName(raw: string): PersonNameResult {
   if (Array.from(value).length > PERSON_NAME_MAX || !PERSON_NAME_RE.test(value)) return { ok: false, code: "invalid" };
   return { ok: true, value };
 }
-
-/** "First Last", or null for an account activated before names were collected that has not added them yet. */
-export function personFullName(s: { firstName?: string | null; lastName?: string | null }): string | null {
-  return s.firstName && s.lastName ? `${s.firstName} ${s.lastName}` : null;
-}

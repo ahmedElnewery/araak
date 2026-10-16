@@ -8,11 +8,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { LtrText } from "@workspace/ui/components/ltr-text";
+import { StaffName } from "@workspace/ui/components/staff-name";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 import { initialFormState, type FormState } from "@/features/form-state";
 import { platformResetStaffAction } from "@/features/tenants/staff-reset-action";
 
-export type StaffRow = { staffId: string; username: string; email: string; enabled: boolean; isManager: boolean };
+export type StaffRow = {
+  staffId: string; username: string; firstName: string | null; lastName: string | null; email: string; enabled: boolean; isManager: boolean;
+};
 
 type Props = { tenantId: string; staff: StaffRow[]; t: Dictionary["admin"] };
 
@@ -30,7 +33,7 @@ export function StaffPanel({ tenantId, staff, t }: Props) {
         <Table data-testid="tenant-staff">
           <TableHeader>
             <TableRow>
-              <TableHead scope="col">{t.staff.username}</TableHead>
+              <TableHead scope="col">{t.staff.name}</TableHead>
               <TableHead scope="col">{t.staff.email}</TableHead>
               <TableHead scope="col">{t.staff.status}</TableHead>
               <TableHead scope="col"><span className="sr-only">{t.common.actions}</span></TableHead>
@@ -39,7 +42,7 @@ export function StaffPanel({ tenantId, staff, t }: Props) {
           <TableBody>
             {staff.map((s) => (
               <TableRow key={s.staffId}>
-                <TableCell><LtrText>{s.username}</LtrText></TableCell>
+                <TableCell><StaffName staff={s} /></TableCell>
                 <TableCell><LtrText>{s.email}</LtrText></TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">

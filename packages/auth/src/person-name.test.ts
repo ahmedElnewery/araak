@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PERSON_NAME_MAX, personFullName, validatePersonName } from "./person-name";
+import { PERSON_NAME_MAX, validatePersonName } from "./person-name";
 
 describe("validatePersonName", () => {
   it("trims, collapses inner spaces and accepts Arabic and Latin names", () => {
@@ -20,13 +20,5 @@ describe("validatePersonName", () => {
     expect(validatePersonName("-Ali")).toEqual({ ok: false, code: "invalid" });
     expect(validatePersonName("a".repeat(PERSON_NAME_MAX + 1))).toEqual({ ok: false, code: "invalid" });
     expect(validatePersonName("a".repeat(PERSON_NAME_MAX)).ok).toBe(true);
-  });
-});
-
-describe("personFullName", () => {
-  it("joins the first and last name, or returns null while there is none", () => {
-    expect(personFullName({ firstName: "أحمد", lastName: "علي" })).toBe("أحمد علي");
-    expect(personFullName({ firstName: null, lastName: null })).toBeNull();
-    expect(personFullName({})).toBeNull();
   });
 });

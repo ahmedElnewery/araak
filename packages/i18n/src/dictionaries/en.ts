@@ -93,7 +93,7 @@ export const en = {
       title: "Staff",
       intro: "Send a staff member a password reset link. They choose the new password; you never see it.",
       none: "No staff yet",
-      username: "Username",
+      name: "Name",
       email: "Email",
       status: "Status",
       enabled: "Enabled",

@@ -1,4 +1,4 @@
-import { StaffName } from "@/components/staff-name";
+import { StaffName } from "@workspace/ui/components/staff-name";
 import { requireStaff } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 

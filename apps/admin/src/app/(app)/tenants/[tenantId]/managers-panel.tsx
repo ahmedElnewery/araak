@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { LtrText } from "@workspace/ui/components/ltr-text";
+import { StaffName, staffName } from "@workspace/ui/components/staff-name";
 import { useTimeZone } from "@workspace/ui/hooks/use-time-zone";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
@@ -16,9 +17,9 @@ import { inviteManager, promoteManager, revokeManager } from "@/features/manager
 import type { ErrorCode } from "@/lib/rpc-error";
 
 export type ManagersData = {
-  active: { staffId: string; username: string; email: string; enabled: boolean }[];
+  active: { staffId: string; username: string; firstName: string | null; lastName: string | null; email: string; enabled: boolean }[];
   pending: { invitationId: string; email: string; expiresAt: string | null }[];
-  eligible: { staffId: string; username: string; email: string }[];
+  eligible: { staffId: string; username: string; firstName: string | null; lastName: string | null; email: string }[];
 };
 
 type Props = { tenantId: string; data: ManagersData; t: Dictionary["admin"]; locale: Locale };
@@ -41,7 +42,7 @@ export function ManagersPanel({ tenantId, data, t, locale }: Props) {
           {data.active.length === 0 ? <li className="p-3 text-muted-foreground">{t.managers.none}</li> : null}
           {data.active.map((m) => (
             <li key={m.staffId} className="flex items-center justify-between gap-2 p-3">
-              <span><LtrText>{m.username}</LtrText> (<LtrText>{m.email}</LtrText>)</span>
+              <span><StaffName staff={m} /> (<LtrText>{m.email}</LtrText>)</span>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" disabled={pending}>{t.managers.revoke}</Button>
@@ -84,7 +85,7 @@ export function ManagersPanel({ tenantId, data, t, locale }: Props) {
           <select id="staffId" name="staffId" required defaultValue="" className="h-9 min-w-64 rounded-md border border-input bg-transparent px-3 text-sm">
             <option value="" disabled>{t.managers.selectStaff}</option>
             {data.eligible.map((s) => (
-              <option key={s.staffId} value={s.staffId}>{`${s.username} (${s.email})`}</option>
+              <option key={s.staffId} value={s.staffId}>{`${staffName(s)} (${s.email})`}</option>
             ))}
           </select>
         </div>

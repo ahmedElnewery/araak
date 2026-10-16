@@ -50,7 +50,7 @@ export type Dictionary = {
       revokeBody: string; inviteEmail: string; invite: string; invited: string; expires: string;
     };
     staff: {
-      title: string; intro: string; none: string; username: string; email: string; status: string; enabled: string;
+      title: string; intro: string; none: string; name: string; email: string; status: string; enabled: string;
       disabled: string; manager: string; resetPassword: string; resetTitle: string; resetIntro: string;
       adminPassword: string; confirmReset: string; resetSent: string; resetNotDelivered: string;
     };
