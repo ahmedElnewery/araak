@@ -48,7 +48,7 @@ function PasswordInput({
         disabled={disabled}
         aria-label={label}
         aria-pressed={visible}
-        onClick={() => setVisible((current) => !current)}
+        onClick={() => { setVisible((current) => !current); }}
         className="absolute end-1.5 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
       >
         {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

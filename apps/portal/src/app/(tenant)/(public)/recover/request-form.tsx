@@ -14,7 +14,7 @@ export function RequestForm({ t }: { t: Dictionary["portal"]["recovery"] }) {
 
   useEffect(() => {
     if (!state.submittedAt) return;
-    toast.success(t.neutral, { id: `recovery-sent-${state.submittedAt}`, duration: 8000 });
+    toast.success(t.neutral, { id: `recovery-sent-${String(state.submittedAt)}`, duration: 8000 });
   }, [state.submittedAt, t.neutral]);
 
   return (
