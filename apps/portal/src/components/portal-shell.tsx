@@ -5,10 +5,11 @@ import {
   UserPlus, UserRound, Users,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useTransition, type ReactNode } from "react";
 import { AccountMenu } from "@workspace/ui/components/account-menu";
 import { AppShell, type ShellNavItem, type ShellSection } from "@workspace/ui/components/app-shell";
+import { FilterNavigationProvider } from "@workspace/ui/components/filter-navigation";
 import type { NavGroup, NavIcon, NavItem } from "@/lib/navigation";
 
 const icons: Record<NavIcon, typeof House> = {
@@ -50,6 +51,11 @@ function toShell(items: NavItem[], pathname: string): ShellNavItem[] {
 /** Primary navigation, the current section's secondary sidebar and the account menu. Items arrive already permission-filtered. */
 export function PortalShell({ dir, brand, groups, accountItems, account, signOutAction, defaultCollapsed, labels, children }: Props) {
   const pathname = usePathname();
+  // list filters navigate softly through here, so applying one re-renders the page's data without a reload
+  const router = useRouter();
+  const search = useSearchParams().toString();
+  const [pending, start] = useTransition();
+  const navigate = useCallback((href: string) => { start(() => { router.push(href, { scroll: false }); }); }, [router]);
   const nav = groups.map((g) => ({ id: g.id, label: g.label, items: toShell(g.items, pathname) }));
   const parent = nav.flatMap((g) => g.items.map((item) => ({ item, group: g.label }))).find(({ item }) => item.active && item.children?.length);
   const section: ShellSection | undefined = parent
@@ -76,7 +82,7 @@ export function PortalShell({ dir, brand, groups, accountItems, account, signOut
       labels={labels}
       closeSignal={pathname}
     >
-      {children}
+      <FilterNavigationProvider navigate={navigate} pending={pending} search={search}>{children}</FilterNavigationProvider>
     </AppShell>
   );
 }

@@ -2,10 +2,11 @@
 
 import { Building2, Contrast, History, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useTransition, type ReactNode } from "react";
 import { AccountMenu } from "@workspace/ui/components/account-menu";
 import { AppShell } from "@workspace/ui/components/app-shell";
+import { FilterNavigationProvider } from "@workspace/ui/components/filter-navigation";
 import { LtrText } from "@workspace/ui/components/ltr-text";
 import { initials } from "@workspace/ui/lib/initials";
 
@@ -28,6 +29,11 @@ type Props = {
 /** Platform navigation. Wording and assets stay inside apps/admin (Constitution IX). */
 export function AdminShell({ dir, nav, email, signOutAction, defaultCollapsed, labels, children }: Props) {
   const pathname = usePathname();
+  // list filters navigate softly through here, so applying one re-renders the page's data without a reload
+  const router = useRouter();
+  const search = useSearchParams().toString();
+  const [pending, start] = useTransition();
+  const navigate = useCallback((href: string) => { start(() => { router.push(href, { scroll: false }); }); }, [router]);
   const items = nav.map((item) => {
     const Icon = icons[item.icon];
     return { id: item.href, href: item.href, label: item.label, icon: <Icon />, active: pathname === item.href || pathname.startsWith(`${item.href}/`) };
@@ -57,7 +63,7 @@ export function AdminShell({ dir, nav, email, signOutAction, defaultCollapsed, l
       labels={labels}
       closeSignal={pathname}
     >
-      {children}
+      <FilterNavigationProvider navigate={navigate} pending={pending} search={search}>{children}</FilterNavigationProvider>
     </AppShell>
   );
 }

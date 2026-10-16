@@ -1,7 +1,11 @@
+"use client";
+
 import { Search } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type SubmitEvent, type ReactNode } from "react";
 import { Button, buttonVariants } from "@workspace/ui/components/button";
+import { useFilterNavigation } from "@workspace/ui/components/filter-navigation";
 import { Input } from "@workspace/ui/components/input";
+import { filterTarget } from "@workspace/ui/lib/filter-url";
 import type { LinkComponent } from "@workspace/ui/lib/link";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -23,14 +27,37 @@ type BarProps = {
 
 /**
  * Search and filters for one list, in a single row that wraps on small screens. A plain GET form: the server reads the
- * query, applies the filters and renders the page, so nothing depends on client state or JavaScript.
+ * query, applies the filters and renders the page, so it works before hydration and without JavaScript. Once hydrated
+ * under a FilterNavigationProvider, applying navigates softly instead of reloading, sends nothing when no filter
+ * changed and keeps empty fields out of the URL.
  */
 export function FilterBar({ action, label, submitLabel, clear, link: Link, keep = {}, children, className }: BarProps) {
+  const nav = useFilterNavigation();
+  const form = useRef<HTMLFormElement>(null);
+  const search = nav?.search;
+  const mounted = useRef(false);
+  // the fields are uncontrolled, so a URL that changed from elsewhere (Clear, a tab, back) puts the server's values back
+  useEffect(() => {
+    if (mounted.current) form.current?.reset();
+    mounted.current = true;
+  }, [search]);
+
+  const apply = (e: SubmitEvent<HTMLFormElement>) => {
+    if (!nav) return; // the native GET submit
+    e.preventDefault();
+    for (const menu of e.currentTarget.querySelectorAll("details[open]")) (menu as HTMLDetailsElement).open = false;
+    const to = filterTarget(action, new FormData(e.currentTarget), nav.search);
+    if (to !== null) nav.navigate(to);
+  };
+
   return (
-    <form action={action} method="get" role="search" aria-label={label} className={cn("flex flex-wrap items-center gap-2", className)}>
+    <form
+      ref={form} action={action} method="get" role="search" aria-label={label} aria-busy={nav?.pending || undefined} onSubmit={apply}
+      className={cn("flex flex-wrap items-center gap-2", className)}
+    >
       {Object.entries(keep).map(([name, value]) => (value ? <input key={name} type="hidden" name={name} value={value} /> : null))}
       {children}
-      <Button type="submit" className="h-10 rounded-[10px] px-4">{submitLabel}</Button>
+      <Button type="submit" disabled={nav?.pending} className="h-10 rounded-[10px] px-4">{submitLabel}</Button>
       {clear && Link ? (
         <Link href={clear.href} className={cn(buttonVariants({ variant: "ghost" }), "h-10 rounded-[10px]")}>{clear.label}</Link>
       ) : null}
