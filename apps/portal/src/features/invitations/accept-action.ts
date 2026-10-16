@@ -8,6 +8,7 @@ import { createSupabaseServerClient, getSupabaseAdmin, hashToken, registerSessio
 import { requireTenant } from "@/lib/tenant-context";
 import { toErrorCode } from "@/lib/rpc-error";
 import type { FormState } from "../form-state";
+import { personNameFieldError, readPersonName } from "../person-name";
 
 const token = z.string().min(20).max(200);
 const text = (v: FormDataEntryValue | null) => (typeof v === "string" ? v : "");
@@ -32,9 +33,11 @@ export async function acceptInvitationAction(rawToken: string, _prev: FormState,
   const peek = await peekInvitation(rawToken);
   if (!peek.valid || !peek.email) return { error: "invitation_invalid" };
 
+  const name = readPersonName(formData);
   const username = text(formData.get("username")).trim();
   const password = text(formData.get("password"));
   const confirm = text(formData.get("confirmPassword"));
+  if (!name.ok) return { fieldErrors: name.fieldErrors };
   const u = validateUsername(username);
   if (!u.ok) return { fieldErrors: { username: "username_invalid" }, usernameError: u.code };
   if (!checkPasswordPolicy(password)) return { fieldErrors: { password: "password_policy" } };
@@ -47,11 +50,14 @@ export async function acceptInvitationAction(rawToken: string, _prev: FormState,
 
   const { data: staffId, error: redeemError } = await admin.rpc("svc_redeem_staff_invitation", {
     p_token_hash: hashToken(rawToken), p_auth_user_id: created.user.id, p_username: username,
+    p_first_name: name.firstName, p_last_name: name.lastName,
   });
   if (redeemError || !staffId) {
     await admin.auth.admin.deleteUser(created.user.id).catch(() => undefined);
     const code = redeemError ? toErrorCode(redeemError) : "generic";
     if (code === "username_taken" || code === "username_invalid") return { fieldErrors: { username: code } };
+    const nameError = personNameFieldError(code);
+    if (nameError) return { fieldErrors: nameError };
     return { error: "invitation_invalid" };
   }
 

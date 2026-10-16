@@ -822,7 +822,9 @@ export type Database = {
           email: string;
           email_normalized: string;
           enabled: boolean;
+          first_name: string | null;
           id: string;
+          last_name: string | null;
           tenant_id: string;
           username: string;
           username_normalized: string | null;
@@ -834,7 +836,9 @@ export type Database = {
           email: string;
           email_normalized: string;
           enabled?: boolean;
+          first_name?: string | null;
           id?: string;
+          last_name?: string | null;
           tenant_id: string;
           username: string;
           username_normalized?: string | null;
@@ -846,7 +850,9 @@ export type Database = {
           email?: string;
           email_normalized?: string;
           enabled?: boolean;
+          first_name?: string | null;
           id?: string;
+          last_name?: string | null;
           tenant_id?: string;
           username?: string;
           username_normalized?: string | null;
@@ -900,6 +906,10 @@ export type Database = {
     };
     Functions: {
       archive_role: { Args: { p_role_id: string }; Returns: Json };
+      change_my_name: {
+        Args: { p_first_name: string; p_last_name: string };
+        Returns: undefined;
+      };
       change_my_username: { Args: { p_username: string }; Returns: undefined };
       create_role: {
         Args: { p_description: string; p_grants: Json; p_name: string };
@@ -1104,6 +1114,8 @@ export type Database = {
       svc_redeem_staff_invitation: {
         Args: {
           p_auth_user_id: string;
+          p_first_name: string;
+          p_last_name: string;
           p_token_hash: string;
           p_username: string;
         };

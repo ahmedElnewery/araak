@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | tenants | id, display_name, immutable subdomain, state, optional logo_ref, created_at | platform metadata; subdomain globally unique and immutable |
 | platform_admins | auth_user_id, enabled, explicit platform capabilities | platform only; distinct from tenant staff authorization |
-| tenant_staff | id, tenant_id, auth_user_id, normalized verified email, username, enabled, activated_at | tenant; global unique active/disabled staff email; unique (tenant_id, normalized username); post-activation email immutable |
+| tenant_staff | id, tenant_id, auth_user_id, normalized verified email, username, first_name, last_name, enabled, activated_at | tenant; global unique active/disabled staff email; unique (tenant_id, normalized username); post-activation email immutable; first and last name (any script) required at activation, shown in the portal and the admin app in place of the username, self-service change; null only for accounts activated before names were collected |
 | email_reservations | normalized_email, tenant_id, invitation_id, expires_at, state | atomic global claim; existing staff identity takes precedence; expired unredeemed reservations reusable |
 | staff_invitations | id, tenant_id, recipient normalized email, initial role IDs, token_hash, issued_at, expires_at, consumed_at, superseded_at, resend history | recipient-bound; expires <168h; only latest usable; no standalone cancellation |
 | platform_invitations | id, target, inviter, token_hash, expires_at, consumed_at | platform-owned, <24h, invite privilege required |

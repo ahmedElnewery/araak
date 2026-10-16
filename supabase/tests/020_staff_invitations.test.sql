@@ -81,17 +81,17 @@ select tests.reset();
 create temp table u as select tests.mk_user('newbie@inv.test') uid, tests.mk_user('byman@inv.test') uid2, tests.mk_user('plat@inv.test') uid3;
 select tests.age_links((select id from inv where k='ok'), interval '167:59:59');
 select is((private.peek_staff_invitation(tests.th('i-ok')))->>'valid', 'true', 'valid at +167:59:59');
-select is(private.redeem_staff_invitation(tests.th('i-ok'), (select uid from u), 'Newbie') is not null, true, 'redemption works at +167:59:59');
+select is(private.redeem_staff_invitation(tests.th('i-ok'), (select uid from u), 'Newbie', 'Test', 'Person') is not null, true, 'redemption works at +167:59:59');
 select is((select count(*)::int from public.tenant_staff where auth_user_id = (select uid from u)), 1, 'exactly one tenant_staff created');
 select is((select count(*)::int from public.staff_roles sr join public.tenant_staff s on s.id = sr.staff_id where s.auth_user_id = (select uid from u)), 1, 'invitation roles applied');
-select throws_ok(format($$select private.redeem_staff_invitation(tests.th('i-ok'), %L, 'Another')$$, (select uid from u)), 'P0001', 'invitation_invalid', 'single use: second redemption refused');
+select throws_ok(format($$select private.redeem_staff_invitation(tests.th('i-ok'), %L, 'Another', 'Test', 'Person')$$, (select uid from u)), 'P0001', 'invitation_invalid', 'single use: second redemption refused');
 select is((select count(*)::int from public.email_reservations where email_normalized = 'newbie@inv.test'), 0, 'reservation released after redemption');
 select tests.age_links((select id from inv where k='mgr'), interval '168 hours');
 select is((private.peek_staff_invitation(tests.th('i-mgr')))->>'valid', 'false', 'invalid at exactly +168:00:00');
-select throws_ok(format($$select private.redeem_staff_invitation(tests.th('i-mgr'), %L, 'Byman')$$, (select uid2 from u)), 'P0001', 'invitation_invalid', 'redemption refused at exactly +168:00:00');
-select throws_ok(format($$select private.redeem_staff_invitation(tests.th('nope'), %L, 'Byman')$$, (select uid2 from u)), 'P0001', 'invitation_invalid', 'unknown link refused');
-select throws_ok(format($$select private.redeem_staff_invitation(tests.th('i-plat'), %L, 'bad name')$$, (select uid3 from u)), 'P0001', 'username_invalid', 'invalid username refused');
-select throws_ok(format($$select private.redeem_staff_invitation(tests.th('i-plat'), %L, 'Newbie')$$, (select uid3 from u)), 'P0001', 'username_taken', 'case-insensitive username uniqueness at activation');
+select throws_ok(format($$select private.redeem_staff_invitation(tests.th('i-mgr'), %L, 'Byman', 'Test', 'Person')$$, (select uid2 from u)), 'P0001', 'invitation_invalid', 'redemption refused at exactly +168:00:00');
+select throws_ok(format($$select private.redeem_staff_invitation(tests.th('nope'), %L, 'Byman', 'Test', 'Person')$$, (select uid2 from u)), 'P0001', 'invitation_invalid', 'unknown link refused');
+select throws_ok(format($$select private.redeem_staff_invitation(tests.th('i-plat'), %L, 'bad name', 'Test', 'Person')$$, (select uid3 from u)), 'P0001', 'username_invalid', 'invalid username refused');
+select throws_ok(format($$select private.redeem_staff_invitation(tests.th('i-plat'), %L, 'Newbie', 'Test', 'Person')$$, (select uid3 from u)), 'P0001', 'username_taken', 'case-insensitive username uniqueness at activation');
 select is((select state from public.staff_invitations where id = (select id from inv where k='plat')), 'pending', 'failed activation consumes nothing');
 
 -- ---- resend: authorization, cooldown, cap --------------------------------------------------------------------------
@@ -157,6 +157,6 @@ select tests.act_as((select user_id from st where k='mgr'), (select sid from st 
 select throws_ok($$update public.staff_invitations set state = 'redeemed'$$, '42501', null, 'direct UPDATE of invitations denied');
 select throws_ok($$delete from public.staff_invitation_links$$, '42501', null, 'direct DELETE of links denied');
 select tests.reset();
-select is(has_function_privilege('authenticated', 'private.redeem_staff_invitation(text, uuid, text)', 'execute'), false, 'redemption is service_role only');
-select is(has_function_privilege('authenticated', 'public.svc_redeem_staff_invitation(text, uuid, text)', 'execute'), false, 'redemption wrapper is service_role only');
+select is(has_function_privilege('authenticated', 'private.redeem_staff_invitation(text, uuid, text, text, text)', 'execute'), false, 'redemption is service_role only');
+select is(has_function_privilege('authenticated', 'public.svc_redeem_staff_invitation(text, uuid, text, text, text)', 'execute'), false, 'redemption wrapper is service_role only');
 select is(has_function_privilege('anon', 'public.invite_staff(text, uuid[], text)', 'execute'), false, 'anon cannot invite');

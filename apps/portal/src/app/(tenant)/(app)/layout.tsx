@@ -1,7 +1,7 @@
 import { LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@workspace/ui/components/button";
-import { LtrText } from "@workspace/ui/components/ltr-text";
+import { StaffName } from "@workspace/ui/components/staff-name";
 import { TenantIdentity } from "@workspace/ui/components/tenant-identity";
 import { HeaderControls } from "@/components/header-controls";
 import { PortalShell } from "@/components/portal-shell";
@@ -28,8 +28,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       shellLabels={{ skipToContent: t.common.skipToContent, openMenu: t.common.openMenu, closeMenu: t.common.closeMenu }}
       header={
         <>
-          {/* A narrow header (phones, or tablets with both sidebars) gets the design reference's compact form: no username, icon-only theme and sign-out */}
-          <LtrText className="hidden min-w-0 truncate text-sm text-muted-foreground @lg:block">{ctx.username}</LtrText>
+          {/* A narrow header (phones, or tablets with both sidebars) gets the design reference's compact form: no name, icon-only theme and sign-out */}
+          <StaffName staff={ctx} className="hidden min-w-0 truncate text-sm text-muted-foreground @lg:block" />
           <div className="ms-auto flex items-center gap-2">
             <HeaderControls
               locale={locale}

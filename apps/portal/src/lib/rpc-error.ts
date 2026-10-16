@@ -6,7 +6,8 @@ export const ERROR_CODES = [
   "password_mismatch", "not_authorized", "invalid_credentials", "name_required", "name_invalid", "logo_type", "logo_mismatch",
   "logo_too_large", "logo_corrupt", "logo_dimensions", "logo_invalid",
   "role_name_conflict", "role_name_invalid", "role_assigned", "role_self_edit", "role_not_found", "privilege_escalation", "grants_invalid",
-  "cannot_change_own_roles", "cannot_disable_self", "manager_protected", "last_active_manager", "roles_invalid", "session_not_found", "generic",
+  "cannot_change_own_roles", "cannot_disable_self", "manager_protected", "last_active_manager", "roles_invalid", "session_not_found",
+  "first_name_required", "first_name_invalid", "last_name_required", "last_name_invalid", "generic",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
