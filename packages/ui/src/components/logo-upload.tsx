@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type DragEvent } from "react";
+import { useRef, useState, type DragEvent } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -28,11 +28,15 @@ export function LogoUpload({ id, name, accept, alt, currentSrc, removeName, labe
   const [removed, setRemoved] = useState(false);
   const [dragging, setDragging] = useState(false);
 
-  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
-
+  // data: URL, not blob:, because the app CSP only allows `img-src 'self' data:`
   const select = (file: File | undefined) => {
-    setPreview(file && file.type.startsWith("image/") ? URL.createObjectURL(file) : null);
-    if (file) setRemoved(false);
+    setPreview(null);
+    if (!file) return;
+    setRemoved(false);
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => { if (typeof reader.result === "string") setPreview(reader.result); };
+    reader.readAsDataURL(file);
   };
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
