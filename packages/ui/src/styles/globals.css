@@ -133,6 +133,86 @@ html[lang="en"] body {
   }
 }
 
+/* Six-dot page loader. Dots use currentColor so they follow the text token in light and dark. */
+.loader {
+  width: 4px;
+  color: currentColor;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow:
+    19px -19px 0 0px,
+    38px -19px 0 0px,
+    19px 0px 0 5px,
+    38px 0px 0 5px,
+    19px 19px 0 0px,
+    38px 19px 0 0px;
+  transform: translateX(-28.5px);
+  animation: l26 2s infinite linear;
+}
+
+@keyframes l26 {
+  0%,
+  100% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 0px,
+      19px 0px 0 5px,
+      38px 0px 0 5px,
+      19px 19px 0 0px,
+      38px 19px 0 0px;
+  }
+
+  16.66% {
+    box-shadow:
+      19px -19px 0 5px,
+      38px -19px 0 0px,
+      19px 0px 0 0px,
+      38px 0px 0 5px,
+      19px 19px 0 0px,
+      38px 19px 0 5px;
+  }
+
+  33.33% {
+    box-shadow:
+      19px -19px 0 5px,
+      38px -19px 0 5px,
+      19px 0px 0 0px,
+      38px 0px 0 0px,
+      19px 19px 0 5px,
+      38px 19px 0 0px;
+  }
+
+  50% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 5px,
+      19px 0px 0 5px,
+      38px 0px 0 0px,
+      19px 19px 0 5px,
+      38px 19px 0 0px;
+  }
+
+  66.66% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 0px,
+      19px 0px 0 5px,
+      38px 0px 0 5px,
+      19px 19px 0 0px,
+      38px 19px 0 5px;
+  }
+
+  83.33% {
+    box-shadow:
+      19px -19px 0 5px,
+      38px -19px 0 0px,
+      19px 0px 0 0px,
+      38px 0px 0 5px,
+      19px 19px 0 5px,
+      38px 19px 0 0px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

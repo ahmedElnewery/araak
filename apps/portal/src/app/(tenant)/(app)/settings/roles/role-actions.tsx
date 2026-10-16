@@ -29,7 +29,7 @@ export function RoleActions({ roleId, archived, canArchive, canRestore, t }: { r
           <AlertDialogFooter>
             <AlertDialogCancel>{t.portal.staff.cancel}</AlertDialogCancel>
             <Button
-              disabled={pending}
+              loading={pending}
               onClick={() => {
                 start(async () => {
                   const acted = archived ? "restored" : "archived";

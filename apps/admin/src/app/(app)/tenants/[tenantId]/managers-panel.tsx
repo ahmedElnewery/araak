@@ -45,7 +45,7 @@ export function ManagersPanel({ tenantId, data, t, locale }: Props) {
               <span><StaffName staff={m} /> (<LtrText>{m.email}</LtrText>)</span>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="sm" disabled={pending}>{t.managers.revoke}</Button>
+                  <Button variant="outline" size="sm" loading={pending}>{t.managers.revoke}</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -89,7 +89,7 @@ export function ManagersPanel({ tenantId, data, t, locale }: Props) {
             ))}
           </select>
         </div>
-        <Button type="submit" disabled={promoting || data.eligible.length === 0}>{t.managers.promote}</Button>
+        <Button type="submit" disabled={data.eligible.length === 0} loading={promoting}>{t.managers.promote}</Button>
         {promoteState.error ? <p role="alert" className="w-full text-sm text-destructive">{err(promoteState.error)}</p> : null}
       </form>
 
@@ -98,7 +98,7 @@ export function ManagersPanel({ tenantId, data, t, locale }: Props) {
           <Label htmlFor="inviteEmail">{t.managers.inviteEmail}</Label>
           <Input id="inviteEmail" name="email" type="email" dir="ltr" required className="min-w-64" autoComplete="off" />
         </div>
-        <Button type="submit" variant="outline" disabled={inviting}>{t.managers.invite}</Button>
+        <Button type="submit" variant="outline" loading={inviting}>{t.managers.invite}</Button>
         {inviteState.fieldErrors?.email ? <p role="alert" className="w-full text-sm text-destructive">{err(inviteState.fieldErrors.email)}</p> : null}
         {inviteState.error ? <p role="alert" className="w-full text-sm text-destructive">{err(inviteState.error)}</p> : null}
         {inviteState.ok ? <p role="status" className="w-full text-sm">{inviteState.notice ? t.tenants.invitationNotDelivered : t.managers.invited}</p> : null}

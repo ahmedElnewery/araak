@@ -31,7 +31,7 @@ export function RequestForm({ t }: { t: Dictionary["portal"]["recovery"] }) {
           <Input id="identifier" name="identifier" size="lg" autoComplete="username" dir="ltr" required className="ps-12" />
         </div>
       </div>
-      <Button type="submit" size="xl" className="mt-2 w-full" disabled={pending}>{t.send}</Button>
+      <Button type="submit" size="xl" className="mt-2 w-full" loading={pending}>{t.send}</Button>
     </form>
   );
 }

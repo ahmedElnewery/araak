@@ -32,7 +32,7 @@ export function InviteForm({ roles, t }: { roles: { id: string; name: string }[]
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
       {state.ok && !state.notice ? <p role="status" className="text-sm">{t.portal.staff.invited}</p> : null}
       {state.notice === "invitation_not_delivered" ? <p role="alert" className="text-sm text-destructive">{t.portal.staff.invitationNotDelivered}</p> : null}
-      <Button type="submit" disabled={pending}>{t.portal.staff.send}</Button>
+      <Button type="submit" loading={pending}>{t.portal.staff.send}</Button>
     </form>
   );
 }

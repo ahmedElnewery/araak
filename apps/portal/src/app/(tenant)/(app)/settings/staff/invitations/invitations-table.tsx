@@ -41,7 +41,7 @@ export function InvitationsTable({ rows, canResend, t, locale }: { rows: Pending
               {canResend ? (
                 <td className="p-2">
                   <Button
-                    size="sm" variant="outline" disabled={!r.canResend || pending}
+                    size="sm" variant="outline" disabled={!r.canResend} loading={pending && r.canResend}
                     aria-describedby={r.canResend ? undefined : `next-${r.invitationId}`}
                     onClick={() => {
                       start(async () => {

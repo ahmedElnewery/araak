@@ -54,7 +54,7 @@ export function CompleteForm({ token, t }: { token: string; t: Dictionary }) {
       </div>
       {state.error === "invalid" ? <p role="alert" className="text-sm text-destructive">{t.portal.recovery.invalidBody}</p> : null}
       {state.error === "failed" ? <p role="alert" className="text-sm text-destructive">{t.portal.recovery.retryNeeded}</p> : null}
-      <Button type="submit" size="xl" className="mt-2 w-full" disabled={pending}>{t.portal.recovery.submit}</Button>
+      <Button type="submit" size="xl" className="mt-2 w-full" loading={pending}>{t.portal.recovery.submit}</Button>
     </form>
   );
 }

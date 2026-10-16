@@ -50,7 +50,7 @@ export function SessionsTable({ rows, t, locale }: { rows: SessionRow[]; t: Dict
                 {row.is_current ? null : (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" disabled={pending}>{s.logout}</Button>
+                      <Button variant="outline" size="sm" loading={pending}>{s.logout}</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
@@ -72,7 +72,7 @@ export function SessionsTable({ rows, t, locale }: { rows: SessionRow[]; t: Dict
       {hasOthers ? (
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" disabled={pending}>{s.logoutAll}</Button>
+            <Button variant="destructive" loading={pending}>{s.logoutAll}</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

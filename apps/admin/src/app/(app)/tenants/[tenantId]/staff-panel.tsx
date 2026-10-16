@@ -84,7 +84,7 @@ function ResetDialog({ tenantId, staffId, t }: { tenantId: string; staffId: stri
             </div>
             {state.error ? <p role="alert" className="text-sm text-destructive">{t.errors[state.error]}</p> : null}
             <div className="flex gap-2">
-              <Button type="submit" disabled={pending}>{t.staff.confirmReset}</Button>
+              <Button type="submit" loading={pending}>{t.staff.confirmReset}</Button>
               <Button type="button" variant="outline" onClick={() => {
                 setOpen(false);
               }}>{t.common.cancel}</Button>

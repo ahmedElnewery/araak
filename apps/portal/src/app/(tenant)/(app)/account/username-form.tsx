@@ -16,7 +16,7 @@ export function UsernameForm({ current, t }: { current: string; t: Dictionary })
       <UsernameField t={t} defaultValue={current} serverError={state.fieldErrors?.username} serverRule={state.usernameError} />
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{t.portal.account.saved}</p> : null}
-      <Button type="submit" disabled={pending}>{t.portal.account.save}</Button>
+      <Button type="submit" loading={pending}>{t.portal.account.save}</Button>
     </form>
   );
 }

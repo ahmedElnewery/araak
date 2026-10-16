@@ -30,7 +30,7 @@ export function StatusControl({ staffId, enabled, t }: { staffId: string; enable
           <AlertDialogFooter>
             <AlertDialogCancel>{s.cancel}</AlertDialogCancel>
             <Button
-              disabled={pending}
+              loading={pending}
               onClick={() => {
                 start(async () => {
                   const acted = enabled ? "disabled" : "enabled";

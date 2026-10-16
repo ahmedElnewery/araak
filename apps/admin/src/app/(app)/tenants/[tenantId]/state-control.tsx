@@ -29,7 +29,7 @@ export function StateControl({ tenantId, state, t }: Props) {
       </Badge>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant={state === "active" ? "destructive" : "default"} disabled={pending}>{text.trigger}</Button>
+          <Button variant={state === "active" ? "destructive" : "default"} loading={pending}>{text.trigger}</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>

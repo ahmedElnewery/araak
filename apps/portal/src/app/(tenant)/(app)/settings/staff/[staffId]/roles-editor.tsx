@@ -24,7 +24,7 @@ export function RolesEditor({ staffId, options, selected, t }: { staffId: string
       </fieldset>
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{t.portal.staff.rolesSaved}</p> : null}
-      <Button type="submit" disabled={pending}>{t.portal.staff.saveRoles}</Button>
+      <Button type="submit" loading={pending}>{t.portal.staff.saveRoles}</Button>
     </form>
   );
 }

@@ -51,7 +51,7 @@ export function RoleForm({ roleId, name, description, offered, on, readOnly, ext
       </fieldset>
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{r.saved}</p> : null}
-      {readOnly ? null : <Button type="submit" disabled={pending}>{r.save}</Button>}
+      {readOnly ? null : <Button type="submit" loading={pending}>{r.save}</Button>}
     </form>
   );
 }

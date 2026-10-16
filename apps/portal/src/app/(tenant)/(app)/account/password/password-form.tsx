@@ -31,7 +31,7 @@ export function PasswordForm({ t }: { t: Dictionary }) {
       </div>
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{t.portal.password.done}</p> : null}
-      <Button type="submit" disabled={pending}>{t.portal.password.submit}</Button>
+      <Button type="submit" loading={pending}>{t.portal.password.submit}</Button>
     </form>
   );
 }

@@ -65,7 +65,7 @@ export function LoginForm({
         />
       </div>
       {state.error ? <p role="alert" className="text-sm text-destructive">{labels.invalidCredentials}</p> : null}
-      <Button type="submit" size="xl" className="mt-2 w-full" disabled={pending}>
+      <Button type="submit" size="xl" className="mt-2 w-full" loading={pending}>
         {labels.signIn}
       </Button>
     </form>

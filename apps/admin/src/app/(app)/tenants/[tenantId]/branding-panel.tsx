@@ -28,8 +28,8 @@ export function BrandingPanel({ tenantId, displayName, hasLogo, logoVersion, t }
           {code ? <p role="alert" className="text-sm text-destructive">{t.errors[code]}</p> : null}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" name="intent" value="upload" disabled={pending}>{t.tenants.uploadLogo}</Button>
-          {hasLogo ? <Button type="submit" name="intent" value="remove" variant="outline" disabled={pending}>{t.tenants.removeLogo}</Button> : null}
+          <Button type="submit" name="intent" value="upload" loading={pending}>{t.tenants.uploadLogo}</Button>
+          {hasLogo ? <Button type="submit" name="intent" value="remove" variant="outline" loading={pending}>{t.tenants.removeLogo}</Button> : null}
           {state.ok ? <p role="status" className="text-sm">{t.tenants.logoSaved}</p> : null}
         </div>
       </form>

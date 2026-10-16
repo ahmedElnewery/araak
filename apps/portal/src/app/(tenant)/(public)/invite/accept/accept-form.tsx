@@ -54,7 +54,7 @@ export function AcceptForm({ token, email, t }: { token: string; email: string; 
         {f.confirmPassword ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[f.confirmPassword]}</p> : null}
       </div>
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
-      <Button type="submit" size="xl" className="mt-2 w-full" disabled={pending}>{t.portal.invite.activate}</Button>
+      <Button type="submit" size="xl" className="mt-2 w-full" loading={pending}>{t.portal.invite.activate}</Button>
     </form>
   );
 }

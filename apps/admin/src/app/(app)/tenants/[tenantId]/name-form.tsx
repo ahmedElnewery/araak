@@ -27,7 +27,7 @@ export function NameForm({ tenantId, displayName, subdomain, t }: Props) {
         <p id="subdomain-hint" className="text-sm text-muted-foreground">{t.tenants.subdomainReadOnly}</p>
       </div>
       <div className="flex items-center gap-3">
-        <Button type="submit" disabled={pending}>{t.tenants.saveName}</Button>
+        <Button type="submit" loading={pending}>{t.tenants.saveName}</Button>
         {state.ok ? <p role="status" className="text-sm">{t.tenants.nameSaved}</p> : null}
       </div>
     </form>

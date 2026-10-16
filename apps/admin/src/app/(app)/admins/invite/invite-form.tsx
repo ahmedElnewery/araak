@@ -34,7 +34,7 @@ export function InviteForm({ t, capabilities }: Props) {
       </fieldset>
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.errors[state.error]}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{state.notice ? t.admins.invitationNotDelivered : t.admins.invitationSent}</p> : null}
-      <Button type="submit" disabled={pending}>{t.admins.sendInvitation}</Button>
+      <Button type="submit" loading={pending}>{t.admins.sendInvitation}</Button>
     </form>
   );
 }

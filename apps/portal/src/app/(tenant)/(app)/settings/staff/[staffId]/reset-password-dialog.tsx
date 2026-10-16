@@ -33,7 +33,7 @@ export function ResetPasswordDialog({ staffId, t }: { staffId: string; t: Dictio
             </div>
             {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
             <div className="flex gap-2">
-              <Button type="submit" disabled={pending}>{t.portal.staff.confirmReset}</Button>
+              <Button type="submit" loading={pending}>{t.portal.staff.confirmReset}</Button>
               <Button type="button" variant="outline" onClick={() => {
                 setOpen(false);
               }}>{t.portal.staff.cancel}</Button>
