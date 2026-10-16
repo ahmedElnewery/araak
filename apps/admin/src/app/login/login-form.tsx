@@ -25,7 +25,7 @@ export function LoginForm({ labels }: { labels: Labels }) {
           {labels.invalidCredentials}
         </p>
       ) : null}
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" className="w-full" loading={pending}>
         {labels.signIn}
       </Button>
     </form>

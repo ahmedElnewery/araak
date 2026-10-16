@@ -25,7 +25,7 @@ export function AcceptForm({ token, t }: { token: string; t: Dictionary["admin"]
         {cf ? <p role="alert" className="text-sm text-destructive">{t.errors[cf]}</p> : null}
       </div>
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.errors[state.error]}</p> : null}
-      <Button type="submit" className="w-full" disabled={pending}>{t.admins.accept}</Button>
+      <Button type="submit" className="w-full" loading={pending}>{t.admins.accept}</Button>
     </form>
   );
 }

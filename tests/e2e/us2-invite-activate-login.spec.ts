@@ -196,6 +196,7 @@ test("self-service recovery: neutral response, one-time link, new password works
   await reset.getByLabel(t.recovery.newPassword).fill(RESET_PASSWORD);
   await reset.getByLabel(t.recovery.confirmPassword).fill(RESET_PASSWORD);
   await reset.getByRole("button", { name: t.recovery.submit }).click();
+  await reset.waitForURL((url) => url.pathname === "/login");
   await expect(reset.getByText(t.recovery.done)).toBeVisible();
   const used = await newPage(browser, fx.tenantA.subdomain);
   await used.goto(lastLink);
@@ -230,6 +231,7 @@ test("manager-assisted reset asks for the manager's own password; an expired lin
   await employee.getByLabel(t.recovery.newPassword).fill(MANAGER_RESET_PASSWORD);
   await employee.getByLabel(t.recovery.confirmPassword).fill(MANAGER_RESET_PASSWORD);
   await employee.getByRole("button", { name: t.recovery.submit }).click();
+  await employee.waitForURL((url) => url.pathname === "/login");
   await expect(employee.getByText(t.recovery.done)).toBeVisible();
   // completion ended the employee's other sessions
   await staffSession.goto(`${host(fx.tenantA.subdomain)}/account`);

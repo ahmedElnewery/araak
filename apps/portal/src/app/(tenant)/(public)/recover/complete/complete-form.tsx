@@ -1,39 +1,60 @@
 "use client";
 
-import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Lock } from "lucide-react";
 import type { Dictionary } from "@workspace/i18n";
 import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { PasswordInput } from "@workspace/ui/components/password-input";
 import { completeRecoveryAction, type RecoveryCompleteState } from "@/features/recovery/complete-action";
 
 export function CompleteForm({ token, t }: { token: string; t: Dictionary }) {
+  const router = useRouter();
   const [state, action, pending] = useActionState<RecoveryCompleteState, FormData>(completeRecoveryAction.bind(null, token), {});
-  if (state.done) {
-    return (
-      <div className="space-y-4">
-        <p role="status">{t.portal.recovery.done}</p>
-        <Link className="underline" href="/login">{t.portal.recovery.backToSignIn}</Link>
-      </div>
-    );
-  }
+
+  useEffect(() => {
+    if (!state.done) return;
+    router.replace("/login?notice=password-changed");
+  }, [state.done, router]);
+
+  if (state.done) return null;
   const f = state.fieldErrors ?? {};
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form action={action} className="space-y-5" noValidate>
       <div className="grid gap-2">
         <Label htmlFor="password">{t.portal.recovery.newPassword}</Label>
-        <Input id="password" name="password" type="password" autoComplete="new-password" dir="ltr" required />
+        <PasswordInput
+          id="password"
+          name="password"
+          size="lg"
+          autoComplete="new-password"
+          dir="ltr"
+          required
+          showPasswordLabel={t.portal.auth.showPassword}
+          hidePasswordLabel={t.portal.auth.hidePassword}
+          startIcon={<Lock className="size-4" />}
+        />
         {f.password ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[f.password]}</p> : null}
       </div>
       <div className="grid gap-2">
         <Label htmlFor="confirmPassword">{t.portal.recovery.confirmPassword}</Label>
-        <Input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" dir="ltr" required />
+        <PasswordInput
+          id="confirmPassword"
+          name="confirmPassword"
+          size="lg"
+          autoComplete="new-password"
+          dir="ltr"
+          required
+          showPasswordLabel={t.portal.auth.showPassword}
+          hidePasswordLabel={t.portal.auth.hidePassword}
+          startIcon={<Lock className="size-4" />}
+        />
         {f.confirmPassword ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[f.confirmPassword]}</p> : null}
       </div>
       {state.error === "invalid" ? <p role="alert" className="text-sm text-destructive">{t.portal.recovery.invalidBody}</p> : null}
       {state.error === "failed" ? <p role="alert" className="text-sm text-destructive">{t.portal.recovery.retryNeeded}</p> : null}
-      <Button type="submit" className="w-full" disabled={pending}>{t.portal.recovery.submit}</Button>
+      <Button type="submit" size="xl" className="mt-2 w-full" loading={pending}>{t.portal.recovery.submit}</Button>
     </form>
   );
 }

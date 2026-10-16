@@ -27,6 +27,9 @@
   --input-border: #6196a5;
   --danger: #b42318;
   --on-danger: #ffffff;
+  --toast-success-bg: #1b6b48;
+  --toast-success-border: #14593b;
+  --toast-success-text: #ffffff;
   --focus-ring: var(--accent-strong);
   --radius: 0.625rem;
   --sidebar-foreground: hsl(240 5.3% 26.1%);
@@ -56,6 +59,9 @@
   --input-border: #787878;
   --danger: #f97066;
   --on-danger: #1a0b09;
+  --toast-success-bg: #1f6b45;
+  --toast-success-border: #2a8a58;
+  --toast-success-text: #f4fff8;
   --focus-ring: var(--accent-strong);
   --sidebar-foreground: hsl(240 4.8% 95.9%);
   --sidebar-primary: hsl(224.3 76.3% 48%);
@@ -124,6 +130,86 @@ html[lang="en"] body {
   :focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
+  }
+}
+
+/* Six-dot page loader. Dots use currentColor so they follow the text token in light and dark. */
+.loader {
+  width: 4px;
+  color: currentColor;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow:
+    19px -19px 0 0px,
+    38px -19px 0 0px,
+    19px 0px 0 5px,
+    38px 0px 0 5px,
+    19px 19px 0 0px,
+    38px 19px 0 0px;
+  transform: translateX(-28.5px);
+  animation: l26 2s infinite linear;
+}
+
+@keyframes l26 {
+  0%,
+  100% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 0px,
+      19px 0px 0 5px,
+      38px 0px 0 5px,
+      19px 19px 0 0px,
+      38px 19px 0 0px;
+  }
+
+  16.66% {
+    box-shadow:
+      19px -19px 0 5px,
+      38px -19px 0 0px,
+      19px 0px 0 0px,
+      38px 0px 0 5px,
+      19px 19px 0 0px,
+      38px 19px 0 5px;
+  }
+
+  33.33% {
+    box-shadow:
+      19px -19px 0 5px,
+      38px -19px 0 5px,
+      19px 0px 0 0px,
+      38px 0px 0 0px,
+      19px 19px 0 5px,
+      38px 19px 0 0px;
+  }
+
+  50% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 5px,
+      19px 0px 0 5px,
+      38px 0px 0 0px,
+      19px 19px 0 5px,
+      38px 19px 0 0px;
+  }
+
+  66.66% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 0px,
+      19px 0px 0 5px,
+      38px 0px 0 5px,
+      19px 19px 0 0px,
+      38px 19px 0 5px;
+  }
+
+  83.33% {
+    box-shadow:
+      19px -19px 0 5px,
+      38px -19px 0 0px,
+      19px 0px 0 0px,
+      38px 0px 0 5px,
+      19px 19px 0 5px,
+      38px 19px 0 0px;
   }
 }
 

@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={locale} dir={dir} className={`${cairo.variable} ${inter.variable}`} suppressHydrationWarning>
       <body>
-        <Providers theme={theme}>{children}</Providers>
+        <Providers theme={theme} dir={dir}>{children}</Providers>
       </body>
     </html>
   );

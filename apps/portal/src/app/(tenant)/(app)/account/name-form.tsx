@@ -22,7 +22,7 @@ export function NameForm({ firstName, lastName, t }: { firstName: string | null;
       />
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{t.portal.account.nameSaved}</p> : null}
-      <Button type="submit" disabled={pending}>{t.portal.account.saveName}</Button>
+      <Button type="submit" loading={pending}>{t.portal.account.saveName}</Button>
     </form>
   );
 }

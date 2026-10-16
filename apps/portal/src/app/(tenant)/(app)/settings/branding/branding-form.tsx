@@ -52,7 +52,7 @@ export function BrandingForm({ displayName, logoSrc, t }: Props) {
 
       {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{t.portal.branding.saved}</p> : null}
-      <Button type="submit" disabled={pending}>{t.portal.branding.save}</Button>
+      <Button type="submit" loading={pending}>{t.portal.branding.save}</Button>
     </form>
   );
 }

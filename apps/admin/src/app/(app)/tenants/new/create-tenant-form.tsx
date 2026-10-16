@@ -50,7 +50,7 @@ export function CreateTenantForm({ t }: { t: Dictionary["admin"] }) {
         <Input id="managerEmail" name="managerEmail" type="email" required dir="ltr" autoComplete="off" aria-invalid={!!errors.managerEmail} />
       </Field>
       {state.error ? <p role="alert" className="text-sm text-destructive">{msg(state.error)}</p> : null}
-      <Button type="submit" disabled={pending}>{t.tenants.create}</Button>
+      <Button type="submit" loading={pending}>{t.tenants.create}</Button>
     </form>
   );
 }

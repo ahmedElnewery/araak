@@ -91,6 +91,8 @@ test("System follows the emulated colour scheme; an explicit Dark/Light persists
   const first = await pageIn(browser, { colorScheme: "dark" });
   await first.context().addCookies([{ name: "locale", value: "en", url: host(fx.tenantA.subdomain) }]);
   await signIn(first, fx.managerA.username, en.portal);
+  await expect(first.locator("html")).not.toHaveClass(/dark/); // no choice yet: Light, even on a dark OS
+  await pick(first, en.common.theme, en.common.themeSystem);
   await expect(first.locator("html")).toHaveClass(/dark/); // System + dark OS
   await first.emulateMedia({ colorScheme: "light" });
   await expect(first.locator("html")).not.toHaveClass(/dark/);

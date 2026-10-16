@@ -116,7 +116,8 @@ export type Dictionary = {
       noLogo: string; remove: string; save: string; saved: string; removeLogo: string;
     };
     auth: {
-      title: string; identifier: string; identifierHint: string; password: string; signIn: string;
+      title: string; identifier: string; password: string; signIn: string;
+      showPassword: string; hidePassword: string;
       invalidCredentials: string; forgotPassword: string; sessionExpired: string;
     };
     invite: {
