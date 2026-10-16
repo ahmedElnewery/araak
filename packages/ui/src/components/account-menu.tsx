@@ -3,6 +3,7 @@
 import { ChevronDown, LogOut } from "lucide-react";
 import { useRef, type ComponentType, type ReactNode } from "react";
 import type { ShellLinkProps } from "@workspace/ui/components/app-shell";
+import { Avatar } from "@workspace/ui/components/avatar";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
@@ -21,14 +22,6 @@ type Props = {
   link: ComponentType<ShellLinkProps>;
   signOut: { label: string; action: () => void | Promise<void> };
 };
-
-function Avatar({ initials, className }: { initials: string; className?: string }) {
-  return (
-    <span aria-hidden="true" className={`flex shrink-0 items-center justify-center rounded-[10px] bg-accent text-[13px] font-extrabold text-accent-foreground ${className ?? "size-9"}`}>
-      {initials}
-    </span>
-  );
-}
 
 /**
  * The account entry at the end of the top bar: avatar and name, opening the person's own pages and sign-out.

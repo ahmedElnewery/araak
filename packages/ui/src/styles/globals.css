@@ -27,6 +27,13 @@
   --input-border: #6196a5;
   --danger: #b42318;
   --on-danger: #ffffff;
+  /* status badges: text on its soft surface (check-contrast.mjs) */
+  --success: #1b6b48;
+  --success-soft: #e7f2ec;
+  --warning: #7a4f00;
+  --warning-soft: #fdf3e1;
+  --danger-soft: #fdecea;
+  --neutral-soft: #eef3f5;
   --toast-success-bg: #1b6b48;
   --toast-success-border: #14593b;
   --toast-success-text: #ffffff;
@@ -59,6 +66,12 @@
   --input-border: #787878;
   --danger: #f97066;
   --on-danger: #1a0b09;
+  --success: #8fd9b0;
+  --success-soft: #1f3a2d;
+  --warning: #f2c46b;
+  --warning-soft: #3d3220;
+  --danger-soft: #3f2422;
+  --neutral-soft: #3a3a3a;
   --toast-success-bg: #1f6b45;
   --toast-success-border: #2a8a58;
   --toast-success-text: #f4fff8;
@@ -90,6 +103,12 @@
   --color-accent-foreground: var(--accent-strong);
   --color-destructive: var(--danger);
   --color-destructive-foreground: var(--on-danger);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger-soft: var(--danger-soft);
+  --color-neutral-soft: var(--neutral-soft);
   --color-border: var(--line);
   --color-input: var(--input-border);
   --color-ring: var(--focus-ring);

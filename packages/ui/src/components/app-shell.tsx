@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@workspace/ui/components/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@workspace/ui/components/tooltip";
 import { useMediaQuery } from "@workspace/ui/hooks/use-media-query";
+import type { LinkProps } from "@workspace/ui/lib/link";
 import { SIDEBAR_COLLAPSED, SIDEBAR_COOKIE } from "@workspace/ui/lib/shell";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -23,13 +24,7 @@ export type ShellNavItem = {
 export type ShellNavGroup = { id: string; label?: string; items: ShellNavItem[] };
 /** The secondary sidebar of the section the current page belongs to (Constitution X: only for modules with subsections). */
 export type ShellSection = { eyebrow?: string; title: string; label: string; items: ShellNavItem[] };
-export type ShellLinkProps = {
-  href: string;
-  className?: string;
-  children: ReactNode;
-  "aria-current"?: "page" | "true";
-  onClick?: () => void;
-};
+export type ShellLinkProps = LinkProps;
 
 type Props = {
   dir: "rtl" | "ltr";

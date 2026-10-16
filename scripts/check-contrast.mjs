@@ -27,6 +27,8 @@ const pairs = [
   ["danger", "card", 4.5, "danger text on card"], ["toast-success-text", "toast-success-bg", 4.5, "success toast text"],
   ["input-border", "card", 3, "input border vs card (non-text)"], ["input-border", "bg", 3, "input border vs page (non-text)"],
   ["focus-ring", "bg", 3, "focus ring vs page"], ["focus-ring", "card", 3, "focus ring vs card"],
+  ["success", "success-soft", 4.5, "success badge text"], ["warning", "warning-soft", 4.5, "warning badge text"],
+  ["danger", "danger-soft", 4.5, "danger badge text"], ["muted", "neutral-soft", 4.5, "neutral badge text"],
 ];
 
 let failed = 0;

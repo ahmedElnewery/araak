@@ -1,7 +1,8 @@
 "use client";
 
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useId, type ReactNode } from "react";
+import { useId } from "react";
+import { SettingsSection, SettingsSections } from "@workspace/ui/components/settings-section";
 import { cn } from "@workspace/ui/lib/utils";
 
 export type ThemeMode = "system" | "light" | "dark";
@@ -37,18 +38,6 @@ function Half({ palette }: { palette: keyof typeof PALETTES }) {
   );
 }
 
-function Section({ id, title, hint, children }: { id: string; title: string; hint: string; children: ReactNode }) {
-  return (
-    <section aria-labelledby={id} className="grid gap-4 py-7 first:pt-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-12">
-      <div>
-        <h2 id={id} className="text-[15px] font-extrabold">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
-      </div>
-      {children}
-    </section>
-  );
-}
-
 // The native input covers its whole card (transparent), so a click or tap anywhere on the card hits the radio itself.
 const INPUT = "absolute inset-0 size-full cursor-pointer appearance-none rounded-xl opacity-0";
 const CARD =
@@ -68,8 +57,8 @@ export function AppearancePicker({ theme, locale, onThemeChange, onLocaleChange,
     { value: "en", label: "English" },
   ] as const;
   return (
-    <div className="divide-y divide-border" aria-busy={pending || undefined}>
-      <Section id={`${id}-theme`} title={labels.theme} hint={labels.themeHint}>
+    <SettingsSections aria-busy={pending || undefined}>
+      <SettingsSection id={`${id}-theme`} title={labels.theme} description={labels.themeHint}>
         <div role="radiogroup" aria-labelledby={`${id}-theme`} className="grid grid-cols-3 gap-3">
           {themes.map(({ value, label, Icon, halves }) => (
             <label key={value} className={cn(CARD, "flex flex-col gap-2 p-2")}>
@@ -85,8 +74,8 @@ export function AppearancePicker({ theme, locale, onThemeChange, onLocaleChange,
             </label>
           ))}
         </div>
-      </Section>
-      <Section id={`${id}-language`} title={labels.language} hint={labels.languageHint}>
+      </SettingsSection>
+      <SettingsSection id={`${id}-language`} title={labels.language} description={labels.languageHint}>
         <div role="radiogroup" aria-labelledby={`${id}-language`} className="flex flex-col gap-2">
           {languages.map(({ value, label }) => (
             <label key={value} className={cn(CARD, "group flex min-h-13 items-center gap-3 px-4")}>
@@ -96,7 +85,7 @@ export function AppearancePicker({ theme, locale, onThemeChange, onLocaleChange,
             </label>
           ))}
         </div>
-      </Section>
-    </div>
+      </SettingsSection>
+    </SettingsSections>
   );
 }
