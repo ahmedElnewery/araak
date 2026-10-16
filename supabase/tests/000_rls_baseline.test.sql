@@ -67,7 +67,9 @@ select is((select array_agg(p.proname::text order by p.proname) from pg_proc p j
                'list_pending_invitations','list_grantable_roles','change_my_username','change_my_name','list_my_sessions','revoke_my_session','revoke_my_other_sessions','touch_session_activity','request_manager_assisted_reset','platform_request_staff_reset',
                'create_role','update_role','archive_role','restore_role','list_roles',
                'set_staff_roles','disable_staff','enable_staff','list_staff','get_staff',
-               'get_my_preferences','set_my_preferences','update_tenant_branding','platform_update_tenant_logo'])),
+               'get_my_preferences','set_my_preferences','update_tenant_branding','platform_update_tenant_logo',
+               'list_tenant_audit','get_tenant_audit_event','export_tenant_audit','list_security_events','get_security_event',
+               'export_security_events','platform_list_audit'])),
           null::text[], 'public functions executable by authenticated are exactly the allowlisted RPCs');
 select is((select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
            where n.nspname = 'public' and p.proname like 'svc\_%' and has_function_privilege('service_role', p.oid, 'EXECUTE') = false),

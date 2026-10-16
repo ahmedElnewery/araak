@@ -1,4 +1,5 @@
-import { AUDIT_CATEGORIES, type AuditCategory, type PermissionKey } from "./catalog";
+import { AUDIT_CATEGORIES, type AuditCategory } from "./audit-categories";
+import type { PermissionKey } from "./catalog";
 import type { EffectivePermissions } from "./evaluate";
 import { canGrant } from "./grant-ceiling";
 

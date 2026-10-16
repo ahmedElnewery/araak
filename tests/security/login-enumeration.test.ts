@@ -78,7 +78,7 @@ describe("throttling", () => {
     expect(await attempt(fx.tenantB.id, fx.staffB.username, PASSWORD)).toMatchObject({ ok: true }); // another identifier
     expect(await attempt(fx.tenantA.id, victim.username, PASSWORD)).toEqual({ ok: false }); // not an account in tenant A anyway
     // the throttle log holds only HMACs: no raw identifier
-    const events = await sql<{ metadata: unknown }>(`select metadata from public.tenant_security_events where tenant_id = '${fx.tenantB.id}' and event = 'auth.login_throttled'`);
+    const events = await sql<{ metadata: unknown }>(`select metadata from public.tenant_security_events where tenant_id = '${fx.tenantB.id}' and event = 'auth.sign_in_failed' and metadata ->> 'reason' = 'throttled'`);
     expect(events.length).toBeGreaterThan(0);
     expect(JSON.stringify(events)).not.toContain(victim.username);
     const rows = await sql(`select 1 from private.auth_attempts where tenant_id = '${fx.tenantB.id}'`);

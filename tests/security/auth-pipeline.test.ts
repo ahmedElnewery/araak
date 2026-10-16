@@ -177,7 +177,7 @@ describe("tenant isolation through the real API (JWT + RLS)", () => {
 describe("audit wrappers", () => {
   it("write rows without secret-like metadata keys", async () => {
     await recordTenantAudit({ tenantId: fx.tenantA.id, actor: { kind: "staff", staffId: fx.managerA.id }, category: "staff", event: "staff.disabled", metadata: { reason: "x", password: "p", nested: { api_token: "t", ok: 1 } } });
-    await recordSecurityEvent({ tenantId: fx.tenantA.id, event: "auth.login_failed", metadata: { token: "t", attempt: 2 } });
+    await recordSecurityEvent({ tenantId: fx.tenantA.id, event: "auth.sign_in_failed", metadata: { token: "t", attempt: 2 } });
     await recordPlatformAudit({ adminId: fx.platformAdminId, event: "tenant.created", metadata: { secret: "s", n: 1 } });
     const [t] = await sql<{ metadata: unknown }>(`select metadata from public.tenant_audit_events where tenant_id = '${fx.tenantA.id}' order by id desc limit 1`);
     expect(t!.metadata).toEqual({ reason: "x", nested: { ok: 1 } });

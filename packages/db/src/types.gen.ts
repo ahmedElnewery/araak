@@ -917,8 +917,29 @@ export type Database = {
       };
       disable_staff: { Args: { p_staff_id: string }; Returns: Json };
       enable_staff: { Args: { p_staff_id: string }; Returns: Json };
+      export_security_events: {
+        Args: {
+          p_event?: string;
+          p_from?: string;
+          p_search?: string;
+          p_to?: string;
+        };
+        Returns: Json;
+      };
+      export_tenant_audit: {
+        Args: {
+          p_actor?: string;
+          p_categories?: string[];
+          p_from?: string;
+          p_search?: string;
+          p_to?: string;
+        };
+        Returns: Json;
+      };
       get_my_preferences: { Args: never; Returns: Json };
+      get_security_event: { Args: { p_id: number }; Returns: Json };
       get_staff: { Args: { p_staff_id: string }; Returns: Json };
+      get_tenant_audit_event: { Args: { p_id: number }; Returns: Json };
       invite_staff: {
         Args: { p_email: string; p_role_ids: string[]; p_token_hash: string };
         Returns: string;
@@ -927,7 +948,30 @@ export type Database = {
       list_my_sessions: { Args: never; Returns: Json };
       list_pending_invitations: { Args: never; Returns: Json };
       list_roles: { Args: never; Returns: Json };
+      list_security_events: {
+        Args: {
+          p_event?: string;
+          p_from?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_search?: string;
+          p_to?: string;
+        };
+        Returns: Json;
+      };
       list_staff: { Args: never; Returns: Json };
+      list_tenant_audit: {
+        Args: {
+          p_actor?: string;
+          p_categories?: string[];
+          p_from?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_search?: string;
+          p_to?: string;
+        };
+        Returns: Json;
+      };
       my_effective_permissions: { Args: never; Returns: Json };
       platform_create_tenant: {
         Args: {
@@ -968,6 +1012,17 @@ export type Database = {
       platform_invite_tenant_manager: {
         Args: { p_email: string; p_tenant_id: string; p_token_hash: string };
         Returns: string;
+      };
+      platform_list_audit: {
+        Args: {
+          p_event?: string;
+          p_from?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_search?: string;
+          p_to?: string;
+        };
+        Returns: Json;
       };
       platform_list_tenant_staff: {
         Args: { p_tenant_id: string };

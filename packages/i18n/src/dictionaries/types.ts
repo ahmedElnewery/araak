@@ -1,3 +1,22 @@
+/** Tenant audit event names the viewer labels (unknown names fall back to the raw code). */
+export type TenantAuditEventName =
+  | "staff.activated" | "staff.disabled" | "staff.enabled" | "staff.name_changed" | "staff.username_changed"
+  | "staff.role_added" | "staff.role_removed" | "staff.disable_denied" | "staff.enable_denied" | "staff.roles_denied"
+  | "manager.granted" | "manager.revoked" | "password.reset_initiated" | "password.reset_completed" | "password.changed"
+  | "invitation.issued" | "invitation.resent" | "invitation.delivery_failed"
+  | "role.created" | "role.updated" | "role.archived" | "role.restored"
+  | "role.create_denied" | "role.update_denied" | "role.archive_denied" | "role.restore_denied"
+  | "tenant.created" | "tenant.suspended" | "tenant.activated" | "tenant.name_updated" | "tenant.branding_updated"
+  | "tenant.logo_updated" | "audit.exported" | "session.revoked";
+export type SecurityEventName =
+  | "auth.sign_in_failed" | "authz.denied" | "authz.privilege_escalation_denied" | "authz.self_membership_denied"
+  | "authz.role_self_edit_denied" | "session.invalid_reuse";
+export type PlatformAuditEventName =
+  | "tenant.created" | "tenant.suspended" | "tenant.activated" | "tenant.name_updated" | "tenant.logo_updated"
+  | "manager.granted" | "manager.invited" | "manager.revoked" | "platform_admin.invited" | "platform_admin.invitation_accepted"
+  | "platform_admin.invitation_rejected" | "platform_admin.bootstrapped" | "platform_admin.revoked_by_ops"
+  | "auth.sign_in_failed" | "authz.denied" | "retention.purged" | "restore.rehearsed";
+
 /** Every user-facing string of the foundation shell. Both locales must provide every key (dictionaries.test.ts). */
 export type Dictionary = {
   common: {
@@ -11,6 +30,7 @@ export type Dictionary = {
     retry: string;
     openMenu: string;
     closeMenu: string;
+    close: string;
     logoAlt: string;
   };
   errors: {
@@ -29,7 +49,7 @@ export type Dictionary = {
     home: string;
   };
   admin: {
-    nav: { tenants: string; admins: string; menu: string; brand: string };
+    nav: { tenants: string; admins: string; audit: string; menu: string; brand: string };
     common: { cancel: string; created: string; state: string; actions: string; none: string; back: string };
     auth: {
       title: string; email: string; password: string; confirmPassword: string; signIn: string; signOut: string;
@@ -58,6 +78,13 @@ export type Dictionary = {
       title: string; intro: string; invite: string; inviteTitle: string; capabilities: string; sendInvitation: string;
       invitationSent: string; invitationNotDelivered: string; acceptTitle: string; acceptIntro: string; accept: string;
       invitationInvalid: string; noRemoval: string;
+    };
+    audit: {
+      title: string; intro: string; eventType: string; allEvents: string; search: string; searchHint: string; from: string;
+      to: string; apply: string; clear: string; colTime: string; colEvent: string; colActor: string; colOrganization: string;
+      details: string; noDetails: string; empty: string; emptyFiltered: string; count: string; previous: string; next: string;
+      pageOf: string; pagination: string; actorOperator: string; actorSystem: string;
+      events: Record<PlatformAuditEventName, string>;
     };
     capabilities: {
       "tenants.manage": string; "tenants.managers.manage": string; "tenants.staff.manage": string;
@@ -122,6 +149,21 @@ export type Dictionary = {
       extraNote: string; noSwitches: string; open: string; view: string;
       switches: { viewStaff: string; manageStaff: string; manageRoles: string; viewAudit: string };
       switchHints: { viewStaff: string; manageStaff: string; manageRoles: string; viewAudit: string };
+    };
+    audit: {
+      title: string; intro: string; filtersTitle: string; categoriesLabel: string; from: string; to: string; search: string;
+      searchHint: string; apply: string; clear: string; export: string; exportNote: string; colTime: string; colCategory: string;
+      colEvent: string; colActor: string; colResource: string; colDetails: string; viewDetails: string; detailTitle: string;
+      eventCode: string; noDetails: string; empty: string; emptyFiltered: string; count: string; previous: string; next: string;
+      pageOf: string; pagination: string; actorPlatform: string; actorSystem: string; filterByActor: string;
+      actorFiltered: string; removeFilter: string; retentionNote: string;
+      categories: { staff: string; invitations: string; roles: string; tenant_settings: string; sessions: string };
+      events: Record<TenantAuditEventName, string>;
+    };
+    securityLogs: {
+      title: string; intro: string; eventType: string; allEvents: string; empty: string; emptyFiltered: string;
+      detailTitle: string; export: string; retentionNote: string;
+      events: Record<SecurityEventName, string>;
     };
     account: {
       title: string; username: string; changeUsername: string; save: string; saved: string; email: string;

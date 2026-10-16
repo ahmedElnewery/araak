@@ -1,5 +1,6 @@
 import "server-only";
 import { AuthError } from "../errors";
+import { recordSecurityEvent } from "./audit";
 import type { ServerClient } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
@@ -52,7 +53,11 @@ export async function getTenantStaffContext(hostTenant: HostTenant, supabase: Se
   if (!row || row.tenantId !== hostTenant.id) throw new AuthError("unauthenticated");
   if (row.tenantState !== "active") throw new AuthError("suspended");
   if (!row.enabled) throw new AuthError("forbidden");
-  if (!row.sessionLive) throw new AuthError("session_expired");
+  if (!row.sessionLive) {
+    // a revoked or expired session presented again (CL-034); best effort, deduplicated per minute by the database
+    await recordSecurityEvent({ tenantId: row.tenantId, staffId: row.staffId, event: "session.invalid_reuse" }).catch(() => undefined);
+    throw new AuthError("session_expired");
+  }
   return { authUserId: sub, sessionId, tenantId: row.tenantId, staffId: row.staffId, username: row.username,
            firstName: row.firstName ?? null, lastName: row.lastName ?? null, email: row.email, isManager: row.isManager, supabase };
 }

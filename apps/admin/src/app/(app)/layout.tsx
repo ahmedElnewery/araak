@@ -12,6 +12,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const nav = [
     ...(TENANT_CAPABILITIES.some((c) => ctx.capabilities.includes(c)) ? [{ href: "/tenants", label: t.admin.nav.tenants, icon: "tenants" as const }] : []),
     ...(ctx.capabilities.includes("platform_admins.invite") ? [{ href: "/admins", label: t.admin.nav.admins, icon: "admins" as const }] : []),
+    ...(ctx.capabilities.includes("platform_audit.view") ? [{ href: "/audit", label: t.admin.nav.audit, icon: "audit" as const }] : []),
   ];
   return (
     <AdminShell

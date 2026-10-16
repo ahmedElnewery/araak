@@ -1,4 +1,5 @@
-import { AUDIT_CATEGORIES, SUPPORTED_SCOPES, isTenantGrantable, type AuditCategory, type RecordScope } from "./catalog";
+import { AUDIT_CATEGORIES, type AuditCategory } from "./audit-categories";
+import { SUPPORTED_SCOPES, isTenantGrantable, type RecordScope } from "./catalog";
 import { auditCategoriesFor, type EffectivePermissions } from "./evaluate";
 
 export type RequestedGrant = { key: string; scope: RecordScope; auditCategories?: AuditCategory[] | null };

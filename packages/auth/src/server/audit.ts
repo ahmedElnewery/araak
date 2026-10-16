@@ -7,13 +7,15 @@ export type TenantAuditEvent =
   | "invitation.resent" | "role.created" | "role.updated" | "role.archived" | "role.restored" | "role.assigned"
   | "role.unassigned" | "staff.username_changed" | "password.reset_completed" | "tenant.branding_updated" | "session.revoked" | "password.reset_initiated" | "password.changed"
   | "tenant.created" | "tenant.suspended" | "tenant.activated" | "tenant.name_updated" | "tenant.logo_updated" | "manager.granted" | "manager.revoked";
+/** The approved Security Log types (SECURITY_EVENT_TYPES in @workspace/authorization; the database rejects others). */
 export type SecurityEvent =
-  | "auth.login_failed" | "auth.login_throttled" | "authz.denied" | "session.invalid" | "tenant.cross_access_denied";
+  | "auth.sign_in_failed" | "authz.denied" | "authz.privilege_escalation_denied" | "authz.self_membership_denied"
+  | "authz.role_self_edit_denied" | "session.invalid_reuse";
 export type PlatformAuditEvent =
   | "tenant.created" | "tenant.suspended" | "tenant.activated" | "manager.granted" | "manager.revoked"
   | "platform_admin.invited" | "platform_admin.bootstrapped" | "platform_admin.invitation_accepted"
   | "platform_admin.invitation_rejected" | "platform_admin.revoked_by_ops" | "tenant.name_updated" | "tenant.logo_updated" | "manager.invited"
-  | "auth.login_failed" | "auth.login_throttled" | "restore.rehearsed" | "authz.denied";
+  | "auth.sign_in_failed" | "restore.rehearsed" | "authz.denied";
 
 type Meta = Record<string, unknown>;
 
@@ -36,6 +38,10 @@ export async function recordTenantAudit(e: {
   if (error) throw new Error("audit_write_failed");
 }
 
+/**
+ * Identical events (same tenant, actor, type and metadata) within 60 seconds are written once (flood control in
+ * private.write_security_event_throttled). Never pass raw identifiers, IPs or tokens.
+ */
 export async function recordSecurityEvent(e: { tenantId: string; staffId?: string; event: SecurityEvent; metadata?: Meta }) {
   const { error } = await getSupabaseAdmin().rpc("svc_write_security_event", {
     p_tenant_id: e.tenantId,

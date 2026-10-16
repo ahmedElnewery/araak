@@ -4,9 +4,6 @@
 export const RECORD_SCOPES = ["all", "own", "assigned"] as const;
 export type RecordScope = (typeof RECORD_SCOPES)[number];
 
-export const AUDIT_CATEGORIES = ["staff", "invitations", "roles", "tenant_settings", "sessions"] as const;
-export type AuditCategory = (typeof AUDIT_CATEGORIES)[number];
-
 export const TENANT_GRANTABLE_KEYS = [
   "staff.view", "staff.invite", "staff.disable", "staff.enable", "staff.roles.assign",
   "roles.view", "roles.create", "roles.update", "roles.archive", "roles.restore", "audit_logs.view",

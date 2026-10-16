@@ -1,5 +1,6 @@
-import type { AuditCategory, ManagerOnlyKey, PermissionKey, RecordScope } from "./catalog";
-import { AUDIT_CATEGORIES, isTenantGrantable } from "./catalog";
+import { AUDIT_CATEGORIES, type AuditCategory } from "./audit-categories";
+import type { ManagerOnlyKey, PermissionKey, RecordScope } from "./catalog";
+import { isTenantGrantable } from "./catalog";
 
 export type EffectiveGrant = { key: PermissionKey; scope: RecordScope; auditCategories: AuditCategory[] | null };
 export type EffectivePermissions = { isManager: boolean; permissions: EffectiveGrant[] };

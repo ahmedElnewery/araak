@@ -1,5 +1,6 @@
 // The TypeScript catalog and email normalization must match the database (the database is authoritative).
 import { describe, expect, it } from "vitest";
+import { AUDIT_CATEGORIES, SECURITY_EVENT_TYPES } from "../../packages/authorization/src/audit-categories";
 import { MANAGER_ONLY_KEYS, SUPPORTED_SCOPES, TENANT_GRANTABLE_KEYS } from "../../packages/authorization/src/catalog";
 import { normalizeEmail } from "../../packages/auth/src/email/normalize";
 import { RESERVED_SUBDOMAINS } from "../../packages/tenancy/src/reserved-subdomains";
@@ -16,6 +17,12 @@ describe("TS <-> DB parity", () => {
       expect(db[k]!.supports_scopes).toBe(`{${SUPPORTED_SCOPES[k].join(",")}}`);
     }
     for (const k of MANAGER_ONLY_KEYS) expect(db[k]!.tenant_grantable).toBe(false);
+  });
+  it("approved audit categories and Security Log event types match the database constraints", async () => {
+    const [row] = await sql<{ cats: string[]; types: string[] }>(
+      `select private.approved_audit_categories() cats, private.approved_security_event_types() types`);
+    expect([...row!.cats].sort()).toEqual([...AUDIT_CATEGORIES].sort());
+    expect([...row!.types].sort()).toEqual([...SECURITY_EVENT_TYPES].sort());
   });
   it("reserved subdomains match", async () => {
     const rows = await sql<{ name: string }>(`select name from private.reserved_subdomains`);

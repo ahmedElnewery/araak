@@ -16,6 +16,7 @@ vi.mock("next/headers", () => ({
       setCalls.push({ name, options });
     },
   }),
+  headers: async () => new Headers(),
 }));
 vi.mock("next/navigation", () => ({
   redirect: (to: string) => {
@@ -114,6 +115,28 @@ describe("portal guards (T071)", () => {
     const events = await sql<{ metadata: { reason: string } }>(
       `select metadata from public.tenant_security_events where tenant_id = '${fx.tenantA.id}' and event = 'authz.denied' order by id`);
     expect(events.map((e) => e.metadata.reason)).toEqual(["permission:roles.create", "manager_only"]);
+  });
+  it("repeated identical denials within a minute are recorded once (flood control)", async () => {
+    const { requirePermission } = await import("../../apps/portal/src/lib/guards");
+    currentTenant = tenantOf(fx.tenantA);
+    await signInAs(fx.staffA);
+    for (let i = 0; i < 3; i++) expect(await redirectOf(requirePermission("roles.create"))).toBe("REDIRECT:/forbidden");
+    const [row] = await sql<{ n: number }>(`select count(*)::int n from public.tenant_security_events
+      where tenant_id = '${fx.tenantA.id}' and event = 'authz.denied' and metadata ->> 'reason' = 'permission:roles.create'`);
+    expect(row!.n).toBe(1);
+  });
+  it("reusing a revoked session is denied and recorded once as session.invalid_reuse", async () => {
+    const { requireStaff } = await import("../../apps/portal/src/lib/guards");
+    currentTenant = tenantOf(fx.tenantA);
+    await signInAs(fx.managerA);
+    await sql(`update public.session_registry set revoked_at = now(), revoked_reason = 'user'
+               where staff_id = '${fx.managerA.id}' and revoked_at is null`);
+    expect(await redirectOf(requireStaff())).toBe("REDIRECT:/login?reason=expired");
+    expect(await redirectOf(requireStaff())).toBe("REDIRECT:/login?reason=expired");
+    const rows = await sql<{ metadata: unknown }>(`select metadata from public.tenant_security_events
+      where tenant_id = '${fx.tenantA.id}' and event = 'session.invalid_reuse' and actor_staff_id = '${fx.managerA.id}'`);
+    expect(rows).toHaveLength(1);
+    expect(JSON.stringify(rows)).not.toMatch(/eyJ|session_id|token/i); // no token or provider session id is stored
   });
   it("a manager passes requireManager and every grantable permission", async () => {
     const { requirePermission, requireManager } = await import("../../apps/portal/src/lib/guards");

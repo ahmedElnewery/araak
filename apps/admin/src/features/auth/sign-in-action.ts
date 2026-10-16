@@ -31,14 +31,14 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
   });
   if (!(await checkAndRecordAttempt(keys))) {
     await padFailedSignIn(); // a throttled attempt costs what a failed password check costs, without an Auth call
-    await recordPlatformAudit({ event: "auth.login_throttled", metadata: { identifierHmac: keys.identifierHmac } }).catch(() => undefined);
+    await recordPlatformAudit({ event: "auth.sign_in_failed", metadata: { identifierHmac: keys.identifierHmac, reason: "throttled" } }).catch(() => undefined);
     return { error: "invalid" };
   }
 
   const supabase = await createSupabaseServerClient("admin");
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
   if (error) {
-    await recordPlatformAudit({ event: "auth.login_failed", metadata: { reason: "credentials" } }).catch(() => undefined);
+    await recordPlatformAudit({ event: "auth.sign_in_failed", metadata: { reason: "credentials" } }).catch(() => undefined);
     return { error: "invalid" };
   }
   const { data: row } = await getSupabaseAdmin()
@@ -55,7 +55,7 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
   };
   if (!row?.enabled) {
     await endSession();
-    await recordPlatformAudit({ event: "auth.login_failed", metadata: { reason: "not_platform_admin" } }).catch(() => undefined);
+    await recordPlatformAudit({ event: "auth.sign_in_failed", metadata: { reason: "not_platform_admin" } }).catch(() => undefined);
     return { error: "invalid" };
   }
   try {
@@ -66,7 +66,7 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
     });
   } catch {
     await endSession();
-    await recordPlatformAudit({ adminId: data.user.id, event: "auth.login_failed", metadata: { reason: "session_registration" } }).catch(() => undefined);
+    await recordPlatformAudit({ adminId: data.user.id, event: "auth.sign_in_failed", metadata: { reason: "session_registration" } }).catch(() => undefined);
     return { error: "invalid" };
   }
   await recordAuthSuccess(keys);
