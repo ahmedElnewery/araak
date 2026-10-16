@@ -67,7 +67,10 @@ for (const v of variants) {
     await guest.context().close();
 
     const page = await portalSignIn(browser, v);
-    const paths = ["/", "/account", "/settings/staff/invitations", "/settings/staff/invite", "/settings/branding", "/sessions", "/settings/roles", "/audit", "/security-logs"];
+    const paths = [
+      "/", "/account", "/account/appearance", "/account/password", "/account/sessions", "/settings/staff", "/settings/staff/invitations",
+      "/settings/staff/invite", "/settings/branding", "/settings/roles", "/audit", "/security-logs",
+    ];
     for (const path of paths) {
       const res = await page.goto(`${host(sub)}${path}`);
       if (!res || res.status() >= 400 || page.url().endsWith("/forbidden") || page.url().endsWith("/login")) continue; // not shipped yet
@@ -90,6 +93,8 @@ for (const v of variants) {
     await page.locator("form button[type=submit]").click();
     await page.waitForURL(/\/tenants/);
     await scan(page, `admin /tenants ${v.locale}/${v.theme}`);
+    await page.goto(`${adminUrl}/appearance`);
+    await scan(page, `admin /appearance ${v.locale}/${v.theme}`);
     await page.goto(`${adminUrl}/tenants/${fx.tenantA.id}`);
     await scan(page, `admin tenant details ${v.locale}/${v.theme}`);
     await context.close();
@@ -99,6 +104,7 @@ for (const v of variants) {
 test("keyboard-only traversal: visible focus, dialog focus trap and focus return", async ({ browser }, testInfo) => {
   test.skip(testInfo.project.name !== "portal-tenant-a", "one project drives the tenant host");
   const page = await portalSignIn(browser, { locale: "en", theme: "light" });
+  await page.waitForLoadState("networkidle"); // keys go to a settled page, not one still navigating after sign-in
   // visible focus on every stop of the shell
   const seen = new Set<string>();
   for (let i = 0; i < 14; i++) {
@@ -118,7 +124,7 @@ test("keyboard-only traversal: visible focus, dialog focus trap and focus return
   }
   expect(seen.size).toBeGreaterThan(5);
   // the skip link is the first stop and moves focus to the main landmark
-  await page.goto(`${host(fx.tenantA.subdomain)}/`);
+  await page.goto(`${host(fx.tenantA.subdomain)}/`, { waitUntil: "networkidle" });
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: en.common.skipToContent })).toBeFocused();
   await page.keyboard.press("Enter");

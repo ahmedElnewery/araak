@@ -1,30 +1,30 @@
-import Link from "next/link";
+import { formatDate, type Locale } from "@workspace/i18n";
 import type { ReactNode } from "react";
-import { buttonVariants } from "@workspace/ui/components/button";
-import { cn } from "@workspace/ui/lib/utils";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
 import { metadataEntries } from "@/features/audit/present";
 
-/** Previous / "Page x of y" / Next. Links are plain GET URLs, so every page is re-authorized by the server. */
-export function AuditPagination({ page, pages, href, labels }: {
-  page: number; pages: number; href: (page: number) => string;
-  labels: { pagination: string; previous: string; next: string; pageOf: string };
-}) {
-  if (pages <= 1) return null;
-  const link = (enabled: boolean, target: number, text: string) =>
-    enabled ? (
-      <Link href={href(target)} className={buttonVariants({ variant: "outline", size: "sm" })}>{text}</Link>
-    ) : (
-      <span aria-disabled="true" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "pointer-events-none opacity-50")}>{text}</span>
-    );
+/** The date range of a log filter, inside its "Period" menu. Whole days in UTC, both ends inclusive (filters.ts). */
+export function PeriodFields({ idPrefix, from, to, labels }: { idPrefix: string; from: string | null; to: string | null; labels: { from: string; to: string } }) {
   return (
-    <nav aria-label={labels.pagination} className="flex flex-wrap items-center justify-between gap-3">
-      {link(page > 1, page - 1, labels.previous)}
-      <span className="text-sm text-muted-foreground">
-        {labels.pageOf.replace("{page}", String(page)).replace("{pages}", String(pages))}
-      </span>
-      {link(page < pages, page + 1, labels.next)}
-    </nav>
+    <div className="grid gap-3 p-1">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${idPrefix}-from`}>{labels.from}</Label>
+        <Input id={`${idPrefix}-from`} type="date" name="from" defaultValue={from ?? ""} />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${idPrefix}-to`}>{labels.to}</Label>
+        <Input id={`${idPrefix}-to`} type="date" name="to" defaultValue={to ?? ""} />
+      </div>
+    </div>
   );
+}
+
+/** What the "Period" menu shows while closed: the chosen range, an open end left as a dash. */
+export function periodLabel(f: { from: string | null; to: string | null }, locale: Locale, all: string): string {
+  if (!f.from && !f.to) return all;
+  const day = (d: string | null) => (d ? formatDate(d, locale) : "…");
+  return `${day(f.from)} – ${day(f.to)}`;
 }
 
 /** A definition list of the event's fixed fields followed by its (already sanitized) metadata. */

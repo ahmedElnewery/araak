@@ -39,7 +39,7 @@ async function device(browser: Browser, userAgent?: string): Promise<{ context: 
 async function signIn(page: Page) {
   await page.goto(`${host(fx.tenantA.subdomain)}/login`);
   await page.getByLabel(t.auth.identifier).fill(fx.staffA.username);
-  await page.getByLabel(t.auth.password).fill(PASSWORD);
+  await page.getByLabel(t.auth.password, { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: t.auth.signIn }).click();
   await page.waitForURL(`${host(fx.tenantA.subdomain)}/`);
 }

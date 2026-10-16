@@ -1,11 +1,13 @@
 "use client";
 
-import { Building2, History, ShieldCheck } from "lucide-react";
+import { Building2, Contrast, History, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { AccountMenu } from "@workspace/ui/components/account-menu";
 import { AppShell } from "@workspace/ui/components/app-shell";
-import { cn } from "@workspace/ui/lib/utils";
+import { LtrText } from "@workspace/ui/components/ltr-text";
+import { initials } from "@workspace/ui/lib/initials";
 
 type NavItem = { href: string; label: string; icon: "tenants" | "admins" | "audit" };
 const icons = { tenants: Building2, admins: ShieldCheck, audit: History };
@@ -13,48 +15,46 @@ const icons = { tenants: Building2, admins: ShieldCheck, audit: History };
 type Props = {
   dir: "rtl" | "ltr";
   nav: NavItem[];
-  navLabel: string;
-  brandLabel: string;
-  shellLabels: { skipToContent: string; openMenu: string; closeMenu: string };
-  header: ReactNode;
+  email: string;
+  signOutAction: () => Promise<void>;
+  defaultCollapsed: boolean;
+  labels: {
+    nav: string; brand: string; accountMenu: string; appearance: string; signOut: string;
+    skipToContent: string; openMenu: string; closeMenu: string; collapseMenu: string; expandMenu: string; backToMenu: string;
+  };
   children: ReactNode;
 };
 
 /** Platform navigation. Wording and assets stay inside apps/admin (Constitution IX). */
-export function AdminShell({ dir, nav, navLabel, brandLabel, shellLabels, header, children }: Props) {
+export function AdminShell({ dir, nav, email, signOutAction, defaultCollapsed, labels, children }: Props) {
   const pathname = usePathname();
-  const primaryNav = (
-    <nav aria-label={navLabel}>
-      <ul className="space-y-1">
-        {nav.map((item) => {
-          const Icon = icons[item.icon];
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
-                  active && "bg-accent font-medium text-accent-foreground",
-                )}
-              >
-                <Icon className="size-4" aria-hidden="true" />
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
+  const items = nav.map((item) => {
+    const Icon = icons[item.icon];
+    return { id: item.href, href: item.href, label: item.label, icon: <Icon />, active: pathname === item.href || pathname.startsWith(`${item.href}/`) };
+  });
   return (
     <AppShell
       dir={dir}
-      brand={<span className="text-sm font-semibold">{brandLabel}</span>}
-      primaryNav={primaryNav}
-      header={<div className="flex flex-1 items-center justify-end gap-2">{header}</div>}
-      labels={shellLabels}
+      brand={
+        <Link href="/" className="flex min-w-0 items-center gap-3 rounded-lg">
+          <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
+            <ShieldCheck className="size-5" />
+          </span>
+          <span className="truncate text-[15px] font-extrabold">{labels.brand}</span>
+        </Link>
+      }
+      account={
+        <AccountMenu
+          dir={dir} name={<LtrText>{email}</LtrText>} initials={initials(null, null, email)} label={labels.accountMenu} link={Link}
+          items={[{ href: "/appearance", label: labels.appearance, icon: <Contrast /> }]}
+          signOut={{ label: labels.signOut, action: signOutAction }}
+        />
+      }
+      nav={[{ id: "main", items }]}
+      navLabel={labels.nav}
+      link={Link}
+      defaultCollapsed={defaultCollapsed}
+      labels={labels}
       closeSignal={pathname}
     >
       {children}

@@ -1,7 +1,9 @@
+import { redirect } from "next/navigation";
 import { can } from "@workspace/authorization";
+import { PageContainer } from "@workspace/ui/components/page-header";
 import { loadPermissions, renewSession, requireStaff } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
-import { redirect } from "next/navigation";
+import { StaffHeader, STAFF_TITLE_ID } from "../staff-header";
 import { InvitationsTable, type PendingInvitation } from "./invitations-table";
 
 export default async function PendingInvitationsPage() {
@@ -10,12 +12,20 @@ export default async function PendingInvitationsPage() {
   if (!can(perms, "staff.invite") && !can(perms, "staff.view")) redirect("/forbidden");
   await renewSession(ctx);
   const { locale, t } = await getI18n();
-  const { data } = await ctx.supabase.rpc("list_pending_invitations");
+  const canView = can(perms, "staff.view");
+  const [{ data }, staff] = await Promise.all([
+    ctx.supabase.rpc("list_pending_invitations"),
+    canView ? ctx.supabase.rpc("list_staff") : null,
+  ]);
+  const rows = (data ?? []) as PendingInvitation[];
   return (
-    <section className="space-y-6" aria-labelledby="pending-title">
-      <h1 id="pending-title" className="text-xl font-semibold">{t.portal.staff.pendingTitle}</h1>
-      <InvitationsTable rows={(data ?? []) as PendingInvitation[]} canResend={ctx.isManager} t={t} locale={locale} />
+    <PageContainer labelledBy={STAFF_TITLE_ID}>
+      <StaffHeader
+        perms={perms} t={t} active="invitations"
+        counts={{ staff: (staff?.data as unknown[] | null | undefined)?.length, invitations: rows.length }}
+      />
+      <InvitationsTable rows={rows} canResend={ctx.isManager} t={t} locale={locale} />
       <p className="text-sm text-muted-foreground">{t.portal.staff.noCancelNote}</p>
-    </section>
+    </PageContainer>
   );
 }

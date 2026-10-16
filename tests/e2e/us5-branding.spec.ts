@@ -33,24 +33,25 @@ async function newPage(browser: Browser, sub: string): Promise<Page> {
 async function signIn(page: Page, sub: string, identifier: string) {
   await page.goto(`${host(sub)}/login`);
   await page.getByLabel(t.auth.identifier).fill(identifier);
-  await page.getByLabel(t.auth.password).fill(PASSWORD);
+  await page.getByLabel(t.auth.password, { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: t.auth.signIn }).click();
   await page.waitForURL(`${host(sub)}/`);
 }
 const nameOf = async (id: string) => (await sql<{ display_name: string }>(`select display_name from public.tenants where id = '${id}'`))[0]!.display_name;
 
-test("login shows each tenant's own name, and the no-logo tenant shows the neutral icon", async ({ browser }) => {
+// Signed-out pages show the tenant's logo, not its name (owner decision, PublicShell); the name is the page title.
+test("login carries each tenant's own name, and the no-logo tenant shows the neutral icon", async ({ browser }) => {
   await sql(`update public.tenants set display_name = 'Hope Charity' where id = '${fx.tenantA.id}';
              update public.tenants set display_name = 'جمعية النور' where id = '${fx.tenantB.id}'`);
   const a = await newPage(browser, fx.tenantA.subdomain);
   await a.goto(`${host(fx.tenantA.subdomain)}/login`);
-  await expect(a.getByText("Hope Charity").first()).toBeVisible();
+  await expect(a).toHaveTitle("Hope Charity");
   await expect(a.getByText("جمعية النور")).toHaveCount(0);
   await expect(a.locator("img")).toHaveCount(0); // no logo: a decorative icon, never default artwork
   await expect(a.locator('[aria-hidden="true"] svg').first()).toBeVisible();
   const b = await newPage(browser, fx.tenantB.subdomain);
   await b.goto(`${host(fx.tenantB.subdomain)}/login`);
-  await expect(b.getByText("جمعية النور").first()).toBeVisible();
+  await expect(b).toHaveTitle("جمعية النور");
   await expect(b.getByText("Hope Charity")).toHaveCount(0);
 });
 

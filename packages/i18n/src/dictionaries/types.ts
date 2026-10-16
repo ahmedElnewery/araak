@@ -32,6 +32,15 @@ export type Dictionary = {
     closeMenu: string;
     close: string;
     logoAlt: string;
+    accountMenu: string;
+    collapseMenu: string;
+    expandMenu: string;
+    backToMenu: string;
+    appearance: string;
+    appearanceIntro: string;
+    themeHint: string;
+    languageHint: string;
+    breadcrumb: string;
   };
   errors: {
     notFoundTitle: string;
@@ -49,7 +58,7 @@ export type Dictionary = {
     home: string;
   };
   admin: {
-    nav: { tenants: string; admins: string; audit: string; menu: string; brand: string };
+    nav: { tenants: string; admins: string; audit: string; menu: string; brand: string; appearance: string; appearanceSaved: string };
     common: { cancel: string; created: string; state: string; actions: string; none: string; back: string };
     auth: {
       title: string; email: string; password: string; confirmPassword: string; signIn: string; signOut: string;
@@ -108,12 +117,14 @@ export type Dictionary = {
     nav: {
       menu: string; home: string; inviteStaff: string; invitations: string; account: string; signOut: string;
       settings: string; staff: string; roles: string; branding: string; auditLog: string; securityLogs: string;
-      settingsMenu: string;
+      settingsMenu: string; mainGroup: string; systemGroup: string; beneficiaries: string; donors: string; volunteers: string;
+      profile: string; appearance: string; password: string; sessions: string; accountMenu: string; appearanceSaved: string;
     };
-    home: { welcome: string; intro: string };
+    home: { welcome: string; greeting: string; intro: string };
     branding: {
       title: string; intro: string; nameLabel: string; logoLabel: string; logoHint: string; currentLogo: string;
-      noLogo: string; remove: string; save: string; saved: string; removeLogo: string;
+      noLogo: string; remove: string; save: string; saved: string; removeLogo: string; nameTitle: string; nameIntro: string;
+      logoTitle: string;
     };
     auth: {
       title: string; identifier: string; password: string; signIn: string;
@@ -141,13 +152,17 @@ export type Dictionary = {
       rolesEditorTitle: string; rolesEditorIntro: string; saveRoles: string; rolesSaved: string; ownRolesNote: string;
       noAssignableRoles: string; disable: string; enable: string; disableTitle: string; disableBody: string;
       enableTitle: string; enableBody: string; confirm: string; disabled: string; enabled: string;
+      tabsLabel: string; search: string; searchPlaceholder: string; filters: string; allStates: string; apply: string; clear: string;
+      count: string; emptyFiltered: string; pendingEmptyHint: string; accountTitle: string; accountIntro: string; accessTitle: string;
+      accessIntro: string; inviteIntro: string; emailIntro: string; rolesIntro: string;
     };
     roles: {
       title: string; intro: string; tabActive: string; tabArchived: string; new: string; newTitle: string; editTitle: string;
       name: string; description: string; permissions: string; save: string; saved: string; created: string; archive: string;
       restore: string; archived: string; restored: string; empty: string; emptyArchived: string; members: string;
       heldNote: string; archiveTitle: string; archiveBody: string; restoreTitle: string; restoreBody: string; back: string;
-      extraNote: string; noSwitches: string; open: string; view: string;
+      extraNote: string; noSwitches: string; open: string; view: string; tabsLabel: string; detailsTitle: string; detailsIntro: string;
+      permissionsTitle: string;
       switches: { viewStaff: string; manageStaff: string; manageRoles: string; viewAudit: string };
       switchHints: { viewStaff: string; manageStaff: string; manageRoles: string; viewAudit: string };
     };
@@ -157,7 +172,8 @@ export type Dictionary = {
       colEvent: string; colActor: string; colResource: string; colDetails: string; viewDetails: string; detailTitle: string;
       eventCode: string; noDetails: string; empty: string; emptyFiltered: string; count: string; previous: string; next: string;
       pageOf: string; pagination: string; actorPlatform: string; actorSystem: string; filterByActor: string;
-      actorFiltered: string; removeFilter: string; retentionNote: string;
+      actorFiltered: string; removeFilter: string; retentionNote: string; searchPlaceholder: string; period: string; periodAll: string;
+      allCategories: string; selectedCount: string;
       categories: { staff: string; invitations: string; roles: string; tenant_settings: string; sessions: string };
       events: Record<TenantAuditEventName, string>;
     };
@@ -168,8 +184,8 @@ export type Dictionary = {
     };
     account: {
       title: string; username: string; changeUsername: string; save: string; saved: string; email: string;
-      emailImmutable: string; sessionsLink: string; passwordLink: string;
-      changeName: string; nameMissing: string; saveName: string; nameSaved: string;
+      emailImmutable: string;
+      changeName: string; nameMissing: string; saveName: string; nameSaved: string; profileIntro: string;
     };
     sessions: {
       title: string; intro: string; empty: string; colDevice: string; colBrowser: string; colSignedIn: string;

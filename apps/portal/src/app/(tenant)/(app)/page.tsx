@@ -1,3 +1,4 @@
+import { PageContainer, PageHeader } from "@workspace/ui/components/page-header";
 import { StaffName } from "@workspace/ui/components/staff-name";
 import { requireStaff } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
@@ -6,10 +7,10 @@ import { getI18n } from "@/lib/locale";
 export default async function Home() {
   const ctx = await requireStaff();
   const { t } = await getI18n();
+  const [before, after] = t.portal.home.greeting.split("{name}");
   return (
-    <section className="space-y-2" aria-labelledby="home-title">
-      <h1 id="home-title" className="text-xl font-semibold">{t.portal.home.welcome} · <StaffName staff={ctx} /></h1>
-      <p className="text-muted-foreground">{t.portal.home.intro}</p>
-    </section>
+    <PageContainer labelledBy="home-title">
+      <PageHeader titleId="home-title" title={<>{before}<StaffName staff={ctx} />{after}</>} description={t.portal.home.intro} />
+    </PageContainer>
   );
 }

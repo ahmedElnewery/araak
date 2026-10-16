@@ -1,13 +1,17 @@
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
-import { HeaderControls } from "@/components/header-controls";
-import { SignOutButton } from "@/components/sign-out-button";
+import { SIDEBAR_COLLAPSED, SIDEBAR_COOKIE } from "@workspace/ui/lib/shell";
 import { AdminShell } from "@/components/admin-shell";
+import { signOutAction } from "@/features/auth/sign-out-action";
 import { getI18n } from "@/lib/locale";
 import { TENANT_CAPABILITIES, requirePlatformSession } from "@/lib/platform-guards";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const ctx = await requirePlatformSession({ touch: false }); // the page's own guard renews the session once authorized
-  const { locale, theme, dir, t } = await getI18n();
+  const { dir, t } = await getI18n();
+  const { data } = await ctx.supabase.auth.getClaims();
+  const email = typeof data?.claims.email === "string" ? data.claims.email : "";
+  const collapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === SIDEBAR_COLLAPSED;
   // Navigation is filtered by capability; routes still enforce it server-side.
   const nav = [
     ...(TENANT_CAPABILITIES.some((c) => ctx.capabilities.includes(c)) ? [{ href: "/tenants", label: t.admin.nav.tenants, icon: "tenants" as const }] : []),
@@ -18,19 +22,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <AdminShell
       dir={dir}
       nav={nav}
-      navLabel={t.admin.nav.menu}
-      brandLabel={t.admin.nav.brand}
-      shellLabels={{ skipToContent: t.common.skipToContent, openMenu: t.common.openMenu, closeMenu: t.common.closeMenu }}
-      header={
-        <>
-          <HeaderControls
-            locale={locale}
-            theme={theme}
-            labels={{ language: t.common.language, theme: t.common.theme, themeSystem: t.common.themeSystem, themeLight: t.common.themeLight, themeDark: t.common.themeDark }}
-          />
-          <SignOutButton label={t.admin.auth.signOut} />
-        </>
-      }
+      email={email}
+      signOutAction={signOutAction}
+      defaultCollapsed={collapsed}
+      labels={{
+        nav: t.admin.nav.menu, brand: t.admin.nav.brand, accountMenu: t.common.accountMenu, appearance: t.admin.nav.appearance,
+        signOut: t.admin.auth.signOut, skipToContent: t.common.skipToContent, openMenu: t.common.openMenu, closeMenu: t.common.closeMenu,
+        collapseMenu: t.common.collapseMenu, expandMenu: t.common.expandMenu, backToMenu: t.common.backToMenu,
+      }}
     >
       {children}
     </AdminShell>

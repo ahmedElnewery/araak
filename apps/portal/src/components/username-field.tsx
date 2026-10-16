@@ -14,10 +14,14 @@ type Props = {
   serverError?: ErrorCode | undefined;
   serverRule?: UsernameError | undefined;
   size?: InputProps["size"];
+  /** The caller shows the rules itself, with the id USERNAME_HINT_ID (a settings section's description). */
+  hideHint?: boolean;
 };
 
+export const USERNAME_HINT_ID = "username-hint";
+
 /** Shows the localized rules and an inline error for an invalid name as the user types (FR-010). */
-export function UsernameField({ t, defaultValue = "", serverError, serverRule, size }: Props) {
+export function UsernameField({ t, defaultValue = "", serverError, serverRule, size, hideHint = false }: Props) {
   const [value, setValue] = useState(defaultValue);
   const [touched, setTouched] = useState(false);
   const local = touched && value !== "" ? validateUsername(value) : ({ ok: true } as const);
@@ -34,9 +38,9 @@ export function UsernameField({ t, defaultValue = "", serverError, serverRule, s
         onBlur={() => {
           setTouched(true);
         }}
-        aria-invalid={message ? true : undefined} aria-describedby="username-hint username-error"
+        aria-invalid={message ? true : undefined} aria-describedby={`${USERNAME_HINT_ID} username-error`}
       />
-      <p id="username-hint" className="text-sm text-muted-foreground">{t.username.hint}</p>
+      {hideHint ? null : <p id={USERNAME_HINT_ID} className="text-sm text-muted-foreground">{t.username.hint}</p>}
       {message ? <p id="username-error" role="alert" className="text-sm text-destructive">{message}</p> : null}
     </div>
   );

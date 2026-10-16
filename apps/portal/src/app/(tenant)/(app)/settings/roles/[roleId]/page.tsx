@@ -2,6 +2,8 @@ import Link from "next/link";
 import { z } from "zod";
 import { notFound } from "next/navigation";
 import { can, grantsToSwitches, offerableSwitches } from "@workspace/authorization";
+import { PageContainer, PageHeader } from "@workspace/ui/components/page-header";
+import { settingsCrumb } from "@/lib/breadcrumbs";
 import { requirePermission } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 import type { RoleRow } from "../page";
@@ -18,14 +20,17 @@ export default async function EditRolePage({ params }: { params: Promise<{ roleI
   const { on, extra } = grantsToSwitches(role.grants);
   // read-only when the actor holds the role (CL-027) or lacks roles.update; the database denies a forged save either way
   const readOnly = role.heldByActor || !can(ctx.permissions, "roles.update");
+  const r = t.portal.roles;
   return (
-    <section className="space-y-6" aria-labelledby="edit-role-title">
-      <Link href="/settings/roles" className="text-sm underline">{t.portal.roles.back}</Link>
-      <h1 id="edit-role-title" className="text-xl font-semibold" dir="auto">{role.name}</h1>
+    <PageContainer labelledBy="edit-role-title" width="narrow">
+      <PageHeader
+        titleId="edit-role-title" title={<bdi dir="auto">{role.name}</bdi>} description={role.description ?? undefined} link={Link}
+        breadcrumb={{ label: t.common.breadcrumb, items: [settingsCrumb(ctx.permissions, t), { label: r.title, href: "/settings/roles" }, { label: role.name }] }}
+      />
       <RoleForm
         roleId={role.id} name={role.name} description={role.description ?? ""} offered={offerableSwitches(ctx.permissions)}
         on={on} readOnly={readOnly} extra={extra} t={t}
       />
-    </section>
+    </PageContainer>
   );
 }

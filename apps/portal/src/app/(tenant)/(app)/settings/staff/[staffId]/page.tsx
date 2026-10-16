@@ -2,9 +2,12 @@ import Link from "next/link";
 import { z } from "zod";
 import { notFound } from "next/navigation";
 import { can } from "@workspace/authorization";
-import { Badge } from "@workspace/ui/components/badge";
 import { LtrText } from "@workspace/ui/components/ltr-text";
-import { StaffName } from "@workspace/ui/components/staff-name";
+import { PageContainer, PageHeader } from "@workspace/ui/components/page-header";
+import { SettingsSection, SettingsSections, settingsCard } from "@workspace/ui/components/settings-section";
+import { StaffName, staffName } from "@workspace/ui/components/staff-name";
+import { StatusBadge, Tag } from "@workspace/ui/components/status-badge";
+import { settingsCrumb } from "@/lib/breadcrumbs";
 import { requirePermission } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 import { ResetPasswordDialog } from "./reset-password-dialog";
@@ -38,34 +41,54 @@ export default async function StaffDetailPage({ params }: { params: Promise<{ st
     .sort((a, b) => a.name.localeCompare(b.name));
   const canToggle = !isSelf && (person.enabled ? can(ctx.permissions, "staff.disable") : can(ctx.permissions, "staff.enable"));
 
+  const canReset = ctx.isManager && person.enabled && !isSelf;
+  const st = t.portal.staff;
+
   return (
-    <section className="space-y-6" aria-labelledby="staff-name">
-      <Link href="/settings/staff" className="text-sm underline">{t.portal.staff.back}</Link>
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 id="staff-name" className="text-xl font-semibold"><StaffName staff={person} /></h1>
-        {person.isManager ? <Badge variant="secondary">{t.portal.staff.managerBadge}</Badge> : null}
-        <span className="text-sm text-muted-foreground">{person.enabled ? t.portal.staff.stateEnabled : t.portal.staff.stateDisabled}</span>
+    <PageContainer labelledBy="staff-name" width="narrow">
+      <PageHeader
+        titleId="staff-name" title={<StaffName staff={person} />} link={Link}
+        breadcrumb={{
+          label: t.common.breadcrumb,
+          items: [settingsCrumb(ctx.permissions, t), { label: st.directoryTitle, href: "/settings/staff" }, { label: staffName(person) }],
+        }}
+        description={
+          <span className="flex flex-wrap items-center gap-2">
+            <StatusBadge tone={person.enabled ? "success" : "neutral"} dot>{person.enabled ? st.stateEnabled : st.stateDisabled}</StatusBadge>
+            {person.isManager ? <StatusBadge tone="accent">{st.managerBadge}</StatusBadge> : null}
+          </span>
+        }
+      />
+      <div className={settingsCard}>
+        <SettingsSections>
+          <SettingsSection id="staff-account" title={st.accountTitle} description={st.accountIntro}>
+            <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[auto_minmax(0,1fr)]">
+              <dt className="text-muted-foreground">{st.username}</dt>
+              <dd className="min-w-0 font-semibold"><LtrText>{person.username}</LtrText></dd>
+              <dt className="text-muted-foreground">{st.email}</dt>
+              <dd className="min-w-0 break-words font-semibold"><LtrText>{person.email}</LtrText></dd>
+            </dl>
+          </SettingsSection>
+          <SettingsSection id="staff-roles" title={st.rolesEditorTitle} description={canAssign ? st.rolesEditorIntro : undefined}>
+            {canAssign ? <RolesEditor staffId={person.id} options={options} selected={held.map((r) => r.id)} t={t} /> : (
+              <>
+                {person.roles.length ? (
+                  <div className="flex flex-wrap gap-1.5">{person.roles.map((r) => <Tag key={r.id}>{r.name}</Tag>)}</div>
+                ) : <p className="text-sm text-muted-foreground">{st.noRolesAssigned}</p>}
+                {isSelf ? <p className="text-sm text-muted-foreground">{st.ownRolesNote}</p> : null}
+              </>
+            )}
+          </SettingsSection>
+          {canToggle || canReset ? (
+            <SettingsSection id="staff-access" title={st.accessTitle} description={st.accessIntro}>
+              <div className="flex flex-wrap items-start gap-2">
+                {canReset ? <ResetPasswordDialog staffId={person.id} t={t} /> : null}
+                {canToggle ? <StatusControl staffId={person.id} enabled={person.enabled} t={t} /> : null}
+              </div>
+            </SettingsSection>
+          ) : null}
+        </SettingsSections>
       </div>
-      {/* the heading shows the name; the username stays visible here because it is what the person signs in with */}
-      {person.firstName ? (
-        <p className="text-sm"><span className="text-muted-foreground">{t.portal.staff.username}: </span><LtrText>{person.username}</LtrText></p>
-      ) : null}
-      <p><LtrText>{person.email}</LtrText></p>
-
-      <div className="space-y-2">
-        <h2 className="font-medium">{t.portal.staff.rolesEditorTitle}</h2>
-        {canAssign ? <RolesEditor staffId={person.id} options={options} selected={held.map((r) => r.id)} t={t} /> : (
-          <>
-            <p className="text-sm" dir="auto">{person.roles.map((r) => r.name).join(", ") || t.portal.staff.noRolesAssigned}</p>
-            {isSelf ? <p className="text-sm text-muted-foreground">{t.portal.staff.ownRolesNote}</p> : null}
-          </>
-        )}
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {canToggle ? <StatusControl staffId={person.id} enabled={person.enabled} t={t} /> : null}
-        {ctx.isManager && person.enabled && !isSelf ? <ResetPasswordDialog staffId={person.id} t={t} /> : null}
-      </div>
-    </section>
+    </PageContainer>
   );
 }

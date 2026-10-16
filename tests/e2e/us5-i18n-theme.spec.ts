@@ -28,13 +28,21 @@ async function signIn(page: Page, identifier: string, labels: typeof en.portal |
   const sub = fx.tenantA.subdomain;
   await page.goto(`${host(sub)}/login`);
   await page.getByLabel(labels.auth.identifier).fill(identifier);
-  await page.getByLabel(labels.auth.password).fill(PASSWORD);
+  await page.getByLabel(labels.auth.password, { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: labels.auth.signIn }).click();
   await page.waitForURL(`${host(sub)}/`);
 }
-const pick = async (page: Page, control: string, option: string) => {
-  await page.getByRole("combobox", { name: control }).click();
-  await page.getByRole("option", { name: option }).click();
+// Language and theme live on the Appearance page (account menu > My account > Appearance and language)
+const pick = async (page: Page, option: string) => {
+  await page.goto(`${host(fx.tenantA.subdomain)}/account/appearance`);
+  const saved = page.waitForResponse((r) => r.request().method() === "POST"); // the preference action
+  await page.getByRole("radio", { name: option, exact: true }).check();
+  await saved;
+};
+const signOut = async (page: Page, label: string) => {
+  await page.getByTestId("account-menu").click();
+  await page.getByRole("menuitem", { name: label }).click();
+  await page.waitForURL("**/login");
 };
 
 test("guests: Arabic RTL by default; English LTR survives a reload (cookie only)", async ({ browser }) => {
@@ -60,6 +68,7 @@ test("guests: the theme comes from the cookie before sign-in", async ({ browser 
 
 test("usernames and emails render inside bdi[dir=ltr] and data is not rewritten", async ({ browser }) => {
   const page = await pageIn(browser);
+  await page.context().addCookies([{ name: "locale", value: "en", url: host(fx.tenantA.subdomain) }]); // the default locale is Arabic
   await signIn(page, fx.managerA.username, en.portal);
   await expect(page.locator("bdi[dir=ltr]", { hasText: fx.managerA.username }).first()).toBeVisible();
   await page.goto(`${host(fx.tenantA.subdomain)}/account`);
@@ -71,18 +80,18 @@ test("language preference is stored server-side and follows the person to a seco
   const first = await pageIn(browser);
   await first.context().addCookies([{ name: "locale", value: "en", url: host(fx.tenantA.subdomain) }]);
   await signIn(first, fx.staffA.username, en.portal);
-  await pick(first, en.common.language, "العربية");
+  await pick(first, "العربية");
   await expect(first.locator("html")).toHaveAttribute("dir", "rtl");
   await first.reload();
   await expect(first.locator("html")).toHaveAttribute("dir", "rtl");
-  await first.getByRole("button", { name: ar.portal.nav.signOut }).click();
+  await signOut(first, ar.portal.nav.signOut);
   // a second, empty browser context: sign in (labels follow the default, Arabic) and the stored choice applies
   const second = await pageIn(browser);
   await signIn(second, fx.staffA.username, ar.portal);
   await expect(second.locator("html")).toHaveAttribute("lang", "ar");
   await expect(second.locator("html")).toHaveAttribute("dir", "rtl");
   // switching back to English persists across reload
-  await pick(second, ar.common.language, "English");
+  await pick(second, "English");
   await second.reload();
   await expect(second.locator("html")).toHaveAttribute("dir", "ltr");
 });
@@ -92,16 +101,16 @@ test("System follows the emulated colour scheme; an explicit Dark/Light persists
   await first.context().addCookies([{ name: "locale", value: "en", url: host(fx.tenantA.subdomain) }]);
   await signIn(first, fx.managerA.username, en.portal);
   await expect(first.locator("html")).not.toHaveClass(/dark/); // no choice yet: Light, even on a dark OS
-  await pick(first, en.common.theme, en.common.themeSystem);
+  await pick(first, en.common.themeSystem);
   await expect(first.locator("html")).toHaveClass(/dark/); // System + dark OS
   await first.emulateMedia({ colorScheme: "light" });
   await expect(first.locator("html")).not.toHaveClass(/dark/);
   await first.emulateMedia({ colorScheme: "dark" });
-  await pick(first, en.common.theme, en.common.themeLight);
+  await pick(first, en.common.themeLight);
   await expect(first.locator("html")).not.toHaveClass(/dark/); // explicit Light beats a dark OS
   await first.reload();
   await expect(first.locator("html")).not.toHaveClass(/dark/);
-  await pick(first, en.common.theme, en.common.themeDark);
+  await pick(first, en.common.themeDark);
   await first.reload();
   await expect(first.locator("html")).toHaveClass(/dark/);
   // server-stored: a fresh context with a LIGHT OS still gets Dark after sign-in

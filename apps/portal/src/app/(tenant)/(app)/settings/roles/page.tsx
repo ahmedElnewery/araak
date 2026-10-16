@@ -1,10 +1,15 @@
+import { Archive, KeyRound, Plus } from "lucide-react";
 import Link from "next/link";
-import { can } from "@workspace/authorization";
-import { Button } from "@workspace/ui/components/button";
+import { can, grantsToSwitches } from "@workspace/authorization";
+import { buttonVariants } from "@workspace/ui/components/button";
+import { EmptyState } from "@workspace/ui/components/empty-state";
+import { ListCard, ListCardItem } from "@workspace/ui/components/list-card";
+import { PageContainer, PageHeader } from "@workspace/ui/components/page-header";
+import { RouteTabs } from "@workspace/ui/components/route-tabs";
+import { settingsCrumb } from "@/lib/breadcrumbs";
 import { requirePermission } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 import { RoleActions } from "./role-actions";
-import { grantsToSwitches } from "@workspace/authorization";
 
 export type RoleRow = {
   id: string; name: string; description: string | null; archivedAt: string | null; assignedCount: number;
@@ -16,41 +21,59 @@ export default async function RolesPage({ searchParams }: { searchParams: Promis
   const { tab } = await searchParams;
   const archivedTab = tab === "archived";
   const { t } = await getI18n();
+  const r = t.portal.roles;
   const { data } = await ctx.supabase.rpc("list_roles");
-  const rows = ((data ?? []) as RoleRow[]).filter((r) => (r.archivedAt !== null) === archivedTab);
-  const canCreate = can(ctx.permissions, "roles.create");
-  const tabClass = (active: boolean) => `rounded-md px-3 py-1 text-sm ${active ? "bg-muted font-medium" : "underline"}`;
+  const all = (data ?? []) as RoleRow[];
+  const rows = all.filter((x) => (x.archivedAt !== null) === archivedTab);
+  const archivedCount = all.filter((x) => x.archivedAt !== null).length;
+  const newRole = can(ctx.permissions, "roles.create") ? (
+    <Link href="/settings/roles/new" className={buttonVariants({ className: "h-10 rounded-[10px]" })}>
+      <Plus aria-hidden="true" />
+      {r.new}
+    </Link>
+  ) : null;
   return (
-    <section className="space-y-6" aria-labelledby="roles-title">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 id="roles-title" className="text-xl font-semibold">{t.portal.roles.title}</h1>
-        {canCreate ? <Button asChild><Link href="/settings/roles/new">{t.portal.roles.new}</Link></Button> : null}
-      </div>
-      <p className="text-sm text-muted-foreground">{t.portal.roles.intro}</p>
-      <nav aria-label={t.portal.roles.title} className="flex gap-2">
-        <Link href="/settings/roles" aria-current={archivedTab ? undefined : "page"} className={tabClass(!archivedTab)}>{t.portal.roles.tabActive}</Link>
-        <Link href="/settings/roles?tab=archived" aria-current={archivedTab ? "page" : undefined} className={tabClass(archivedTab)}>{t.portal.roles.tabArchived}</Link>
-      </nav>
-      {rows.length === 0 ? <p className="text-muted-foreground">{archivedTab ? t.portal.roles.emptyArchived : t.portal.roles.empty}</p> : (
-        <ul className="divide-y rounded-md border">
-          {rows.map((r) => {
-            const { on } = grantsToSwitches(r.grants);
+    <PageContainer labelledBy="roles-title">
+      <PageHeader
+        titleId="roles-title" title={r.title} description={r.intro} actions={newRole} link={Link}
+        breadcrumb={{ label: t.common.breadcrumb, items: [settingsCrumb(ctx.permissions, t), { label: r.title }] }}
+      />
+      <RouteTabs
+        label={r.tabsLabel}
+        link={Link}
+        tabs={[
+          { href: "/settings/roles", label: r.tabActive, count: all.length - archivedCount, active: !archivedTab },
+          { href: "/settings/roles?tab=archived", label: r.tabArchived, count: archivedCount, active: archivedTab },
+        ]}
+      />
+      {rows.length === 0 ? (
+        archivedTab ? <EmptyState icon={<Archive />} title={r.emptyArchived} /> : (
+          <EmptyState icon={<KeyRound />} title={r.empty} description={r.intro} action={newRole} />
+        )
+      ) : (
+        <ListCard label={archivedTab ? r.tabArchived : r.title}>
+          {rows.map((x) => {
+            const { on } = grantsToSwitches(x.grants);
             return (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 p-3" data-testid="role-row">
-                <div className="space-y-1">
-                  <Link href={`/settings/roles/${r.id}`} className="font-medium underline" dir="auto">{r.name}</Link>
-                  <p className="text-xs text-muted-foreground">
-                    {t.portal.roles.members}: {r.assignedCount}
-                    {on.length > 0 ? ` · ${on.map((s) => t.portal.roles.switches[s]).join("، ")}` : ""}
-                  </p>
-                </div>
-                <RoleActions roleId={r.id} archived={r.archivedAt !== null} canArchive={can(ctx.permissions, "roles.archive")}
-                  canRestore={can(ctx.permissions, "roles.restore")} t={t} />
-              </li>
+              <ListCardItem
+                key={x.id}
+                data-testid="role-row"
+                icon={<KeyRound />}
+                title={<span dir="auto">{x.name}</span>}
+                href={`/settings/roles/${x.id}`}
+                link={Link}
+                meta={`${r.members}: ${String(x.assignedCount)}${on.length > 0 ? ` · ${on.map((s) => r.switches[s]).join("، ")}` : ""}`}
+                actions={
+                  <RoleActions
+                    roleId={x.id} archived={x.archivedAt !== null} canArchive={can(ctx.permissions, "roles.archive")}
+                    canRestore={can(ctx.permissions, "roles.restore")} t={t}
+                  />
+                }
+              />
             );
           })}
-        </ul>
+        </ListCard>
       )}
-    </section>
+    </PageContainer>
   );
 }

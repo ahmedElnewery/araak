@@ -18,7 +18,7 @@ export function TenantIdentity({ name, logoSrc, className }: Props) {
           <Building2 className="size-5" />
         </span>
       )}
-      <span dir="auto" className="truncate text-sm font-semibold">
+      <span dir="auto" className="truncate text-[15px] font-extrabold">
         {name}
       </span>
     </div>
