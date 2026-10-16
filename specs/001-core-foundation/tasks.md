@@ -797,8 +797,8 @@ Protected manager authority stays platform-only.
   - `apps/portal/src/app/manifest.ts`: tenant name, neutral icon.
 
   (FR-035, FR-037, Constitution IX)
-- [X] T161 [US5] Implement navigation `apps/portal/src/lib/navigation.ts`. Primary items: Home, Account, Settings (secondary sidebar: Staff, Roles, Branding), Audit Log, Security Logs. Each item declares its required permission or manager check and is filtered by `my_effective_permissions`. Home is a minimal welcome with no KPIs, charts, dashboard widgets or global search. Account is direct-entry with no empty secondary sidebar (FR-040, Constitution X, US5 scenario 6)
-- [X] T162 [US5] Implement the authenticated shell `apps/portal/src/app/(app)/layout.tsx` (`requireStaff()`, `AppShell` with filtered navigation, header with `TenantIdentity`, language and theme selectors, sign-out) and `apps/portal/src/app/(app)/page.tsx` (minimal localized home) (FR-040)
+- [X] T161 [US5] Implement navigation `apps/portal/src/lib/navigation.ts`. Primary items: Home, Account, Settings (secondary sidebar: Staff, Roles, Branding), Audit Log, Security Logs. Each item declares its required permission or manager check and is filtered by `my_effective_permissions`. Home is a minimal welcome with no KPIs, charts, dashboard widgets or global search. Account is direct-entry with no empty secondary sidebar (FR-040, Constitution X, US5 scenario 6). Superseded in part by T208: the primary navigation now has two groups, and Account moved to the account menu with its own secondary sidebar
+- [X] T162 [US5] Implement the authenticated shell `apps/portal/src/app/(app)/layout.tsx` (`requireStaff()`, `AppShell` with filtered navigation, header with `TenantIdentity`, language and theme selectors, sign-out) and `apps/portal/src/app/(app)/page.tsx` (minimal localized home) (FR-040). Superseded in part by T208: language and theme moved from the header to the Appearance and language page
 - [X] T163 [US5] Implement preference persistence in `apps/portal/src/features/preferences/actions.ts`. Signed-in users write to `set_my_preferences` plus the `locale`/`theme` cookies; before sign-in, cookies only. The root layout reads the stored preference first. The admin app uses cookie persistence in `apps/admin/src/features/preferences/actions.ts` (FR-039, Constitution VIII)
 - [X] T164 [P] [US5] Audit both apps for mixed-direction content: wrap usernames, emails and record IDs with `LtrText` in `apps/portal/src/**` and `apps/admin/src/**`. Confirm every user-visible string comes from `packages/i18n` dictionaries (no hard-coded literals; add an ESLint `i18next/no-literal-string`-style rule in `eslint.config.mjs` scoped to `apps/*/src/app/**/*.tsx`) (FR-038, FR-041)
 - [X] T165 [P] [US5] Finalize the `packages/ui/src/styles/globals.css` palette with the owner-approved values. Verify contrast ratios with `scripts/check-contrast.mjs`, which computes WCAG ratios for every foreground/background token pair in both themes ⛔ GATE-BRAND (FR-037, FR-041)
@@ -815,6 +815,49 @@ Protected manager authority stays platform-only.
 - Navigation items carry a `built` flag (`apps/portal/src/lib/navigation.ts`); Roles, Audit Log and Security Logs stay hidden until their stories ship, then flip the flag.
 
 **Checkpoint**: A white-label, bilingual, accessible shell with manager-only branding works for two tenants.
+
+---
+
+## Phase 7A: Layout refresh — shell and page layout (owner request 2026-10-16)
+
+**Purpose**: Rebuild the shell and every signed-in page for a modern, consistent layout, from the owner-approved design (canvas reviewed 2026-10-16; decisions recorded in `docs/design-references/README.md` "Shell idea" and "Page layout"). Presentation only: no route, permission, RPC or schema changes, and no business modules (SC-010).
+
+**Depends on**: Phase 7 (US5 shell), and the pages of US2, US3, US4 and US6, which it restyles.
+
+- [X] T208 [US5] Rebuild the shell in `packages/ui/src/components/app-shell.tsx` and `account-menu.tsx`:
+  - A full-width top bar: collapse toggle and tenant identity at the start, the account menu (avatar, name, role) at the end with only "My account" and sign-out.
+  - A primary sidebar in two groups (main menu, system administration) that collapses to icons with tooltips, remembered in the `sidebar` cookie.
+  - A secondary sidebar for Settings and for the account pages (profile, appearance and language, password, sessions).
+  - A phone drawer whose sections open as a drill-down panel.
+  - Language and theme move to `/account/appearance` (admin: `/appearance`) via `appearance-picker.tsx`; `header-controls`, `theme-select` and `language-select` are removed.
+  - The navigation in `apps/portal/src/lib/navigation.ts` gains the two groups and the account section.
+
+  (FR-039, FR-040, FR-041, Constitution X)
+- [X] T209 [P] [US5] Add the shared page kit in `packages/ui/src/components/`: `PageHeader`/`PageContainer`, `SettingsSections`/`SettingsSection`, `DataTable` (ARIA table roles, a card per row on phones, sort links), `PaginationBar`, `FilterBar`/`FilterSearch`/`FilterMenu`/`FilterOption` (a GET form, native disclosure menus), `RouteTabs`, `ListCard`, `EmptyState`, `StatusBadge`/`Tag` and `Avatar`. Add the badge colour tokens to `globals.css` and their pairs to `scripts/check-contrast.mjs`. Input, checkbox, select and button keep the global `:focus-visible` outline. Cover the kit in `page-kit.test.tsx` (FR-041)
+- [X] T210 [US5] Move every signed-in portal page onto the kit:
+  - Staff and pending invitations as route tabs. The directory gets search, a state filter and name order as URL parameters (`apps/portal/src/features/staff/directory.ts`, unit-tested).
+  - Staff detail, invite, role new/edit, branding, profile and password as two-column sections.
+  - Roles as a list card with active/archived tabs.
+  - Sessions as a table with "sign out all other sessions" as the page action.
+  - Audit and Security Logs with the filter bar (search, categories or event type, period), a table and the shared pagination; the export moves to the header.
+  - Breadcrumbs lead Settings to the first page the viewer may open (`sectionHref`, `apps/portal/src/lib/breadcrumbs.ts`).
+
+  Update `tests/e2e/us6-audit.spec.ts` (categories sit in a menu) and `tests/e2e/us5-branding.spec.ts` (signed-out pages show the logo only; the name is the page title) (FR-031, FR-033, FR-040, FR-041)
+- [ ] T211 [US5] Move the admin app pages onto the same kit:
+  - Tenants list with search.
+  - Tenant detail (name, state, branding, managers, staff) as sections.
+  - New tenant; platform admins and invite.
+  - Platform audit with the filter bar and pagination.
+
+  Then update the admin selectors in `tests/e2e/us1-tenant-onboarding.spec.ts` and `tests/e2e/us6-audit.spec.ts`, and run them with `tests/e2e/us2-invite-activate-login.spec.ts` (needs the mail catcher) and the full `tests/accessibility/shell.a11y.spec.ts` on the portal and admin projects (FR-040, FR-041)
+
+**Implementation notes (Phase 7A)**:
+- T208–T210 were verified against the Development project: `us3-sessions`, `us4-staff-roles`, `us6-audit`, `us5-i18n-theme` and the portal axe scans (ar/en × light/dark, keyboard-only traversal, reduced motion) pass.
+- Two checks in `us5-branding` ("title, icon link and manifest…" and the forged request in "staff and delegates get no branding navigation…") could not run in the implementing session: its Node request context cannot resolve `*.localhost` subdomains. Run them where those hosts resolve.
+- `us2-invite-activate-login` was not run (no mail catcher in the implementing session).
+- `SettingsSection` is a plain `<section>` with an h2, not a named region, so a settings page is not a stack of landmarks; `SettingsSections` spaces its direct children, so a section can sit inside its own form.
+
+**Checkpoint**: Every signed-in portal page uses the shared shell and page kit; T211 brings the admin app to the same layout.
 
 ---
 
@@ -978,6 +1021,7 @@ Protected manager authority stays platform-only.
 - **Setup (Phase 1)**: No dependencies. Can start immediately (plan: S0 may start after baseline review).
 - **Foundational (Phase 2)**: Depends on Setup. **Blocks all user stories.** 2A gate tasks run in parallel with 2B/2C/2D, but T032/T049 need T018's result.
 - **User stories (Phases 3–9)**: All depend on Phase 2 only. They can then proceed in parallel, or sequentially in spec order US1 → US7.
+- **Layout refresh (Phase 7A)**: Depends on Phase 7 and on the US2, US3, US4 and US6 pages it restyles.
 - **Polish (Phase 10)**: Depends on all user stories being complete.
 
 ### User Story Dependencies

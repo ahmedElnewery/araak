@@ -61,7 +61,18 @@ Owner decisions (2026-10-16), implemented in `packages/ui/src/components/app-she
 - Language and theme are chosen on the Appearance and language page (`/account/appearance` in the portal, `/appearance` in the admin app), not in the top bar.
 - An off-canvas drawer on phones, in which a section opens as a drill-down panel with a way back to the main menu.
 - Logical CSS properties for RTL/LTR, `prefers-reduced-motion` and `prefers-contrast: more` support.
-- A sign-in card with the tenant name and logo above a minimal form, with no marketing copy.
+- A sign-in card with the tenant logo (or the neutral icon) above a minimal form, with no marketing copy. The tenant name is the page title, not text in the card (owner change, PR #23).
+
+### Page layout
+
+Owner decisions (2026-10-16), implemented with the page kit in `packages/ui/src/components/` (tasks T209–T211):
+
+- Every page starts with a page header: the breadcrumb, the title and a short description, with the page's primary action at the end of the title row.
+- Lists and tables are wide and sit in a card; on phones each table row becomes a small card.
+- Forms and settings are narrow, in a card, in two columns: what a group is and why on one side, its fields on the other.
+- Search, filters and sorting appear only where the list needs them (staff, audit, security logs, tenants), never on short lists such as roles or invitations. They are URL parameters, so a filtered list can be bookmarked and shared.
+- Related lists that are separate pages (staff and pending invitations, active and archived roles) are route tabs with counts.
+- An empty list says what to do next: an empty state with the page's primary action, or a way to clear the filters.
 
 ## Not adopted
 
