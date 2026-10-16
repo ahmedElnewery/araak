@@ -66,6 +66,6 @@ These conflict with the constitution or the approved spec:
 - **Business modules in the navigation** (dashboard, beneficiaries, donors, volunteers, donations, accounts, reports, services). These are out of Core Foundation scope (SC-010). The foundation navigation is defined in T161.
 - **Demo sign-in** with hard-coded credentials and the "preview credentials" box. Mock authentication must never ship (Constitution III).
 - **Username-only sign-in.** The portal accepts username **or** email (FR-012).
-- **Theme defaulting to Dark with only a Dark/Light toggle stored in `localStorage`.** The default is System, the choices are Dark/Light/System, and the choice persists per user (FR-039).
+- **Theme defaulting to Dark with only a Dark/Light toggle stored in `localStorage`.** The default is Light, the choices are Dark/Light/System, and the choice persists per user (FR-039).
 - **ERAK name or logo as fixed markup.** Tenant identity is rendered from tenant configuration with a neutral fallback icon (FR-035).
 - **Tahoma / Segoe UI font stack.** It is replaced by Cairo and Inter.

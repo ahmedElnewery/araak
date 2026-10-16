@@ -7,7 +7,7 @@ export function resolveLocale(input: { stored?: string | null; cookie?: string |
   return DEFAULT_LOCALE;
 }
 
-/** stored user preference -> `theme` cookie -> System (FR-039). Invalid values are ignored. */
+/** stored user preference -> `theme` cookie -> Light (FR-039). Invalid values are ignored. */
 export function resolveTheme(input: { stored?: string | null; cookie?: string | null }): ThemeMode {
   if (isThemeMode(input.stored)) return input.stored;
   if (isThemeMode(input.cookie)) return input.cookie;

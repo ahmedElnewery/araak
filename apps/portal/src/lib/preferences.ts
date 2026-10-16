@@ -22,7 +22,7 @@ const loadStored = cache(async (): Promise<Stored> => {
   }
 });
 
-/** Stored preference first, then the cookie (guests), then Arabic / System (FR-038, FR-039). */
+/** Stored preference first, then the cookie (guests), then Arabic / Light (FR-038, FR-039). */
 export const getPreferences = cache(async (): Promise<{ locale: Locale; theme: ThemeMode }> => {
   const [store, stored] = await Promise.all([cookies(), loadStored()]);
   return {

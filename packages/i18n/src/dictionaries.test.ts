@@ -33,11 +33,12 @@ describe("locale helpers", () => {
     expect(resolveLocale({ stored: "fr", cookie: "xx" })).toBe("ar");
     expect(resolveLocale({})).toBe("ar");
   });
-  it("resolves the theme stored -> cookie -> system and ignores invalid values", () => {
+  it("resolves the theme stored -> cookie -> light and ignores invalid values", () => {
     expect(resolveTheme({ stored: "dark", cookie: "light" })).toBe("dark");
     expect(resolveTheme({ stored: null, cookie: "light" })).toBe("light");
-    expect(resolveTheme({ stored: "blue", cookie: "x" })).toBe("system");
-    expect(resolveTheme({})).toBe("system");
+    expect(resolveTheme({ stored: "blue", cookie: "x" })).toBe("light");
+    expect(resolveTheme({})).toBe("light");
+    expect(resolveTheme({ stored: "system" })).toBe("system");
   });
   it("formats with an explicit locale and Latin digits", () => {
     expect(formatNumber(1234.5, "ar")).toBe("1,234.5");

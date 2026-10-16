@@ -13,7 +13,7 @@ export function dir(locale: Locale): "rtl" | "ltr" {
 
 export const THEME_MODES = ["system", "light", "dark"] as const;
 export type ThemeMode = (typeof THEME_MODES)[number];
-export const DEFAULT_THEME: ThemeMode = "system";
+export const DEFAULT_THEME: ThemeMode = "light";
 export const THEME_COOKIE = "theme";
 export const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
