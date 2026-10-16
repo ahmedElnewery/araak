@@ -10,6 +10,8 @@ import {
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
+import "sonner/dist/styles.css"
+
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
 
@@ -17,6 +19,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      richColors
       icons={{
         success: <CircleCheckIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,
@@ -26,10 +29,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
+          "--normal-bg": "var(--card)",
+          "--normal-text": "var(--text)",
+          "--normal-border": "var(--line)",
+          "--success-bg": "var(--toast-success-bg)",
+          "--success-border": "var(--toast-success-border)",
+          "--success-text": "var(--toast-success-text)",
           "--border-radius": "var(--radius)",
+          fontFamily: "inherit",
         } as React.CSSProperties
       }
       {...props}
@@ -37,4 +44,5 @@ const Toaster = ({ ...props }: ToasterProps) => {
   )
 }
 
+export { toast } from "sonner"
 export { Toaster }

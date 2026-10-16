@@ -24,7 +24,8 @@ const pairs = [
   ["text", "secondary-bg", 4.5, "text on secondary surface"], ["muted", "bg", 4.5, "muted text on page"], ["muted", "card", 4.5, "muted text on card"],
   ["subtle", "bg", 4.5, "subtle text on page"], ["subtle", "card", 4.5, "subtle text on card"], ["accent", "card", 4.5, "accent text/link on card"],
   ["accent-strong", "card", 4.5, "strong accent on card"], ["on-accent", "accent", 4.5, "button text on accent"], ["on-danger", "danger", 4.5, "text on danger"],
-  ["danger", "card", 4.5, "danger text on card"], ["input-border", "card", 3, "input border vs card (non-text)"], ["input-border", "bg", 3, "input border vs page (non-text)"],
+  ["danger", "card", 4.5, "danger text on card"], ["toast-success-text", "toast-success-bg", 4.5, "success toast text"],
+  ["input-border", "card", 3, "input border vs card (non-text)"], ["input-border", "bg", 3, "input border vs page (non-text)"],
   ["focus-ring", "bg", 3, "focus ring vs page"], ["focus-ring", "card", 3, "focus ring vs card"],
 ];
 

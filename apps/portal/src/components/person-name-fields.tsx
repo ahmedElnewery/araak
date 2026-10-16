@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Dictionary } from "@workspace/i18n";
-import { Input } from "@workspace/ui/components/input";
+import { Input, type InputProps } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import type { ErrorCode } from "@/lib/rpc-error";
 
@@ -12,13 +12,14 @@ type Props = {
   defaultLastName?: string;
   firstNameError?: ErrorCode | undefined;
   lastNameError?: ErrorCode | undefined;
+  size?: InputProps["size"];
 };
 
 /**
  * First and last name inputs. Names may be Arabic or Latin, so each input takes the direction of what is typed.
  * Controlled, like UsernameField, so a refused submission keeps what was entered.
  */
-export function PersonNameFields({ t, defaultFirstName = "", defaultLastName = "", firstNameError, lastNameError }: Props) {
+export function PersonNameFields({ t, defaultFirstName = "", defaultLastName = "", firstNameError, lastNameError, size }: Props) {
   const [first, setFirst] = useState(defaultFirstName);
   const [last, setLast] = useState(defaultLastName);
   return (
@@ -26,7 +27,7 @@ export function PersonNameFields({ t, defaultFirstName = "", defaultLastName = "
       <div className="grid gap-2">
         <Label htmlFor="firstName">{t.personName.firstName}</Label>
         <Input
-          id="firstName" name="firstName" dir="auto" autoComplete="given-name" required value={first}
+          id="firstName" name="firstName" size={size} dir="auto" autoComplete="given-name" required value={first}
           onChange={(e) => { setFirst(e.target.value); }}
           aria-invalid={firstNameError ? true : undefined} aria-describedby="person-name-hint first-name-error"
         />
@@ -35,7 +36,7 @@ export function PersonNameFields({ t, defaultFirstName = "", defaultLastName = "
       <div className="grid gap-2">
         <Label htmlFor="lastName">{t.personName.lastName}</Label>
         <Input
-          id="lastName" name="lastName" dir="auto" autoComplete="family-name" required value={last}
+          id="lastName" name="lastName" size={size} dir="auto" autoComplete="family-name" required value={last}
           onChange={(e) => { setLast(e.target.value); }}
           aria-invalid={lastNameError ? true : undefined} aria-describedby="person-name-hint last-name-error"
         />

@@ -27,6 +27,9 @@
   --input-border: #6196a5;
   --danger: #b42318;
   --on-danger: #ffffff;
+  --toast-success-bg: #1b6b48;
+  --toast-success-border: #14593b;
+  --toast-success-text: #ffffff;
   --focus-ring: var(--accent-strong);
   --radius: 0.625rem;
   --sidebar-foreground: hsl(240 5.3% 26.1%);
@@ -56,6 +59,9 @@
   --input-border: #787878;
   --danger: #f97066;
   --on-danger: #1a0b09;
+  --toast-success-bg: #1f6b45;
+  --toast-success-border: #2a8a58;
+  --toast-success-text: #f4fff8;
   --focus-ring: var(--accent-strong);
   --sidebar-foreground: hsl(240 4.8% 95.9%);
   --sidebar-primary: hsl(224.3 76.3% 48%);

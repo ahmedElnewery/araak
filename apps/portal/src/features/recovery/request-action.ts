@@ -8,7 +8,7 @@ import { getI18n } from "@/lib/locale";
 import { getMailContext } from "@/lib/mail-context";
 import { requireTenant } from "@/lib/tenant-context";
 
-export type RecoveryRequestState = { done?: true };
+export type RecoveryRequestState = { done?: true; submittedAt?: number };
 
 const schema = z.object({ identifier: z.string().trim().min(1).max(320) });
 
@@ -16,7 +16,7 @@ const schema = z.object({ identifier: z.string().trim().min(1).max(320) });
 export async function requestRecoveryAction(_prev: RecoveryRequestState, formData: FormData): Promise<RecoveryRequestState> {
   const tenant = await requireTenant();
   const parsed = schema.safeParse({ identifier: formData.get("identifier") });
-  if (!parsed.success) return { done: true };
+  if (!parsed.success) return { done: true, submittedAt: Date.now() };
   const { locale } = await getI18n();
   const mail = getMailContext();
   await requestSelfServiceRecovery({
@@ -33,5 +33,5 @@ export async function requestRecoveryAction(_prev: RecoveryRequestState, formDat
       after(work);
     },
   });
-  return { done: true };
+  return { done: true, submittedAt: Date.now() };
 }

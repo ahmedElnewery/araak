@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usernameErrorKey, validateUsername, type UsernameError } from "@workspace/auth";
 import type { Dictionary } from "@workspace/i18n";
-import { Input } from "@workspace/ui/components/input";
+import { Input, type InputProps } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import type { ErrorCode } from "@/lib/rpc-error";
 
@@ -13,10 +13,11 @@ type Props = {
   /** Error reported by the server action (rule or database code). */
   serverError?: ErrorCode | undefined;
   serverRule?: UsernameError | undefined;
+  size?: InputProps["size"];
 };
 
 /** Shows the localized rules and an inline error for an invalid name as the user types (FR-010). */
-export function UsernameField({ t, defaultValue = "", serverError, serverRule }: Props) {
+export function UsernameField({ t, defaultValue = "", serverError, serverRule, size }: Props) {
   const [value, setValue] = useState(defaultValue);
   const [touched, setTouched] = useState(false);
   const local = touched && value !== "" ? validateUsername(value) : ({ ok: true } as const);
@@ -28,7 +29,7 @@ export function UsernameField({ t, defaultValue = "", serverError, serverRule }:
     <div className="grid gap-2">
       <Label htmlFor="username">{t.username.label}</Label>
       <Input
-        id="username" name="username" dir="ltr" autoComplete="username" required value={value}
+        id="username" name="username" size={size} dir="ltr" autoComplete="username" required value={value}
         onChange={(e) => { setValue(e.target.value); setTouched(true); }}
         onBlur={() => {
           setTouched(true);
