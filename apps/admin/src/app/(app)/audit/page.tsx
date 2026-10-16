@@ -1,9 +1,13 @@
+import { History, SearchX } from "lucide-react";
 import Link from "next/link";
-import { Button, buttonVariants } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
-import { cn } from "@workspace/ui/lib/utils";
+import { buttonVariants } from "@workspace/ui/components/button";
+import { DataTable, type DataColumn } from "@workspace/ui/components/data-table";
+import { EmptyState } from "@workspace/ui/components/empty-state";
+import { FilterBar, FilterMenu, FilterOption, FilterSearch } from "@workspace/ui/components/filter-bar";
+import { LtrText } from "@workspace/ui/components/ltr-text";
+import { PageContainer, PageHeader } from "@workspace/ui/components/page-header";
+import { PaginationBar } from "@workspace/ui/components/pagination-bar";
+import { PeriodFields, periodLabel } from "@/components/period-fields";
 import { DateTime } from "@/components/date-time";
 import { PAGE_SIZE, PLATFORM_EVENTS, parsePlatformAuditFilters, platformAuditQuery, platformAuditRpcArgs, type SearchParams } from "@/features/audit/filters";
 import { getI18n } from "@/lib/locale";
@@ -28,97 +32,77 @@ export default async function PlatformAuditPage({ searchParams }: { searchParams
   const pages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const filtered = f.event !== null || f.from !== null || f.to !== null || f.q !== null;
   const eventLabel = (code: string) => (a.events as Record<string, string | undefined>)[code] ?? code;
-  const actor = (r: Row) =>
-    r.actor ? <bdi dir="ltr">{r.actor.email}</bdi>
-      : r.actorKind === "operator" ? a.actorOperator.replace("{ref}", r.operatorRef ?? "") : a.actorSystem;
-  const pageLink = (enabled: boolean, page: number, text: string) =>
-    enabled ? <Link href={`/audit${platformAuditQuery(f, page)}`} className={buttonVariants({ variant: "outline", size: "sm" })}>{text}</Link>
-      : <span aria-disabled="true" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "pointer-events-none opacity-50")}>{text}</span>;
+
+  const columns: DataColumn<Row>[] = [
+    { id: "time", header: a.colTime, primary: true, className: "md:whitespace-nowrap", cell: (r) => <DateTime value={r.occurredAt} locale={locale} /> },
+    { id: "event", header: a.colEvent, label: a.colEvent, cell: (r) => eventLabel(r.event) },
+    {
+      id: "actor", header: a.colActor, label: a.colActor,
+      cell: (r) => r.actor ? <LtrText>{r.actor.email}</LtrText>
+        : r.actorKind === "operator" ? a.actorOperator.replace("{ref}", r.operatorRef ?? "") : a.actorSystem,
+    },
+    {
+      id: "organization", header: a.colOrganization, label: a.colOrganization,
+      cell: (r) => r.tenant ? <bdi dir="auto">{r.tenant.displayName}</bdi> : null,
+    },
+    {
+      id: "details", header: a.details, label: a.details,
+      cell: (r) => {
+        const entries = Object.entries(r.metadata);
+        return entries.length === 0 ? <span className="text-muted-foreground">{a.noDetails}</span> : (
+          <details>
+            <summary className="cursor-pointer text-sm underline">{a.details}</summary>
+            <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-xs" dir="ltr">
+              <dt className="text-muted-foreground">{a.colEvent}</dt><dd>{r.event}</dd>
+              {entries.map(([k, v]) => (
+                <div key={k} className="contents">
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="break-all">{v !== null && typeof v === "object" ? JSON.stringify(v) : String(v)}</dd>
+                </div>
+              ))}
+            </dl>
+          </details>
+        );
+      },
+    },
+  ];
 
   return (
-    <section className="space-y-6" aria-labelledby="platform-audit-title">
-      <h1 id="platform-audit-title" className="text-xl font-semibold">{a.title}</h1>
-      <p className="text-sm text-muted-foreground">{a.intro}</p>
+    <PageContainer labelledBy="platform-audit-title">
+      <PageHeader titleId="platform-audit-title" title={a.title} description={a.intro} />
 
-      <form action="/audit" method="get" className="grid gap-4 rounded-md border p-4 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Label htmlFor="audit-event">{a.eventType}</Label>
-          <select id="audit-event" name="event" defaultValue={f.event ?? ""} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm">
-            <option value="">{a.allEvents}</option>
-            {PLATFORM_EVENTS.map((e) => <option key={e} value={e}>{a.events[e]}</option>)}
-          </select>
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="audit-q">{a.search}</Label>
-          <Input id="audit-q" type="search" name="q" maxLength={100} defaultValue={f.q ?? ""} aria-describedby="audit-q-hint" />
-          <p id="audit-q-hint" className="text-xs text-muted-foreground">{a.searchHint}</p>
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="audit-from">{a.from}</Label>
-          <Input id="audit-from" type="date" name="from" defaultValue={f.from ?? ""} />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="audit-to">{a.to}</Label>
-          <Input id="audit-to" type="date" name="to" defaultValue={f.to ?? ""} />
-        </div>
-        <div className="flex flex-wrap gap-2 sm:col-span-2">
-          <Button type="submit">{a.apply}</Button>
-          {filtered ? <Link href="/audit" className={buttonVariants({ variant: "ghost" })}>{a.clear}</Link> : null}
-        </div>
-      </form>
+      <div className="space-y-2">
+        <FilterBar action="/audit" label={a.filtersTitle} submitLabel={a.apply} link={Link} clear={filtered ? { href: "/audit", label: a.clear } : undefined}>
+          <FilterSearch id="audit-q" name="q" label={a.search} placeholder={a.searchPlaceholder} defaultValue={f.q} maxLength={100} describedBy="audit-q-hint" />
+          <FilterMenu label={a.eventType} value={f.event ? eventLabel(f.event) : a.allEvents} active={f.event !== null}>
+            <FilterOption type="radio" name="event" value="" label={a.allEvents} defaultChecked={f.event === null} />
+            {PLATFORM_EVENTS.map((e) => (
+              <FilterOption key={e} type="radio" name="event" value={e} label={a.events[e]} defaultChecked={f.event === e} />
+            ))}
+          </FilterMenu>
+          <FilterMenu label={a.period} value={periodLabel(f, locale, a.periodAll)} active={f.from !== null || f.to !== null}>
+            <PeriodFields idPrefix="audit" from={f.from} to={f.to} labels={a} />
+          </FilterMenu>
+        </FilterBar>
+        <p id="audit-q-hint" className="text-xs text-subtle">{a.searchHint}</p>
+      </div>
 
-      <p className="text-sm text-muted-foreground" role="status">{a.count.replace("{count}", String(totalCount))}</p>
-
-      {rows.length === 0 ? <p className="text-muted-foreground">{filtered ? a.emptyFiltered : a.empty}</p> : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead scope="col">{a.colTime}</TableHead>
-              <TableHead scope="col">{a.colEvent}</TableHead>
-              <TableHead scope="col">{a.colActor}</TableHead>
-              <TableHead scope="col">{a.colOrganization}</TableHead>
-              <TableHead scope="col">{a.details}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((r) => {
-              const entries = Object.entries(r.metadata);
-              return (
-                <TableRow key={r.id} data-testid="platform-audit-row" className="align-top">
-                  <TableCell className="whitespace-nowrap"><DateTime value={r.occurredAt} locale={locale} /></TableCell>
-                  <TableCell>{eventLabel(r.event)}</TableCell>
-                  <TableCell>{actor(r)}</TableCell>
-                  <TableCell>{r.tenant ? <bdi dir="auto">{r.tenant.displayName}</bdi> : null}</TableCell>
-                  <TableCell>
-                    {entries.length === 0 ? <span className="text-muted-foreground">{a.noDetails}</span> : (
-                      <details>
-                        <summary className="cursor-pointer text-sm underline">{a.details}</summary>
-                        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-xs" dir="ltr">
-                          <dt className="text-muted-foreground">{a.colEvent}</dt><dd>{r.event}</dd>
-                          {entries.map(([k, v]) => (
-                            <div key={k} className="contents">
-                              <dt className="text-muted-foreground">{k}</dt>
-                              <dd className="break-all">{v !== null && typeof v === "object" ? JSON.stringify(v) : String(v)}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                      </details>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      )}
-
-      {pages > 1 ? (
-        <nav aria-label={a.pagination} className="flex flex-wrap items-center justify-between gap-3">
-          {pageLink(f.page > 1, f.page - 1, a.previous)}
-          <span className="text-sm text-muted-foreground">{a.pageOf.replace("{page}", String(f.page)).replace("{pages}", String(pages))}</span>
-          {pageLink(f.page < pages, f.page + 1, a.next)}
-        </nav>
-      ) : null}
-    </section>
+      <DataTable
+        columns={columns} rows={rows} rowKey={(r) => String(r.id)} caption={a.title} link={Link}
+        rowProps={() => ({ "data-testid": "platform-audit-row" })}
+        footer={
+          <PaginationBar
+            page={f.page} pages={pages} href={(p) => `/audit${platformAuditQuery(f, p)}`} link={Link} labels={a}
+            summary={<span role="status">{a.count.replace("{count}", String(totalCount))}</span>}
+          />
+        }
+        empty={filtered ? (
+          <EmptyState
+            icon={<SearchX />} title={a.emptyFiltered}
+            action={<Link href="/audit" className={buttonVariants({ variant: "outline" })}>{a.clear}</Link>}
+          />
+        ) : <EmptyState icon={<History />} title={a.empty} />}
+      />
+    </PageContainer>
   );
 }

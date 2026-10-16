@@ -65,16 +65,20 @@ export type Dictionary = {
       invalidCredentials: string; rateLimited: string;
     };
     tenants: {
-      title: string; new: string; newTitle: string; empty: string; displayName: string; subdomain: string;
+      title: string; new: string; newTitle: string; newIntro: string; empty: string; displayName: string; subdomain: string;
       subdomainHint: string; subdomainReadOnly: string; initialState: string; managerEmail: string; create: string;
       saveName: string; nameSaved: string; stateActive: string; stateSuspended: string; suspend: string;
       reactivate: string; confirmSuspend: string; confirmReactivate: string; suspendTitle: string;
       suspendBody: string; reactivateTitle: string; reactivateBody: string; invitationNotDelivered: string;
       stateSaved: string; detailsTitle: string;
       logoTitle: string; logoHint: string; noLogo: string; uploadLogo: string; removeLogo: string; logoSaved: string;
+      intro: string; search: string; searchPlaceholder: string; filters: string; allStates: string; apply: string;
+      clear: string; emptyFiltered: string; count: string; nameTitle: string; nameIntro: string; stateTitle: string;
+      stateIntro: string; logoIntro: string; identityTitle: string; identityIntro: string; managerTitle: string;
+      managerIntro: string;
     };
     managers: {
-      title: string; active: string; pending: string; none: string; staffMember: string; selectStaff: string;
+      title: string; intro: string; active: string; pending: string; none: string; staffMember: string; selectStaff: string;
       promote: string; promoted: string; revoke: string; revoked: string; confirmRevoke: string; revokeTitle: string;
       revokeBody: string; inviteEmail: string; invite: string; invited: string; expires: string;
     };
@@ -84,13 +88,15 @@ export type Dictionary = {
       adminPassword: string; confirmReset: string; resetSent: string; resetNotDelivered: string;
     };
     admins: {
-      title: string; intro: string; invite: string; inviteTitle: string; capabilities: string; sendInvitation: string;
+      title: string; intro: string; invite: string; inviteTitle: string; capabilities: string; emailIntro: string;
+      capabilitiesIntro: string; sendInvitation: string;
       invitationSent: string; invitationNotDelivered: string; acceptTitle: string; acceptIntro: string; accept: string;
       invitationInvalid: string; noRemoval: string;
     };
     audit: {
       title: string; intro: string; eventType: string; allEvents: string; search: string; searchHint: string; from: string;
       to: string; apply: string; clear: string; colTime: string; colEvent: string; colActor: string; colOrganization: string;
+      filtersTitle: string; searchPlaceholder: string; period: string; periodAll: string;
       details: string; noDetails: string; empty: string; emptyFiltered: string; count: string; previous: string; next: string;
       pageOf: string; pagination: string; actorOperator: string; actorSystem: string;
       events: Record<PlatformAuditEventName, string>;

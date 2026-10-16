@@ -2,14 +2,15 @@
 
 import { useActionState, useState } from "react";
 import type { Dictionary } from "@workspace/i18n";
-import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import { DataTable, type DataColumn } from "@workspace/ui/components/data-table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { LtrText } from "@workspace/ui/components/ltr-text";
+import { SettingsSection } from "@workspace/ui/components/settings-section";
 import { StaffName } from "@workspace/ui/components/staff-name";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
+import { StatusBadge, Tag } from "@workspace/ui/components/status-badge";
 import { initialFormState, type FormState } from "@/features/form-state";
 import { platformResetStaffAction } from "@/features/tenants/staff-reset-action";
 
@@ -21,42 +22,31 @@ type Props = { tenantId: string; staff: StaffRow[]; t: Dictionary["admin"] };
 
 /** `tenants.staff.manage`: the platform-assisted password reset (T121, CL-015). Account metadata only. */
 export function StaffPanel({ tenantId, staff, t }: Props) {
+  const columns: DataColumn<StaffRow>[] = [
+    { id: "name", header: t.staff.name, primary: true, cell: (s) => <StaffName staff={s} /> },
+    { id: "email", header: t.staff.email, label: t.staff.email, cell: (s) => <LtrText>{s.email}</LtrText> },
+    {
+      id: "status", header: t.staff.status, label: t.staff.status,
+      cell: (s) => (
+        <div className="flex flex-wrap gap-1.5">
+          <StatusBadge tone={s.enabled ? "success" : "neutral"} dot>{s.enabled ? t.staff.enabled : t.staff.disabled}</StatusBadge>
+          {s.isManager ? <Tag>{t.staff.manager}</Tag> : null}
+        </div>
+      ),
+    },
+    {
+      id: "actions", header: t.common.actions, srOnlyHeader: true, align: "end",
+      cell: (s) => (s.enabled ? <ResetDialog tenantId={tenantId} staffId={s.staffId} t={t} /> : null),
+    },
+  ];
   return (
-    <section aria-labelledby="staff" className="space-y-4">
-      <div className="space-y-1">
-        <h2 id="staff" className="text-lg font-medium">{t.staff.title}</h2>
-        <p className="text-sm text-muted-foreground">{t.staff.intro}</p>
-      </div>
-      {staff.length === 0 ? (
-        <p className="text-muted-foreground">{t.staff.none}</p>
-      ) : (
-        <Table data-testid="tenant-staff">
-          <TableHeader>
-            <TableRow>
-              <TableHead scope="col">{t.staff.name}</TableHead>
-              <TableHead scope="col">{t.staff.email}</TableHead>
-              <TableHead scope="col">{t.staff.status}</TableHead>
-              <TableHead scope="col"><span className="sr-only">{t.common.actions}</span></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {staff.map((s) => (
-              <TableRow key={s.staffId}>
-                <TableCell><StaffName staff={s} /></TableCell>
-                <TableCell><LtrText>{s.email}</LtrText></TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    <Badge variant={s.enabled ? "default" : "secondary"}>{s.enabled ? t.staff.enabled : t.staff.disabled}</Badge>
-                    {s.isManager ? <Badge variant="outline">{t.staff.manager}</Badge> : null}
-                  </div>
-                </TableCell>
-                <TableCell>{s.enabled ? <ResetDialog tenantId={tenantId} staffId={s.staffId} t={t} /> : null}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+    <SettingsSection id="staff" title={t.staff.title} description={t.staff.intro}>
+      {staff.length === 0 ? <p className="text-sm text-muted-foreground">{t.staff.none}</p> : (
+        <div data-testid="tenant-staff">
+          <DataTable columns={columns} rows={staff} rowKey={(s) => s.staffId} caption={t.staff.title} />
+        </div>
       )}
-    </section>
+    </SettingsSection>
   );
 }
 

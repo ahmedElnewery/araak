@@ -843,7 +843,7 @@ Protected manager authority stays platform-only.
   - Breadcrumbs lead Settings to the first page the viewer may open (`sectionHref`, `apps/portal/src/lib/breadcrumbs.ts`).
 
   Update `tests/e2e/us6-audit.spec.ts` (categories sit in a menu) and `tests/e2e/us5-branding.spec.ts` (signed-out pages show the logo only; the name is the page title) (FR-031, FR-033, FR-040, FR-041)
-- [ ] T211 [US5] Move the admin app pages onto the same kit:
+- [X] T211 [US5] Move the admin app pages onto the same kit:
   - Tenants list with search.
   - Tenant detail (name, state, branding, managers, staff) as sections.
   - New tenant; platform admins and invite.
@@ -856,6 +856,7 @@ Protected manager authority stays platform-only.
 - Two checks in `us5-branding` ("title, icon link and manifest…" and the forged request in "staff and delegates get no branding navigation…") could not run in the implementing session: its Node request context cannot resolve `*.localhost` subdomains. Run them where those hosts resolve.
 - `us2-invite-activate-login` was not run (no mail catcher in the implementing session).
 - `SettingsSection` is a plain `<section>` with an h2, not a named region, so a settings page is not a stack of landmarks; `SettingsSections` spaces its direct children, so a section can sit inside its own form.
+- T211: the organization list is filtered in the app (`apps/admin/src/features/tenants/directory.ts`) from `platform_list_tenants`, which already returns only metadata. No RPC change. The admin selectors in `us1-tenant-onboarding` and the admin case of `us6-audit` still match (labels, the managers list items, the search field, Apply, the row test id and the cell role), so those specs were not edited. `us1`, `us2`, `us6` and `shell.a11y` were not run here: this session has no `E2E_PLATFORM_ADMIN_*` credentials, no `SUPABASE_ENV`, and no mail catcher.
 
 **Checkpoint**: Every signed-in portal page uses the shared shell and page kit; T211 brings the admin app to the same layout.
 

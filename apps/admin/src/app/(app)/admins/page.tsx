@@ -1,5 +1,7 @@
+import { UserPlus } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@workspace/ui/components/button";
+import { PageContainer, PageHeader } from "@workspace/ui/components/page-header";
 import { getI18n } from "@/lib/locale";
 import { requirePlatformAdmin } from "@/lib/platform-guards";
 
@@ -7,12 +9,19 @@ import { requirePlatformAdmin } from "@/lib/platform-guards";
 export default async function AdminsPage() {
   await requirePlatformAdmin("platform_admins.invite");
   const { t } = await getI18n();
+  const a = t.admin.admins;
   return (
-    <div className="max-w-xl space-y-4">
-      <h1 className="text-xl font-semibold">{t.admin.admins.title}</h1>
-      <p className="text-muted-foreground">{t.admin.admins.intro}</p>
-      <p className="text-sm text-muted-foreground">{t.admin.admins.noRemoval}</p>
-      <Link href="/admins/invite" className={buttonVariants()}>{t.admin.admins.invite}</Link>
-    </div>
+    <PageContainer labelledBy="admins-title" width="narrow">
+      <PageHeader
+        titleId="admins-title" title={a.title} description={a.intro}
+        actions={
+          <Link href="/admins/invite" className={buttonVariants({ className: "h-10 rounded-[10px]" })}>
+            <UserPlus aria-hidden="true" />
+            {a.invite}
+          </Link>
+        }
+      />
+      <p className="text-sm text-muted-foreground">{a.noRemoval}</p>
+    </PageContainer>
   );
 }
