@@ -832,7 +832,7 @@ Protected manager authority stays platform-only.
 
 ### Tests for User Story 6 (write first, must FAIL) ⚠️
 
-- [ ] T167 [P] [US6] Write pgTAP `supabase/tests/060_audit_access.test.sql`:
+- [X] T167 [P] [US6] Write pgTAP `supabase/tests/060_audit_access.test.sql`:
   - A delegate with `audit_logs.view` and categories `{staff,roles}` sees only those categories in rows, `total_count`, detail fetches and export, and never `tenant_settings`, other tenants or platform events.
   - `audit_logs.view` with null or empty categories returns nothing.
   - A manager sees all tenant administrative categories.
@@ -840,13 +840,13 @@ Protected manager authority stays platform-only.
   - A platform admin without tenant access cannot read tenant audit; `platform_list_audit` requires `platform_audit.view`.
 
   (FR-031, FR-033, CL-032, CL-035, SC-006)
-- [ ] T168 [P] [US6] Write pgTAP `supabase/tests/061_audit_retention.test.sql`:
+- [X] T168 [P] [US6] Write pgTAP `supabase/tests/061_audit_retention.test.sql`:
   - `private.purge_expired_audit()` deletes tenant administrative events older than 12 months and security events older than 3 months.
   - It keeps events covered by `audit_legal_holds`, never touches other tenants' unexpired rows, and writes a `retention.purged` platform event with counts only.
   - Direct DELETE remains impossible.
 
   (FR-033, CL-033, CL-034)
-- [ ] T169 [P] [US6] Write `tests/security/audit-coverage.test.ts`. Run every in-scope operation:
+- [X] T169 [P] [US6] Write `tests/security/audit-coverage.test.ts`. Run every in-scope operation:
   - tenant create, state change and name change;
   - manager grant and revoke;
   - staff invite, resend and redeem;
@@ -860,13 +860,13 @@ Protected manager authority stays platform-only.
   - bootstrap.
 
   Assert each yields exactly one event in the correct log, with actor, time, tenant/context and safe ids, and that serialized metadata has no token, password or secret patterns. Denied privileged attempts must yield security events. Plain protected page views must produce NO audit event (FR-030, FR-032, SC-006, Constitution VI)
-- [ ] T170 [P] [US6] Write `tests/security/audit-export.test.ts`. The export obeys categories and filters. When the permission is revoked between list load and export, the export is denied (stale client state). The pagination and count endpoints leak no other categories (edge case "Audit viewer loses permission")
-- [ ] T171 [P] [US6] Write Playwright `tests/e2e/us6-audit.spec.ts`. The category-limited delegate sees a filtered list and export. The manager sees the full administrative list plus Security Logs. Staff get no navigation entry and are denied on a direct URL. Platform audit appears in the admin app only (US6 scenarios 1–6)
+- [X] T170 [P] [US6] Write `tests/security/audit-export.test.ts`. The export obeys categories and filters. When the permission is revoked between list load and export, the export is denied (stale client state). The pagination and count endpoints leak no other categories (edge case "Audit viewer loses permission")
+- [X] T171 [P] [US6] Write Playwright `tests/e2e/us6-audit.spec.ts`. The category-limited delegate sees a filtered list and export. The manager sees the full administrative list plus Security Logs. Staff get no navigation entry and are denied on a direct URL. Platform audit appears in the admin app only (US6 scenarios 1–6)
 
 ### Implementation for User Story 6
 
-- [ ] T172 [P] [US6] Implement `packages/authorization/src/audit-categories.ts`: tenant administrative categories `staff|invitations|roles|tenant_settings|sessions|tenant_lifecycle` and security event types `auth.sign_in_failed|authz.denied|authz.privilege_escalation_denied|session.invalid_reuse`, per T021 ⛔ GATE-RBAC. Add a DB check constraint in a new migration `supabase/migrations/<ts>_audit_category_constraints.sql`, so no unapproved category can be emitted (plan "NON-ADMIN RETENTION")
-- [ ] T173 [US6] Create migration `supabase/migrations/<ts>_audit_read_rpcs.sql`:
+- [X] T172 [P] [US6] Implement `packages/authorization/src/audit-categories.ts`: tenant administrative categories `staff|invitations|roles|tenant_settings|sessions|tenant_lifecycle` and security event types `auth.sign_in_failed|authz.denied|authz.privilege_escalation_denied|session.invalid_reuse`, per T021 ⛔ GATE-RBAC. Add a DB check constraint in a new migration `supabase/migrations/<ts>_audit_category_constraints.sql`, so no unapproved category can be emitted (plan "NON-ADMIN RETENTION"). **Done with the five approved categories only:** `tenant_lifecycle` is not in the owner-approved catalog, so tenant lifecycle events stay under `tenant_settings` (open point in `docs/decisions/audit-events.md`)
+- [X] T173 [US6] Create migration `supabase/migrations/<ts>_audit_read_rpcs.sql`:
   - `public.list_tenant_audit(p_categories text[], p_from timestamptz, p_to timestamptz, p_actor uuid, p_search text, p_limit int, p_offset int)`. It returns rows plus `total_count`, both computed AFTER intersecting with `private.audit_categories_for_actor()` (all administrative categories for an active manager), and requires `request_context_ok()`.
   - `public.get_tenant_audit_event(p_id)`: the same filter.
   - `public.export_tenant_audit(...)`: the same filter and row cap; writes an `audit.exported` event.
@@ -874,13 +874,13 @@ Protected manager authority stays platform-only.
   - `public.platform_list_audit(...)`: requires `platform_audit.view`.
 
   (FR-031, FR-033, CL-032, CL-035)
-- [ ] T174 [US6] Create migration `supabase/migrations/<ts>_audit_retention.sql`: `private.purge_expired_audit()`, which sets `app.retention_purge='on'` locally, deletes tenant administrative events older than 12 months and security events older than 3 months that are not covered by `audit_legal_holds`, and writes a platform audit summary. Schedule it daily with `cron.schedule('purge-expired-audit', '17 3 * * *', $$select private.purge_expired_audit()$$)` (FR-033, CL-033, CL-034)
-- [ ] T175 [US6] Implement the tenant audit viewer `apps/portal/src/app/(app)/audit/page.tsx`: filters limited to the actor's categories, date range, actor and search, pagination, and a detail `Sheet` showing safe metadata only. Add `apps/portal/src/features/audit/actions.ts` and an export route `apps/portal/src/app/(app)/audit/export/route.ts` that re-checks authorization at request time and streams CSV with safe columns (FR-031, US6 scenarios 1–2a)
-- [ ] T176 [US6] Implement Security Logs `apps/portal/src/app/(app)/security-logs/page.tsx` behind `requireManager()`: list, detail and export via `list_security_events`, never linked or authorized via `audit_logs.view` (FR-033, CL-035)
-- [ ] T177 [P] [US6] Implement platform audit `apps/admin/src/app/(app)/audit/page.tsx` behind `requirePlatformAdmin('platform_audit.view')`, showing platform events only with no tenant-private content (FR-031, US6 scenario 4)
-- [ ] T178 [US6] Wire security-event emission. Guards in `apps/portal/src/lib/guards.ts` and `apps/admin/src/lib/platform-guards.ts` emit `authz.denied`. Sign-in emits `auth.sign_in_failed`. Revoked or expired session reuse emits `session.invalid_reuse`. Rate-limit each identical event per actor to avoid log flooding. Raw identifiers, IPs and tokens are never stored (FR-033, CL-034)
-- [ ] T179 [P] [US6] Add AR/EN strings for audit categories, event names, filters and empty states to `packages/i18n/src/dictionaries/{ar,en}.ts`
-- [ ] T180 [US6] Run `supabase/tests/060_audit_access.test.sql`, `supabase/tests/061_audit_retention.test.sql`, `tests/security/audit-coverage.test.ts`, `tests/security/audit-export.test.ts` and `tests/e2e/us6-audit.spec.ts` until T167–T171 pass
+- [X] T174 [US6] Create migration `supabase/migrations/<ts>_audit_retention.sql`: `private.purge_expired_audit()`, which sets `app.retention_purge='on'` locally, deletes tenant administrative events older than 12 months and security events older than 3 months that are not covered by `audit_legal_holds`, and writes a platform audit summary. Schedule it daily with `cron.schedule('purge-expired-audit', '17 3 * * *', $$select private.purge_expired_audit()$$)` (FR-033, CL-033, CL-034)
+- [X] T175 [US6] Implement the tenant audit viewer `apps/portal/src/app/(app)/audit/page.tsx`: filters limited to the actor's categories, date range, actor and search, pagination, and a detail `Sheet` showing safe metadata only. Add `apps/portal/src/features/audit/actions.ts` and an export route `apps/portal/src/app/(app)/audit/export/route.ts` that re-checks authorization at request time and streams CSV with safe columns (FR-031, US6 scenarios 1–2a)
+- [X] T176 [US6] Implement Security Logs `apps/portal/src/app/(app)/security-logs/page.tsx` behind `requireManager()`: list, detail and export via `list_security_events`, never linked or authorized via `audit_logs.view` (FR-033, CL-035)
+- [X] T177 [P] [US6] Implement platform audit `apps/admin/src/app/(app)/audit/page.tsx` behind `requirePlatformAdmin('platform_audit.view')`, showing platform events only with no tenant-private content (FR-031, US6 scenario 4)
+- [X] T178 [US6] Wire security-event emission. Guards in `apps/portal/src/lib/guards.ts` and `apps/admin/src/lib/platform-guards.ts` emit `authz.denied`. Sign-in emits `auth.sign_in_failed`. Revoked or expired session reuse emits `session.invalid_reuse`. Rate-limit each identical event per actor to avoid log flooding. Raw identifiers, IPs and tokens are never stored (FR-033, CL-034)
+- [X] T179 [P] [US6] Add AR/EN strings for audit categories, event names, filters and empty states to `packages/i18n/src/dictionaries/{ar,en}.ts`
+- [X] T180 [US6] Run `supabase/tests/060_audit_access.test.sql`, `supabase/tests/061_audit_retention.test.sql`, `tests/security/audit-coverage.test.ts`, `tests/security/audit-export.test.ts` and `tests/e2e/us6-audit.spec.ts` until T167–T171 pass
 
 **Checkpoint**: Administrative history is complete, safe, category-scoped and tamper-resistant across tenant and platform logs.
 

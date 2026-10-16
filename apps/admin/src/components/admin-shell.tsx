@@ -1,14 +1,14 @@
 "use client";
 
-import { Building2, ShieldCheck } from "lucide-react";
+import { Building2, History, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppShell } from "@workspace/ui/components/app-shell";
 import { cn } from "@workspace/ui/lib/utils";
 
-type NavItem = { href: string; label: string; icon: "tenants" | "admins" };
-const icons = { tenants: Building2, admins: ShieldCheck };
+type NavItem = { href: string; label: string; icon: "tenants" | "admins" | "audit" };
+const icons = { tenants: Building2, admins: ShieldCheck, audit: History };
 
 type Props = {
   dir: "rtl" | "ltr";

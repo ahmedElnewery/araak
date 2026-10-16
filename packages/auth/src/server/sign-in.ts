@@ -25,24 +25,25 @@ export async function signInTenantStaff(i: TenantSignInInput): Promise<TenantSig
     hmacKey: i.hmacKey, trustedProxyHops: i.trustedProxyHops,
   });
   const admin = getSupabaseAdmin();
-  const fail = async (event: "auth.login_failed" | "auth.login_throttled", pad: boolean): Promise<TenantSignInResult> => {
+  const fail = async (reason: "invalid" | "throttled", pad: boolean): Promise<TenantSignInResult> => {
     if (pad) await padFailedSignIn(); // same duration as a real failed password check, without an Auth call
     // hashed identifier only; a logging failure never changes the response
-    await recordSecurityEvent({ tenantId: i.tenantId, event, metadata: { identifierHmac: keys.identifierHmac } }).catch(() => undefined);
+    await recordSecurityEvent({ tenantId: i.tenantId, event: "auth.sign_in_failed", metadata: { identifierHmac: keys.identifierHmac, reason } })
+      .catch(() => undefined);
     return { ok: false };
   };
 
-  if (!(await checkAndRecordAttempt(keys))) return fail("auth.login_throttled", true);
+  if (!(await checkAndRecordAttempt(keys))) return fail("throttled", true);
   const { data: resolved } = await admin.rpc("svc_resolve_login_email", { p_tenant_id: i.tenantId, p_identifier: i.identifier });
   const email = resolved; // null for unknown, disabled, other-tenant or suspended
-  if (!email) return fail("auth.login_failed", true);
+  if (!email) return fail("invalid", true);
 
   const started = performance.now();
   const { data, error } = await i.supabase.auth.signInWithPassword({ email, password: i.password });
   if (error) {
     // calibrates the padded failure paths; only a real wrong-password check counts (not a rate limit or outage)
     if (error.code === "invalid_credentials") recordPasswordCheckDuration(performance.now() - started);
-    return fail("auth.login_failed", false);
+    return fail("invalid", false);
   }
 
   const sessionId = (await i.supabase.auth.getClaims()).data?.claims.session_id;
@@ -53,7 +54,7 @@ export async function signInTenantStaff(i: TenantSignInInput): Promise<TenantSig
   const { data: staff } = await admin.from("tenant_staff").select("id, tenant_id, enabled").eq("auth_user_id", data.user.id).maybeSingle();
   if (!staff || staff.tenant_id !== i.tenantId || !staff.enabled) {
     await endSession(); // a valid identity of another tenant (or an incomplete one) never gets a session here
-    return fail("auth.login_failed", false);
+    return fail("invalid", false);
   }
   try {
     await registerSession({
@@ -62,7 +63,7 @@ export async function signInTenantStaff(i: TenantSignInInput): Promise<TenantSig
     });
   } catch {
     await endSession();
-    return fail("auth.login_failed", false);
+    return fail("invalid", false);
   }
   await recordAuthSuccess(keys);
   return { ok: true, staffId: staff.id };

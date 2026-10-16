@@ -16,6 +16,8 @@ export type TwoTenantFixture = {
   roleA: string; roleB: string;
   /** Registers an Auth user created inside a test so teardown removes it (and any staff row it gained). */
   trackUser(userId: string): void;
+  /** Registers a tenant created inside a test (e.g. through platform_create_tenant) so teardown removes it. */
+  trackTenant(tenantId: string): void;
   teardown(): Promise<void>;
 };
 
@@ -85,6 +87,9 @@ export async function createTwoTenantFixture(): Promise<TwoTenantFixture> {
     tenantA, tenantB, platformAdminId, managerA, staffA, managerB, staffB, roleA: ra!.id, roleB: rb!.id,
     trackUser(userId) {
       userIds.push(userId);
+    },
+    trackTenant(tenantId) {
+      tenantIds.push(tenantId);
     },
     async teardown() {
       const ids = tenantIds.map(q).join(",");

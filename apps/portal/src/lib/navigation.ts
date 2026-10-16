@@ -25,8 +25,8 @@ const DEFINITIONS: readonly Definition[] = [
       { id: "branding", href: "/settings/branding", label: "branding", icon: "branding", requires: { kind: "manager" }, built: true },
     ],
   },
-  { id: "audit", href: "/audit", label: "auditLog", icon: "audit", requires: { kind: "permission", keys: ["audit_logs.view"] }, built: false },
-  { id: "security", href: "/security-logs", label: "securityLogs", icon: "security", requires: { kind: "manager" }, built: false },
+  { id: "audit", href: "/audit", label: "auditLog", icon: "audit", requires: { kind: "permission", keys: ["audit_logs.view"] }, built: true },
+  { id: "security", href: "/security-logs", label: "securityLogs", icon: "security", requires: { kind: "manager" }, built: true },
 ];
 
 export type NavItem = { id: string; href: string; label: string; icon: NavIcon; children: NavItem[] };

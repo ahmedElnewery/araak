@@ -15,6 +15,7 @@ export const TENANT_CAPABILITIES = ["tenants.manage", "tenants.managers.manage",
 export function landingPath(capabilities: readonly string[]): string {
   if (TENANT_CAPABILITIES.some((c) => capabilities.includes(c))) return "/tenants";
   if (capabilities.includes("platform_admins.invite")) return "/admins";
+  if (capabilities.includes("platform_audit.view")) return "/audit";
   return "/forbidden";
 }
 

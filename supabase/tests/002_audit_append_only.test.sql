@@ -5,7 +5,7 @@ create temp table fx as select tests.mk_tenant('audit-a') a;
 grant all on fx to public;
 select private.write_tenant_audit((select a from fx), 'system', null, null, 'staff', 'staff.disabled', 'staff', 'x',
   '{"ok":1,"password":"p","nested":{"api_key":"k","fine":2},"list":[{"otp":"1","v":3}],"error_code":"c"}');
-select private.write_security_event((select a from fx), null, 'login.failed', '{"token":"t","reason":"bad"}');
+select private.write_security_event((select a from fx), null, 'auth.sign_in_failed', '{"token":"t","reason":"bad"}');
 select private.write_platform_audit(null, 'ops-1', 'tenant.created', '{"secret":"s","n":1}');
 
 select is((select metadata from public.tenant_audit_events where tenant_id = (select a from fx)),

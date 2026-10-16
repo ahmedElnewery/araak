@@ -82,7 +82,8 @@ select is((select first_name from public.tenant_staff where id = (select staff_i
 select is((select count(*)::int from public.tenant_audit_events where event = 'staff.name_changed'
            and actor_staff_id = (select staff_id from st where k='zed')), 2, 'each real change is audited once');
 select is((select coalesce(metadata ->> 'oldFirstName', '-') || '>' || (metadata ->> 'newFirstName') from public.tenant_audit_events
-           where event = 'staff.name_changed' order by id limit 1), '->Zed', 'audit records old and new values');
+           where event = 'staff.name_changed' and actor_staff_id = (select staff_id from st where k='zed') order by id limit 1),
+          '->Zed', 'audit records old and new values');
 
 -- ---- admin app lists -----------------------------------------------------------------------------------------------
 create temp table support as select tests.mk_user('support@nm.test') uid;
