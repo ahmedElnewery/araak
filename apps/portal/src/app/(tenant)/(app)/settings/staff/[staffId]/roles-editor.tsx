@@ -12,19 +12,20 @@ export function RolesEditor({ staffId, options, selected, t }: { staffId: string
   if (options.length === 0) return <p className="text-sm text-muted-foreground">{t.portal.staff.noAssignableRoles}</p>;
   return (
     <form action={action} className="space-y-3" noValidate>
-      <p className="text-sm text-muted-foreground">{t.portal.staff.rolesEditorIntro}</p>
-      <fieldset className="grid gap-2">
+      <fieldset className="grid gap-1">
         <legend className="sr-only">{t.portal.staff.rolesEditorTitle}</legend>
         {options.map((r) => (
-          <label key={r.id} className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="roles" value={r.id} defaultChecked={selected.includes(r.id)} className="size-4" />
+          <label key={r.id} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-2 text-sm hover:bg-hover">
+            <input type="checkbox" name="roles" value={r.id} defaultChecked={selected.includes(r.id)} className="size-4 shrink-0 accent-primary" />
             <span dir="auto">{r.name}</span>
           </label>
         ))}
       </fieldset>
-      {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
-      {state.ok ? <p role="status" className="text-sm">{t.portal.staff.rolesSaved}</p> : null}
-      <Button type="submit" loading={pending}>{t.portal.staff.saveRoles}</Button>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" loading={pending}>{t.portal.staff.saveRoles}</Button>
+        {state.error ? <p role="alert" className="text-sm text-destructive">{t.portal.errors[state.error]}</p> : null}
+        {state.ok ? <p role="status" className="text-sm">{t.portal.staff.rolesSaved}</p> : null}
+      </div>
     </form>
   );
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { EffectiveGrant, EffectivePermissions } from "@workspace/authorization";
 import { getDictionary } from "@workspace/i18n";
-import { buildAccountSection, buildNavigation } from "./navigation";
+import { buildAccountSection, buildNavigation, sectionHref } from "./navigation";
 
 const t = getDictionary("en").portal.nav;
 const grants = (...keys: EffectiveGrant["key"][]): EffectivePermissions => ({
@@ -31,5 +31,10 @@ describe("portal navigation", () => {
   it("the account section holds the person's own pages, never the primary navigation", () => {
     expect(buildAccountSection(grants(), t).map((i) => i.href)).toEqual(["/account", "/account/appearance", "/account/password", "/account/sessions"]);
     expect(JSON.stringify(buildNavigation({ isManager: true, permissions: [] }, t))).not.toContain("/account");
+  });
+  it("leads a section to its first page the actor may open", () => {
+    expect(sectionHref(buildNavigation({ isManager: true, permissions: [] }, t), "settings")).toBe("/settings/staff");
+    expect(sectionHref(buildNavigation(grants("roles.view"), t), "settings")).toBe("/settings/roles");
+    expect(sectionHref(buildNavigation(grants(), t), "settings")).toBeUndefined();
   });
 });

@@ -68,7 +68,8 @@ test.describe("portal", () => {
     await expect(row("staff.disabled")).toHaveCount(1);
     await expect(row("role.created")).toHaveCount(1);
     await expect(row("tenant.branding_updated")).toHaveCount(0);
-    // only the granted categories can be chosen as filters
+    // only the granted categories can be chosen as filters, inside the Categories menu of the filter bar
+    await page.locator("summary", { hasText: t.audit.categoriesLabel }).click();
     await expect(page.getByRole("checkbox", { name: t.audit.categories.staff })).toBeVisible();
     await expect(page.getByRole("checkbox", { name: t.audit.categories.tenant_settings })).toHaveCount(0);
 

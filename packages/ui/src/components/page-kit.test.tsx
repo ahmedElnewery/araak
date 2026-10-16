@@ -140,14 +140,17 @@ describe("small pieces", () => {
     expect(out).not.toMatch(/<a href="\/b" aria-current/);
     expect(out).toContain(">3<");
   });
-  it("SettingsSection is a section named by its heading", () => {
+  it("SettingsSection is a section with an h2, not a named landmark", () => {
     const out = html(<SettingsSections><SettingsSection id="name" title="Your name" description="Shown to colleagues">fields</SettingsSection></SettingsSections>);
-    expect(out).toContain('<section aria-labelledby="name"');
+    expect(out).toMatch(/<section class="/);
+    expect(out).not.toContain("aria-labelledby");
     expect(out).toContain('<h2 id="name"');
+    expect(out).toContain("Shown to colleagues");
   });
   it("ListCardItem links its title when it opens something", () => {
-    const out = html(<ListCard label="Roles"><ListCardItem title="Finance" href="/roles/1" link={Link} meta="2 people" /></ListCard>);
+    const out = html(<ListCard label="Roles"><ListCardItem title="Finance" href="/roles/1" link={Link} meta="2 people" data-testid="role-row" /></ListCard>);
     expect(out).toContain('<ul aria-label="Roles"');
+    expect(out).toContain('<li data-testid="role-row"');
     expect(out).toContain('<a href="/roles/1"');
     expect(out).toContain("2 people");
   });

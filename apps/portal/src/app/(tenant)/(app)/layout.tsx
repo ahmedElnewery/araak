@@ -46,7 +46,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         collapseMenu: t.common.collapseMenu, expandMenu: t.common.expandMenu, backToMenu: t.common.backToMenu,
       }}
     >
-      <div className="max-w-3xl space-y-6">{children}</div>
+      {children}
     </PortalShell>
   );
 }

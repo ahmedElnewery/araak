@@ -13,7 +13,7 @@ async function deny(ctx: { tenantId: string; staffId: string }, reason: string):
 }
 
 /** Signed-in, enabled staff of THIS host's tenant with a live session; otherwise redirects without disclosure. */
-type StaffCtx = Awaited<ReturnType<typeof getTenantStaffContext>>;
+export type StaffCtx = Awaited<ReturnType<typeof getTenantStaffContext>>;
 
 /**
  * One guard pipeline per request (getClaims + svc_load_staff_context): the layout and the page share it, like

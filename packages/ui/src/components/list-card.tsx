@@ -5,7 +5,7 @@ import { cn } from "@workspace/ui/lib/utils";
 /** A short list of things in one card (roles, an account's sign-in options), one row each. */
 export function ListCard({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <ul aria-label={label} className={cn("divide-y divide-divider overflow-hidden dark:divide-border rounded-xl border border-border bg-card", className)}>
+    <ul aria-label={label} className={cn("divide-y divide-divider overflow-hidden rounded-xl dark:divide-border border border-border bg-card", className)}>
       {children}
     </ul>
   );
@@ -23,11 +23,12 @@ type ItemProps = {
   /** Buttons at the end of the row. */
   actions?: ReactNode;
   className?: string;
+  "data-testid"?: string;
 };
 
-export function ListCardItem({ icon, title, href, link: Link, meta, actions, className }: ItemProps) {
+export function ListCardItem({ icon, title, href, link: Link, meta, actions, className, "data-testid": testId }: ItemProps) {
   return (
-    <li className={cn("flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4", className)}>
+    <li data-testid={testId} className={cn("flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4", className)}>
       {icon ? (
         <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-accent text-accent-foreground [&_svg]:size-[1.125rem]">{icon}</span>
       ) : null}

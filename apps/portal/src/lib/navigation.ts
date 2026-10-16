@@ -82,6 +82,12 @@ export function buildNavigation(perms: EffectivePermissions, t: Dictionary["port
   return GROUPS.map((g) => ({ id: g.id, label: t[g.label], items: walk(g.items, perms, t) })).filter((g) => g.items.length > 0);
 }
 
+/** Where a section without a page of its own leads: its first child the actor may open, as the sidebar links it. */
+export function sectionHref(groups: NavGroup[], id: string): string | undefined {
+  const item = groups.flatMap((g) => g.items).find((i) => i.id === id);
+  return item?.children[0]?.href ?? item?.href;
+}
+
 /** The account section's pages (every signed-in staff member has all of them). */
 export function buildAccountSection(perms: EffectivePermissions, t: Dictionary["portal"]["nav"]): NavItem[] {
   return walk(ACCOUNT, perms, t);
