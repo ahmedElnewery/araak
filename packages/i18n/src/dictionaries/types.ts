@@ -32,6 +32,14 @@ export type Dictionary = {
     closeMenu: string;
     close: string;
     logoAlt: string;
+    accountMenu: string;
+    collapseMenu: string;
+    expandMenu: string;
+    backToMenu: string;
+    appearance: string;
+    appearanceIntro: string;
+    themeHint: string;
+    languageHint: string;
   };
   errors: {
     notFoundTitle: string;
@@ -49,7 +57,7 @@ export type Dictionary = {
     home: string;
   };
   admin: {
-    nav: { tenants: string; admins: string; audit: string; menu: string; brand: string };
+    nav: { tenants: string; admins: string; audit: string; menu: string; brand: string; appearance: string; appearanceSaved: string };
     common: { cancel: string; created: string; state: string; actions: string; none: string; back: string };
     auth: {
       title: string; email: string; password: string; confirmPassword: string; signIn: string; signOut: string;
@@ -108,7 +116,8 @@ export type Dictionary = {
     nav: {
       menu: string; home: string; inviteStaff: string; invitations: string; account: string; signOut: string;
       settings: string; staff: string; roles: string; branding: string; auditLog: string; securityLogs: string;
-      settingsMenu: string;
+      settingsMenu: string; mainGroup: string; systemGroup: string; beneficiaries: string; donors: string; volunteers: string;
+      profile: string; appearance: string; password: string; sessions: string; accountMenu: string; appearanceSaved: string;
     };
     home: { welcome: string; intro: string };
     branding: {
@@ -168,7 +177,7 @@ export type Dictionary = {
     };
     account: {
       title: string; username: string; changeUsername: string; save: string; saved: string; email: string;
-      emailImmutable: string; sessionsLink: string; passwordLink: string;
+      emailImmutable: string;
       changeName: string; nameMissing: string; saveName: string; nameSaved: string;
     };
     sessions: {

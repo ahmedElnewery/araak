@@ -44,11 +44,12 @@ async function newPage(browser: Browser, sub: string): Promise<Page> {
 async function signIn(page: Page, sub: string, identifier: string, password: string) {
   await page.goto(`${host(sub)}/login`);
   await page.getByLabel(t.auth.identifier).fill(identifier);
-  await page.getByLabel(t.auth.password).fill(password);
+  await page.getByLabel(t.auth.password, { exact: true }).fill(password);
   await page.getByRole("button", { name: t.auth.signIn }).click();
 }
 const signOut = async (page: Page) => {
-  await page.getByRole("button", { name: t.nav.signOut }).click();
+  await page.getByTestId("account-menu").click();
+  await page.getByRole("menuitem", { name: t.nav.signOut }).click();
   await page.waitForURL("**/login");
 };
 
@@ -93,7 +94,7 @@ test("invitee enters a name, sees the username rules, gets inline errors and act
   await expect(page.getByText(en.username.errorPlacement)).toBeVisible();
   await page.getByLabel(en.username.label).fill("Ahmed");
   await page.getByLabel(t.invite.password, { exact: true }).fill(NEW_PASSWORD);
-  await page.getByLabel(t.invite.confirmPassword).fill(NEW_PASSWORD);
+  await page.getByLabel(t.invite.confirmPassword, { exact: true }).fill(NEW_PASSWORD);
   // both names are required; nothing is created until they are given
   await page.getByRole("button", { name: t.invite.activate }).click();
   await expect(page.getByText(t.errors.first_name_required)).toBeVisible();
@@ -102,7 +103,7 @@ test("invitee enters a name, sees the username rules, gets inline errors and act
   await page.getByLabel(en.personName.firstName).fill("أحمد");
   await page.getByLabel(en.personName.lastName).fill("علي");
   await page.getByLabel(t.invite.password, { exact: true }).fill(NEW_PASSWORD);
-  await page.getByLabel(t.invite.confirmPassword).fill(NEW_PASSWORD);
+  await page.getByLabel(t.invite.confirmPassword, { exact: true }).fill(NEW_PASSWORD);
   await page.getByRole("button", { name: t.invite.activate }).click();
   await page.waitForURL(`${host(fx.tenantA.subdomain)}/`);
   // the portal shows the name, not the username
@@ -189,12 +190,12 @@ test("self-service recovery: neutral response, one-time link, new password works
   lastLink = extractLink(await waitForMail(inviteA), "/recover/complete");
   const reset = await newPage(browser, fx.tenantA.subdomain);
   await reset.goto(lastLink);
-  await reset.getByLabel(t.recovery.newPassword).fill("weak");
-  await reset.getByLabel(t.recovery.confirmPassword).fill("weak");
+  await reset.getByLabel(t.recovery.newPassword, { exact: true }).fill("weak");
+  await reset.getByLabel(t.recovery.confirmPassword, { exact: true }).fill("weak");
   await reset.getByRole("button", { name: t.recovery.submit }).click();
   await expect(reset.getByText(t.errors.password_policy)).toBeVisible(); // a typo does not burn the link
-  await reset.getByLabel(t.recovery.newPassword).fill(RESET_PASSWORD);
-  await reset.getByLabel(t.recovery.confirmPassword).fill(RESET_PASSWORD);
+  await reset.getByLabel(t.recovery.newPassword, { exact: true }).fill(RESET_PASSWORD);
+  await reset.getByLabel(t.recovery.confirmPassword, { exact: true }).fill(RESET_PASSWORD);
   await reset.getByRole("button", { name: t.recovery.submit }).click();
   await reset.waitForURL((url) => url.pathname === "/login");
   await expect(reset.getByText(t.recovery.done)).toBeVisible();
@@ -218,18 +219,18 @@ test("manager-assisted reset asks for the manager's own password; an expired lin
   await manager.waitForURL(`${host(fx.tenantA.subdomain)}/`);
   await manager.goto(`${host(fx.tenantA.subdomain)}/settings/staff/${staffAId}`);
   await manager.getByRole("button", { name: t.staff.resetPassword }).click();
-  await manager.getByLabel(t.staff.managerPassword).fill("Not-My-Password-1");
+  await manager.getByLabel(t.staff.managerPassword, { exact: true }).fill("Not-My-Password-1");
   await manager.getByRole("button", { name: t.staff.confirmReset }).click();
   await expect(manager.getByText(t.errors.confirmation_required)).toBeVisible();
-  await manager.getByLabel(t.staff.managerPassword).fill(PASSWORD);
+  await manager.getByLabel(t.staff.managerPassword, { exact: true }).fill(PASSWORD);
   await manager.getByRole("button", { name: t.staff.confirmReset }).click();
   await expect(manager.getByText(t.staff.resetSent)).toBeVisible();
 
   const link = extractLink(await waitForMail(inviteA), "/recover/complete");
   const employee = await newPage(browser, fx.tenantA.subdomain);
   await employee.goto(link);
-  await employee.getByLabel(t.recovery.newPassword).fill(MANAGER_RESET_PASSWORD);
-  await employee.getByLabel(t.recovery.confirmPassword).fill(MANAGER_RESET_PASSWORD);
+  await employee.getByLabel(t.recovery.newPassword, { exact: true }).fill(MANAGER_RESET_PASSWORD);
+  await employee.getByLabel(t.recovery.confirmPassword, { exact: true }).fill(MANAGER_RESET_PASSWORD);
   await employee.getByRole("button", { name: t.recovery.submit }).click();
   await employee.waitForURL((url) => url.pathname === "/login");
   await expect(employee.getByText(t.recovery.done)).toBeVisible();

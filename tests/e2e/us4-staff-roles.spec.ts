@@ -27,7 +27,7 @@ async function signedIn(browser: Browser, username: string): Promise<Page> {
   const page = await context.newPage();
   await page.goto(`${host(sub)}/login`);
   await page.getByLabel(t.auth.identifier).fill(username);
-  await page.getByLabel(t.auth.password).fill(PASSWORD);
+  await page.getByLabel(t.auth.password, { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: t.auth.signIn }).click();
   await page.waitForURL(`${host(sub)}/`);
   return page;
@@ -61,10 +61,13 @@ test("the manager creates two roles and assigns both to a staff member whose nav
   await manager.context().close();
 
   const staff = await signedIn(browser, fx.staffA.username);
-  const nav = staff.getByRole("navigation", { name: t.nav.menu });
-  await expect(nav.getByRole("link", { name: t.nav.roles, exact: true })).toBeVisible(); // from Alpha
-  await expect(nav.getByRole("link", { name: t.nav.inviteStaff })).toBeVisible(); // from Beta
-  await expect(nav.getByRole("link", { name: t.nav.staff, exact: true })).toBeVisible(); // from Viewers
+  await staff.getByRole("navigation", { name: t.nav.menu }).getByRole("link", { name: t.nav.settings }).click();
+  const settings = staff.getByRole("navigation", { name: t.nav.settingsMenu });
+  await expect(settings.getByRole("link", { name: t.nav.roles, exact: true })).toBeVisible(); // from Alpha
+  await expect(settings.getByRole("link", { name: t.nav.staff, exact: true })).toBeVisible(); // from Viewers
+  // from Beta: whoever sees the directory invites from its button, not from the navigation
+  await expect(staff.getByRole("main").getByRole("link", { name: t.nav.inviteStaff })).toBeVisible();
+  await expect(settings.getByRole("link", { name: t.nav.inviteStaff })).toHaveCount(0);
   await staff.context().close();
 });
 

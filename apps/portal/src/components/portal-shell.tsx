@@ -1,78 +1,82 @@
 "use client";
 
-import { History, Home, KeyRound, Palette, Settings, ShieldAlert, User, Users } from "lucide-react";
+import {
+  Contrast, HandCoins, HandHeart, Handshake, History, House, KeyRound, Lock, MonitorSmartphone, Palette, Settings, ShieldAlert,
+  UserPlus, UserRound, Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { AppShell } from "@workspace/ui/components/app-shell";
-import { cn } from "@workspace/ui/lib/utils";
-import type { NavIcon, NavItem } from "@/lib/navigation";
+import { AccountMenu } from "@workspace/ui/components/account-menu";
+import { AppShell, type ShellNavItem, type ShellSection } from "@workspace/ui/components/app-shell";
+import type { NavGroup, NavIcon, NavItem } from "@/lib/navigation";
 
-const icons: Record<NavIcon, typeof Home> = {
-  home: Home, account: User, settings: Settings, staff: Users, roles: KeyRound, branding: Palette, audit: History, security: ShieldAlert,
+const icons: Record<NavIcon, typeof House> = {
+  home: House, beneficiaries: HandHeart, donors: HandCoins, volunteers: Handshake, settings: Settings, staff: Users, invite: UserPlus,
+  roles: KeyRound, branding: Palette, audit: History, security: ShieldAlert,
+  profile: UserRound, appearance: Contrast, password: Lock, sessions: MonitorSmartphone,
 };
 
 type Props = {
   dir: "rtl" | "ltr";
   brand: ReactNode;
-  nav: NavItem[];
-  navLabel: string;
-  settingsLabel: string;
-  shellLabels: { skipToContent: string; openMenu: string; closeMenu: string };
-  header: ReactNode;
+  groups: NavGroup[];
+  accountItems: NavItem[];
+  account: { name: ReactNode; detail?: ReactNode; email: ReactNode; initials: string };
+  signOutAction: () => Promise<void>;
+  defaultCollapsed: boolean;
+  labels: {
+    nav: string; settingsMenu: string; account: string; accountMenu: string; accountSections: string; signOut: string;
+    skipToContent: string; openMenu: string; closeMenu: string; collapseMenu: string; expandMenu: string; backToMenu: string;
+  };
   children: ReactNode;
 };
 
-const isActive = (pathname: string, href: string) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
+const matches = (pathname: string, href: string) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
 
-function NavList({ items, pathname, label, secondary }: { items: NavItem[]; pathname: string; label: string; secondary?: boolean }) {
-  // Only the most specific match is current: /settings/staff/invite marks "Invite staff", not "Staff" as well
-  const current = items.filter((i) => isActive(pathname, i.href)).reduce<NavItem | undefined>((best, i) => (best && best.href.length >= i.href.length ? best : i), undefined);
-  return (
-    <nav aria-label={label}>
-      <ul className="space-y-1">
-        {items.map((item) => {
-          const Icon = icons[item.icon];
-          // a parent with children is active on any of its sections
-          const active = item.children.length > 0 ? item.children.some((c) => isActive(pathname, c.href)) || isActive(pathname, item.href) : item.id === current?.id;
-          return (
-            <li key={item.id}>
-              <Link
-                href={item.children[0]?.href ?? item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
-                  active && "bg-accent font-medium text-accent-foreground",
-                )}
-              >
-                {secondary ? null : <Icon className="size-4" aria-hidden="true" />}
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
+/** Only the most specific match is current: /account/appearance marks Appearance, not Profile (/account) as well. */
+function toShell(items: NavItem[], pathname: string): ShellNavItem[] {
+  const current = items.filter((i) => matches(pathname, i.href)).sort((a, b) => b.href.length - a.href.length)[0];
+  return items.map((i) => {
+    const Icon = icons[i.icon];
+    const children = i.children.length ? toShell(i.children, pathname) : undefined;
+    return {
+      id: i.id, href: i.href, label: i.label, icon: <Icon />, children,
+      active: children ? children.some((c) => c.active) || matches(pathname, i.href) : i.id === current?.id,
+    };
+  });
 }
 
-/** Primary navigation plus the optional Settings secondary sidebar (Constitution X). Items arrive already permission-filtered. */
-export function PortalShell({ dir, brand, nav, navLabel, settingsLabel, shellLabels, header, children }: Props) {
+/** Primary navigation, the current section's secondary sidebar and the account menu. Items arrive already permission-filtered. */
+export function PortalShell({ dir, brand, groups, accountItems, account, signOutAction, defaultCollapsed, labels, children }: Props) {
   const pathname = usePathname();
-  const settings = nav.find((i) => i.id === "settings");
-  const secondary = settings && settings.children.length > 0 && isActive(pathname, settings.href) || settings?.children.some((c) => isActive(pathname, c.href));
+  const nav = groups.map((g) => ({ id: g.id, label: g.label, items: toShell(g.items, pathname) }));
+  const parent = nav.flatMap((g) => g.items.map((item) => ({ item, group: g.label }))).find(({ item }) => item.active && item.children?.length);
+  const section: ShellSection | undefined = parent
+    ? { eyebrow: parent.group, title: parent.item.label, label: labels.settingsMenu, items: parent.item.children ?? [] }
+    : matches(pathname, "/account")
+      ? { title: labels.account, label: labels.accountSections, items: toShell(accountItems, pathname) }
+      : undefined;
   return (
     <AppShell
       dir={dir}
       brand={brand}
-      primaryNav={<NavList items={nav} pathname={pathname} label={navLabel} />}
-      secondaryNav={secondary && settings ? <NavList items={settings.children} pathname={pathname} label={settingsLabel} secondary /> : undefined}
-      header={header}
-      labels={shellLabels}
+      account={
+        <AccountMenu
+          dir={dir} {...account} label={labels.accountMenu} link={Link}
+          items={[{ href: "/account", label: labels.account, icon: <UserRound /> }]}
+          signOut={{ label: labels.signOut, action: signOutAction }}
+        />
+      }
+      nav={nav}
+      navLabel={labels.nav}
+      section={section}
+      link={Link}
+      defaultCollapsed={defaultCollapsed}
+      labels={labels}
       closeSignal={pathname}
     >
       {children}
     </AppShell>
   );
 }
-

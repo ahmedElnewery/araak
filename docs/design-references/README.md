@@ -53,9 +53,13 @@ The prototype's Dark theme passes every check. Four values failed and were adjus
 
 ### Shell idea
 
-- A primary sidebar plus an optional secondary sidebar that appears only for modules with subsections (Constitution §X). The workspace uses the full width otherwise.
-- A top bar with page title and breadcrumb, a language switch and a theme control.
-- An off-canvas drawer on mobile.
+Owner decisions (2026-10-16), implemented in `packages/ui/src/components/app-shell.tsx`:
+
+- A full-width top bar: the sidebar collapse toggle and the tenant identity (a link home) at the start, the account menu at the end. The account menu holds the person's own pages and sign-out only.
+- A primary sidebar in two groups (main menu, system administration) that collapses to icons, with the label as a tooltip; the choice is remembered in the `sidebar` cookie. Below `lg` it is always icons only.
+- An optional secondary sidebar for the current section only (Constitution §X): Settings, and the account pages (profile, appearance and language, password, sessions). The workspace uses the full width otherwise.
+- Language and theme are chosen on the Appearance and language page (`/account/appearance` in the portal, `/appearance` in the admin app), not in the top bar.
+- An off-canvas drawer on phones, in which a section opens as a drill-down panel with a way back to the main menu.
 - Logical CSS properties for RTL/LTR, `prefers-reduced-motion` and `prefers-contrast: more` support.
 - A sign-in card with the tenant name and logo above a minimal form, with no marketing copy.
 

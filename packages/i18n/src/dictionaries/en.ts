@@ -14,6 +14,14 @@ export const en = {
     closeMenu: "Close menu",
     close: "Close",
     logoAlt: "Organization logo",
+    accountMenu: "Account menu",
+    collapseMenu: "Collapse menu",
+    expandMenu: "Expand menu",
+    backToMenu: "Main menu",
+    appearance: "Appearance and language",
+    appearanceIntro: "Choose how the interface looks and which language it uses.",
+    themeHint: "System follows your device setting automatically.",
+    languageHint: "The language and writing direction of menus and pages.",
   },
   errors: {
     notFoundTitle: "Page not found",
@@ -29,7 +37,7 @@ export const en = {
   },
   nav: { home: "Home" },
   admin: {
-    nav: { tenants: "Organizations", admins: "Platform admins", audit: "Audit log", menu: "Main navigation", brand: "Administration" },
+    nav: { tenants: "Organizations", admins: "Platform admins", audit: "Audit log", menu: "Main navigation", brand: "Administration", appearance: "Appearance and language", appearanceSaved: "Your choice is saved in this browser automatically." },
     common: { cancel: "Cancel", created: "Created", state: "State", actions: "Actions", none: "None", back: "Back" },
     auth: {
       title: "Sign in",
@@ -223,7 +231,10 @@ export const en = {
     nav: {
       menu: "Main navigation", home: "Home", inviteStaff: "Invite staff", invitations: "Pending invitations", account: "My account", signOut: "Sign out",
       settings: "Settings", staff: "Staff", roles: "Roles", branding: "Branding", auditLog: "Audit log",
-      securityLogs: "Security logs", settingsMenu: "Settings sections",
+      securityLogs: "Security logs", settingsMenu: "Settings sections", mainGroup: "Main menu", systemGroup: "Administration",
+      beneficiaries: "Beneficiaries", donors: "Donors", volunteers: "Volunteers",
+      profile: "Profile", appearance: "Appearance and language", password: "Password", sessions: "Active sessions",
+      accountMenu: "Account sections", appearanceSaved: "Your choice is saved to your account and follows you to any device.",
     },
     home: { welcome: "Welcome", intro: "Use the menu to open the sections you have access to." },
     branding: {
@@ -478,8 +489,6 @@ export const en = {
       saved: "Username updated.",
       email: "Email",
       emailImmutable: "The email address cannot be changed.",
-      sessionsLink: "Active sessions",
-      passwordLink: "Change password",
       changeName: "Your name",
       nameMissing: "Add your first and last name. Your colleagues see it in place of your username.",
       saveName: "Save name",

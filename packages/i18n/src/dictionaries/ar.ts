@@ -14,6 +14,14 @@ export const ar = {
     closeMenu: "إغلاق القائمة",
     close: "إغلاق",
     logoAlt: "شعار المؤسسة",
+    accountMenu: "قائمة الحساب",
+    collapseMenu: "طي القائمة",
+    expandMenu: "توسيع القائمة",
+    backToMenu: "القائمة الرئيسية",
+    appearance: "المظهر واللغة",
+    appearanceIntro: "اختر شكل الواجهة ولغتها.",
+    themeHint: "«حسب النظام» يتبع إعداد جهازك تلقائيًا.",
+    languageHint: "لغة القوائم والصفحات واتجاه الكتابة.",
   },
   errors: {
     notFoundTitle: "الصفحة غير موجودة",
@@ -29,7 +37,7 @@ export const ar = {
   },
   nav: { home: "الرئيسية" },
   admin: {
-    nav: { tenants: "المؤسسات", admins: "مديرو المنصة", audit: "سجل التدقيق", menu: "القائمة الرئيسية", brand: "الإدارة" },
+    nav: { tenants: "المؤسسات", admins: "مديرو المنصة", audit: "سجل التدقيق", menu: "القائمة الرئيسية", brand: "الإدارة", appearance: "المظهر واللغة", appearanceSaved: "يُحفظ اختيارك في هذا المتصفح تلقائيًا." },
     common: { cancel: "إلغاء", created: "تاريخ الإنشاء", state: "الحالة", actions: "الإجراءات", none: "لا يوجد", back: "رجوع" },
     auth: {
       title: "تسجيل الدخول",
@@ -223,7 +231,10 @@ export const ar = {
     nav: {
       menu: "التنقل الرئيسي", home: "الرئيسية", inviteStaff: "دعوة موظف", invitations: "الدعوات المعلّقة", account: "حسابي", signOut: "تسجيل الخروج",
       settings: "الإعدادات", staff: "الموظفون", roles: "الأدوار", branding: "الهوية", auditLog: "سجل التدقيق",
-      securityLogs: "سجلات الأمان", settingsMenu: "أقسام الإعدادات",
+      securityLogs: "سجلات الأمان", settingsMenu: "أقسام الإعدادات", mainGroup: "القائمة الرئيسية", systemGroup: "إدارة النظام",
+      beneficiaries: "المستفيدون", donors: "المتبرعون", volunteers: "المتطوعون",
+      profile: "الملف الشخصي", appearance: "المظهر واللغة", password: "كلمة المرور", sessions: "الجلسات النشطة",
+      accountMenu: "أقسام حسابي", appearanceSaved: "يُحفظ اختيارك في حسابك تلقائيًا ويتبعك على أي جهاز.",
     },
     home: { welcome: "مرحبًا", intro: "استخدم القائمة لفتح الأقسام المتاحة لك." },
     branding: {
@@ -478,8 +489,6 @@ export const ar = {
       saved: "تم تحديث اسم المستخدم.",
       email: "البريد الإلكتروني",
       emailImmutable: "لا يمكن تغيير عنوان البريد الإلكتروني.",
-      sessionsLink: "الجلسات النشطة",
-      passwordLink: "تغيير كلمة المرور",
       changeName: "اسمك",
       nameMissing: "أضف اسمك الأول واسم العائلة. يراه زملاؤك بدلًا من اسم المستخدم.",
       saveName: "حفظ الاسم",
