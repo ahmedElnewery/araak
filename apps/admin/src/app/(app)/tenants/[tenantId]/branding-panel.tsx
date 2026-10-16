@@ -28,6 +28,7 @@ export function BrandingPanel({ tenantId, displayName, hasLogo, logoVersion, t }
           <LogoUpload
             id="logo" name="logo" accept="image/png,image/jpeg,image/webp" alt={displayName}
             labels={{ prompt: t.tenants.uploadPrompt, remove: t.tenants.discardFile }}
+            errors={{ type: t.errors.logo_type, tooLarge: t.errors.logo_too_large, corrupt: t.errors.logo_corrupt, dimensions: t.errors.logo_dimensions }}
             describedBy={code ? "logo-hint logo-error" : "logo-hint"} invalid={Boolean(code)}
           />
           {code ? <p id="logo-error" role="alert" className="text-sm text-destructive">{t.errors[code]}</p> : null}
