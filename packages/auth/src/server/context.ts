@@ -11,6 +11,9 @@ export type TenantStaffContext = {
   tenantId: string;
   staffId: string;
   username: string;
+  /** Null for an account activated before names were collected, until the staff member adds them. */
+  firstName: string | null;
+  lastName: string | null;
   email: string;
   isManager: boolean;
   supabase: ServerClient;
@@ -24,7 +27,7 @@ export type PlatformAdminContext = {
 };
 
 type StaffRow = {
-  staffId: string; tenantId: string; username: string; email: string; enabled: boolean;
+  staffId: string; tenantId: string; username: string; firstName: string | null; lastName: string | null; email: string; enabled: boolean;
   tenantState: "active" | "suspended"; sessionLive: boolean; isManager: boolean;
 };
 type PlatformRow = { platformAdminId: string; enabled: boolean; capabilities: string[]; sessionLive: boolean };
@@ -51,7 +54,7 @@ export async function getTenantStaffContext(hostTenant: HostTenant, supabase: Se
   if (!row.enabled) throw new AuthError("forbidden");
   if (!row.sessionLive) throw new AuthError("session_expired");
   return { authUserId: sub, sessionId, tenantId: row.tenantId, staffId: row.staffId, username: row.username,
-           email: row.email, isManager: row.isManager, supabase };
+           firstName: row.firstName ?? null, lastName: row.lastName ?? null, email: row.email, isManager: row.isManager, supabase };
 }
 
 export async function getPlatformAdminContext(supabase: ServerClient): Promise<PlatformAdminContext> {

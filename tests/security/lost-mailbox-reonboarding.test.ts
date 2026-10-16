@@ -47,6 +47,7 @@ describe("lost-mailbox re-onboarding", () => {
     fx.trackUser(created.user!.id);
     const { data: staffId, error: redeemError } = await adminClient().rpc("svc_redeem_staff_invitation", {
       p_token_hash: hashToken(token), p_auth_user_id: created.user!.id, p_username: "Replacement",
+      p_first_name: "Re", p_last_name: "Placement",
     });
     expect(redeemError).toBeNull();
     expect(staffId).not.toBe(fx.staffA.id);

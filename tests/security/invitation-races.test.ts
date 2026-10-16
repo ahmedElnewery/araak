@@ -41,7 +41,9 @@ async function authUser(to: string) {
   return data.user.id;
 }
 const redeem = (token: string, userId: string, username: string) =>
-  adminClient().rpc("svc_redeem_staff_invitation", { p_token_hash: hashToken(token), p_auth_user_id: userId, p_username: username });
+  adminClient().rpc("svc_redeem_staff_invitation", {
+    p_token_hash: hashToken(token), p_auth_user_id: userId, p_username: username, p_first_name: "Race", p_last_name: "Runner",
+  });
 
 describe("resend cooldown and cap under concurrency", () => {
   it("10 parallel resends after the cooldown produce exactly one new link", async () => {

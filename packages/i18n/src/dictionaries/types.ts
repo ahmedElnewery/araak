@@ -76,6 +76,7 @@ export type Dictionary = {
   username: {
     label: string; hint: string; errorLength: string; errorCharset: string; errorPlacement: string;
   };
+  personName: { firstName: string; lastName: string; hint: string };
   portal: {
     nav: {
       menu: string; home: string; inviteStaff: string; invitations: string; account: string; signOut: string;
@@ -107,8 +108,8 @@ export type Dictionary = {
       resendAvailableAt: string; resendNotAvailable: string; resent: string; noCancelNote: string; resetPassword: string;
       resetTitle: string; resetIntro: string; managerPassword: string; confirmReset: string; resetSent: string; resetNotDelivered: string;
       cancel: string;
-      directoryTitle: string; colUsername: string; colState: string; stateEnabled: string; stateDisabled: string;
-      managerBadge: string; noStaff: string; open: string; back: string; pendingLink: string; noRolesAssigned: string;
+      directoryTitle: string; colName: string; colState: string; stateEnabled: string; stateDisabled: string;
+      managerBadge: string; noStaff: string; open: string; back: string; pendingLink: string; noRolesAssigned: string; username: string;
       rolesEditorTitle: string; rolesEditorIntro: string; saveRoles: string; rolesSaved: string; ownRolesNote: string;
       noAssignableRoles: string; disable: string; enable: string; disableTitle: string; disableBody: string;
       enableTitle: string; enableBody: string; confirm: string; disabled: string; enabled: string;
@@ -125,6 +126,7 @@ export type Dictionary = {
     account: {
       title: string; username: string; changeUsername: string; save: string; saved: string; email: string;
       emailImmutable: string; sessionsLink: string; passwordLink: string;
+      changeName: string; nameMissing: string; saveName: string; nameSaved: string;
     };
     sessions: {
       title: string; intro: string; empty: string; colDevice: string; colBrowser: string; colSignedIn: string;
@@ -148,7 +150,8 @@ export type Dictionary = {
       role_name_conflict: string; role_name_invalid: string; role_assigned: string; role_self_edit: string;
       role_not_found: string; privilege_escalation: string; grants_invalid: string; cannot_change_own_roles: string;
       cannot_disable_self: string; manager_protected: string; last_active_manager: string; roles_invalid: string;
-      session_not_found: string; generic: string;
+      session_not_found: string; first_name_required: string; first_name_invalid: string; last_name_required: string;
+      last_name_invalid: string; generic: string;
     };
   };
 };

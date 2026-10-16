@@ -78,7 +78,7 @@ test("managers invite staff in tenants A and B", async ({ browser }) => {
   expect(pending).toHaveLength(2);
 });
 
-test("invitee sees the username rules, gets inline errors and activates", async ({ browser }) => {
+test("invitee enters a name, sees the username rules, gets inline errors and activates", async ({ browser }) => {
   const link = extractLink(await waitForMail(inviteA), "/invite/accept");
   expect(link.startsWith(host(fx.tenantA.subdomain))).toBe(true);
   const page = await newPage(browser, fx.tenantA.subdomain);
@@ -94,9 +94,19 @@ test("invitee sees the username rules, gets inline errors and activates", async 
   await page.getByLabel(en.username.label).fill("Ahmed");
   await page.getByLabel(t.invite.password, { exact: true }).fill(NEW_PASSWORD);
   await page.getByLabel(t.invite.confirmPassword).fill(NEW_PASSWORD);
+  // both names are required; nothing is created until they are given
+  await page.getByRole("button", { name: t.invite.activate }).click();
+  await expect(page.getByText(t.errors.first_name_required)).toBeVisible();
+  await expect(page.getByText(t.errors.last_name_required)).toBeVisible();
+  expect(await sql(`select 1 from public.tenant_staff where email_normalized = '${inviteA}'`)).toHaveLength(0);
+  await page.getByLabel(en.personName.firstName).fill("أحمد");
+  await page.getByLabel(en.personName.lastName).fill("علي");
+  await page.getByLabel(t.invite.password, { exact: true }).fill(NEW_PASSWORD);
+  await page.getByLabel(t.invite.confirmPassword).fill(NEW_PASSWORD);
   await page.getByRole("button", { name: t.invite.activate }).click();
   await page.waitForURL(`${host(fx.tenantA.subdomain)}/`);
-  await expect(page.getByText("Ahmed").first()).toBeVisible();
+  // the portal shows the name, not the username
+  await expect(page.getByRole("heading", { name: "أحمد علي" })).toBeVisible();
   const [row] = await sql<{ id: string }>(`select id from public.tenant_staff where email_normalized = '${inviteA}'`);
   staffAId = row!.id;
   // the same link cannot be used twice, and tenant B's host rejects it without disclosure
@@ -141,6 +151,27 @@ test("changes the username without a password; the old name stops working", asyn
   const old = await newPage(browser, fx.tenantA.subdomain);
   await signIn(old, fx.tenantA.subdomain, "Ahmed", NEW_PASSWORD);
   await expect(old.locator('p[role="alert"]')).toHaveText(t.auth.invalidCredentials);
+});
+
+test("changes the name under My account; the portal shows the new name", async ({ browser }) => {
+  const page = await newPage(browser, fx.tenantA.subdomain);
+  await signIn(page, fx.tenantA.subdomain, "Ahmed.Ali", NEW_PASSWORD);
+  await page.waitForURL(`${host(fx.tenantA.subdomain)}/`);
+  await page.goto(`${host(fx.tenantA.subdomain)}/account`);
+  await expect(page.getByLabel(en.personName.firstName)).toHaveValue("أحمد");
+  await expect(page.getByLabel(en.personName.lastName)).toHaveValue("علي");
+  await page.getByLabel(en.personName.firstName).fill("");
+  await page.getByRole("button", { name: t.account.saveName }).click();
+  await expect(page.getByText(t.errors.first_name_required)).toBeVisible(); // a name cannot be cleared
+  await page.getByLabel(en.personName.firstName).fill("Ahmed");
+  await page.getByLabel(en.personName.lastName).fill("Ali");
+  await page.getByRole("button", { name: t.account.saveName }).click();
+  await expect(page.getByText(t.account.nameSaved, { exact: true })).toBeVisible();
+  await page.goto(`${host(fx.tenantA.subdomain)}/`);
+  await expect(page.getByRole("heading", { name: "Ahmed Ali" })).toBeVisible();
+  const [row] = await sql<{ first_name: string; last_name: string }>(`select first_name, last_name from public.tenant_staff where id = '${staffAId}'`);
+  expect(row).toEqual({ first_name: "Ahmed", last_name: "Ali" });
+  await page.context().close();
 });
 
 test("self-service recovery: neutral response, one-time link, new password works", async ({ browser }) => {

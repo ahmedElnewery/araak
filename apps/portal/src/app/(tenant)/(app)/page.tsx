@@ -1,3 +1,4 @@
+import { StaffName } from "@/components/staff-name";
 import { requireStaff } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 
@@ -7,7 +8,7 @@ export default async function Home() {
   const { t } = await getI18n();
   return (
     <section className="space-y-2" aria-labelledby="home-title">
-      <h1 id="home-title" className="text-xl font-semibold">{t.portal.home.welcome} · <bdi dir="ltr">{ctx.username}</bdi></h1>
+      <h1 id="home-title" className="text-xl font-semibold">{t.portal.home.welcome} · <StaffName staff={ctx} /></h1>
       <p className="text-muted-foreground">{t.portal.home.intro}</p>
     </section>
   );

@@ -1,10 +1,13 @@
 import Link from "next/link";
-import { LtrText } from "@workspace/ui/components/ltr-text";
 import { Badge } from "@workspace/ui/components/badge";
+import { StaffName } from "@/components/staff-name";
 import { requirePermission } from "@/lib/guards";
 import { getI18n } from "@/lib/locale";
 
-type StaffRow = { id: string; username: string; email: string; enabled: boolean; isManager: boolean; roles: { id: string; name: string }[] };
+type StaffRow = {
+  id: string; username: string; firstName: string | null; lastName: string | null; email: string; enabled: boolean; isManager: boolean;
+  roles: { id: string; name: string }[];
+};
 
 export default async function StaffDirectoryPage() {
   const ctx = await requirePermission("staff.view");
@@ -21,7 +24,7 @@ export default async function StaffDirectoryPage() {
         <table className="w-full text-start text-sm">
           <thead>
             <tr className="border-b">
-              <th scope="col" className="p-2 text-start">{t.portal.staff.colUsername}</th>
+              <th scope="col" className="p-2 text-start">{t.portal.staff.colName}</th>
               <th scope="col" className="p-2 text-start">{t.portal.staff.colRoles}</th>
               <th scope="col" className="p-2 text-start">{t.portal.staff.colState}</th>
             </tr>
@@ -30,7 +33,7 @@ export default async function StaffDirectoryPage() {
             {rows.map((r) => (
               <tr key={r.id} className="border-b" data-testid="staff-row">
                 <td className="p-2">
-                  <Link href={`/settings/staff/${r.id}`} className="underline"><LtrText>{r.username}</LtrText></Link>
+                  <Link href={`/settings/staff/${r.id}`} className="underline"><StaffName staff={r} /></Link>
                   {r.isManager ? <Badge className="ms-2" variant="secondary">{t.portal.staff.managerBadge}</Badge> : null}
                 </td>
                 <td className="p-2"><span dir="auto">{r.roles.map((x) => x.name).join(", ") || t.portal.staff.noRolesAssigned}</span></td>
